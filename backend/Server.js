@@ -10,7 +10,7 @@ app.use(cors());
 app.use(express.json());
 
 // MongoDB connection
-const MONGO_URI = "mongodb://localhost:27017/airbnb"; // Change "airbnb" to your DB name
+const MONGO_URI = "mongodb://localhost:27017/airbnb"; 
 
 mongoose
   .connect(MONGO_URI, {
