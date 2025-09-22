@@ -1,0 +1,50 @@
+{
+  "chefs": [
+    {
+      "id": 1,
+      "title": "Hyperlocal, foraged fare by Clair",
+      "subtitle": "From ₹8,721 / guest",
+      "price": "₹16,738 minimum",
+      "image": "https://via.placeholder.com/300x200"
+    },
+    {
+      "id": 2,
+      "title": "Hyperlocal, foraged fare by Clair",
+      "subtitle": "From ₹8,721 / guest",
+      "price": "₹16,738 minimum",
+      "image": "https://via.placeholder.com/300x200"
+    }
+  ],
+  "training": [
+    {
+      "id": 1,
+      "title": "Personal Training w/ Dayton",
+      "subtitle": "From $0 / group",
+      "price": "• 5.0",
+      "image": "https://via.placeholder.com/300x200"
+    },
+    {
+      "id": 1,
+      "title": "Personal Training w/ Dayton",
+      "subtitle": "From $0 / group",
+      "price": "• 5.0",
+      "image": "https://via.placeholder.com/300x200"
+    }
+  ],
+  "massage": [
+     {
+      "id": 1,
+      "title": "Personal Training w/ Dayton",
+      "subtitle": "From $0 / group",
+      "price": "• 5.0",
+      "image": "https://via.placeholder.com/300x200"
+    },
+     {
+      "id": 1,
+      "title": "Personal Training w/ Dayton",
+      "subtitle": "From $0 / group",
+      "price": "• 5.0",
+      "image": "https://via.placeholder.com/300x200"
+    }
+  ]
+}

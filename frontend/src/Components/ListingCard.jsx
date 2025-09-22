@@ -1,5 +1,6 @@
 import React from "react";
 import "../Pages/home/Home.scss";
+import { CiHeart } from "react-icons/ci";
 
 const ListingCard = ({ home }) => {
   return (
@@ -7,6 +8,9 @@ const ListingCard = ({ home }) => {
       {/* Badge */}
       <div className="card-overlay">
         <span className="badge">Guest favourite</span>
+        
+                  <CiHeart className="heart-icon" />
+               
       </div>
 
       <img
