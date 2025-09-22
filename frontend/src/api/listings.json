@@ -1,0 +1,78 @@
+{
+  "listings":
+[
+
+  {
+    "id": 1,
+    "title": "Apartment in Bangalore Urban",
+    "location": "Bengaluru",
+    "price": 3650,
+    "nights": 2,
+    "rating": 4.96,
+    "image": "https://via.placeholder.com/400x250"
+  },
+  {
+    "id": 2,
+    "title": "Flat in Kilkattalai",
+    "location": "Chennai",
+    "price": 3253,
+    "nights": 2,
+    "rating": 5.0,
+    "image": "https://via.placeholder.com/400x250"
+  },
+  {
+    "id": 3,
+    "title": "Apartment in Pune City",
+    "location": "Pune",
+    "price": 6000,
+    "nights": 2,
+    "rating": 4.89,
+    "image": "https://via.placeholder.com/400x250"
+  },
+  {
+    "id": 4,
+    "title": "Apartment in Benaulim",
+    "location": "South Goa",
+    "price": 4508,
+    "nights": 2,
+    "rating": 4.94,
+    "image": "https://via.placeholder.com/400x250"
+  },
+   {
+    "id": 5,
+    "title": "Apartment in Bangalore Urban",
+    "location": "Bengaluru",
+    "price": 3650,
+    "nights": 2,
+    "rating": 4.96,
+    "image": "https://via.placeholder.com/400x250"
+  },
+  {
+    "id": 6,
+    "title": "Flat in Kilkattalai",
+    "location": "Chennai",
+    "price": 3253,
+    "nights": 2,
+    "rating": 5.0,
+    "image": "https://via.placeholder.com/400x250"
+  },
+  {
+    "id": 7,
+    "title": "Apartment in Pune City",
+    "location": "Pune",
+    "price": 6000,
+    "nights": 2,
+    "rating": 4.89,
+    "image": "https://via.placeholder.com/400x250"
+  },
+  {
+    "id": 8,
+    "title": "Apartment in Benaulim",
+    "location": "South Goa",
+    "price": 4508,
+    "nights": 2,
+    "rating": 4.94,
+    "image": "https://via.placeholder.com/400x250"
+  }
+]
+}
