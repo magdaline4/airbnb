@@ -1,51 +1,67 @@
 import React from "react";
+import "./Footer.scss";
+import { FaFacebook, FaInstagram } from "react-icons/fa";
+import { MdLanguage } from "react-icons/md" ;
 
 const Footer = () => {
   return (
-    <footer className="border-t bg-gray-100">
-      <div className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-2 md:grid-cols-4 gap-6 text-sm text-gray-600">
-        
-        <div>
-          <h3 className="font-semibold mb-2">Support</h3>
-          <ul className="space-y-1">
-            <li>Help Centre</li>
-            <li>AirCover</li>
-            <li>Cancellation options</li>
-            <li>Report neighbourhood concern</li>
-          </ul>
-        </div>
+    <footer className="footer">
+      <div className="footer__top">
+        <h3>Inspiration for future getaways</h3>
+        <div className="footer__columns">
+          {/* Support */}
+          <div className="footer__col">
+            <h4>Support</h4>
+            <ul>
+              <li>Help Centre</li>
+              <li>Get help with a safety issue</li>
+              <li>AirCover</li>
+              <li>Anti-discrimination</li>
+              <li>Disability support</li>
+              <li>Cancellation options</li>
+              <li>Report neighbourhood concern</li>
+            </ul>
+          </div>
 
-        <div>
-          <h3 className="font-semibold mb-2">Community</h3>
-          <ul className="space-y-1">
-            <li>Airbnb.org</li>
-            <li>Combating discrimination</li>
-          </ul>
-        </div>
+          {/* Hosting */}
+          <div className="footer__col">
+            <h4>Hosting</h4>
+            <ul>
+              <li>Airbnb your home</li>
+              <li>Airbnb your experience</li>
+              <li>Airbnb your service</li>
+              <li>AirCover for Hosts</li>
+              <li>Hosting resources</li>
+              <li>Community forum</li>
+              <li>Hosting responsibly</li>
+              <li>Join a free Hosting class</li>
+              <li>Find a co-host</li>
+            </ul>
+          </div>
 
-        <div>
-          <h3 className="font-semibold mb-2">Hosting</h3>
-          <ul className="space-y-1">
-            <li>Try hosting</li>
-            <li>AirCover for Hosts</li>
-            <li>Explore resources</li>
-            <li>Visit community forum</li>
-          </ul>
-        </div>
-
-        <div>
-          <h3 className="font-semibold mb-2">About</h3>
-          <ul className="space-y-1">
-            <li>Newsroom</li>
-            <li>Learn about new features</li>
-            <li>Investors</li>
-            <li>Careers</li>
-          </ul>
+          {/* Airbnb */}
+          <div className="footer__col">
+            <h4>Airbnb</h4>
+            <ul>
+              <li>2025 Summer Release</li>
+              <li>Newsroom</li>
+              <li>Careers</li>
+              <li>Investors</li>
+              <li>Airbnb.org emergency stays</li>
+            </ul>
+          </div>
         </div>
       </div>
 
-      <div className="border-t py-4 text-center text-xs text-gray-500">
-        © {new Date().getFullYear()} Airbnb clone redesign · Built with React & Tailwind
+      <div className="footer__bottom">
+        <p>© 2025 Airbnb, Inc. · Privacy · Terms · Sitemap · Company details</p>
+
+        <div className="footer__options">
+          <span><MdLanguage /> English (IN)</span>
+          <span>₹ INR</span>
+          <a href="#"><FaFacebook /></a>
+          <a href="#"><FaInstagram /></a>
+        </div>
       </div>
     </footer>
   );
