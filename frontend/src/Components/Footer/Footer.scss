@@ -1,17 +1,17 @@
 .footer {
   background: #fff;
   padding: 20px 40px;
-  border-top: 1px solid #e5e5e5;
   color: #222;
-
+  font-family: Airbnb Cereal VF, Circular, -apple-system, BlinkMacSystemFont,
+    Roboto, Helvetica Neue, sans-serif !important;
   .footer-title {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 20px;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* Align columns to the left */
+    align-items: flex-start;
+    margin-bottom: 5px;
+    border-bottom: #f7f7f7 2px solid;
   }
-
   /* Top Columns */
   .footer-columns {
     display: flex;
@@ -20,6 +20,10 @@
 
     .footer-column {
       flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start; /* Align columns to the left */
+      align-items: flex-start;
 
       h4 {
         font-size: 14px;
@@ -28,6 +32,10 @@
       }
 
       ul {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start; /* Align columns to the left */
+        align-items: flex-start;
         list-style: none;
         padding: 0;
         margin: 0;
@@ -79,7 +87,8 @@
       align-items: center;
       gap: 20px;
 
-      .lang, .currency {
+      .lang,
+      .currency {
         display: flex;
         align-items: center;
         font-size: 14px;
