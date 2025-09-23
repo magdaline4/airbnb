@@ -3,6 +3,7 @@ import axios from "axios";
 import "./Home.scss";
 import ListingCard from "../../Components/ListingCard"; 
 import Navbar from "../../Components/Navbar/Navbar";
+import Footer from "../../Components/Footer/Footer";
 
 const HomePage = () => {
   const [listings, setListings] = useState([]);
@@ -94,6 +95,7 @@ const HomePage = () => {
         </section>
       ))}
     </div>
+    <Footer/>
     </> 
   );
 };

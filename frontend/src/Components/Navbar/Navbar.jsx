@@ -1,33 +1,59 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import "./Navbar.scss";
 import { FaSearch, FaGlobe, FaBars, FaQuestionCircle } from "react-icons/fa";
 
+// Default icons
+import HomeImg from "../../assets/Images/home.avif";
+import ExperImg from "../../assets/Images/experience.avif";
+import ServeImg from "../../assets/Images/service.avif";
+
+// New icons after video
+import NewHomeImg from "../../assets/Images/Homeopen.avif";
+import NewExperImg from "../../assets/Images/experinenceopen.avif";
+import NewServeImg from "../../assets/Images/servieceopen.avif";
+
+// Videos
+import HomeVideo from "../../assets/videos/house-selected.webm";
+import ExperVideo from "../../assets/videos/balloon-selected.webm";
+import ServeVideo from "../../assets/videos/consierge-selected.webm";
+
 const Navbar = () => {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef(null);
+  const [active, setActive] = useState(null); // which tab is active
+  const [playing, setPlaying] = useState(null); // which tab's video is playing
 
-  // Close when clicking outside or pressing Escape
-  useEffect(() => {
-    const handlePointerDown = (e) => {
-      // composedPath covers shadow DOM / portals better than contains in some cases
-      const path = e.composedPath ? e.composedPath() : (e.path || []);
-      const clickedInside = menuRef.current && (menuRef.current.contains(e.target) || path.indexOf?.(menuRef.current) > -1);
-      if (!clickedInside) setMenuOpen(false);
-    };
+  const handleClick = (name) => {
+    // reset everything first
+    setActive(name);
+    setPlaying(name);
+  };
 
-    const handleKeyDown = (e) => {
-      if (e.key === "Escape") setMenuOpen(false);
-    };
+  const handleVideoEnd = (name) => {
+    // stop playing, keep active as new image
+    if (active === name) {
+      setPlaying(null);
+    }
+  };
 
-    document.addEventListener("pointerdown", handlePointerDown);
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("pointerdown", handlePointerDown);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, []);
+  // helper function to render correct icon
+  const renderIcon = (name, defaultImg, newImg, videoSrc) => {
+    if (playing === name) {
+      return (
+        <video
+          src={videoSrc}
+          autoPlay
+          muted
+          onEnded={() => handleVideoEnd(name)}
+          className="icon-video"
+        />
+      );
+    }
 
-  const toggleMenu = () => setMenuOpen((v) => !v);
+    if (active === name) {
+      return <img src={newImg} alt={name} />;
+    }
+
+    return <img src={defaultImg} alt={name} />;
+  };
 
   return (
     <div className="navbar-wrapper">
@@ -40,68 +66,35 @@ const Navbar = () => {
         </div>
 
         <ul className="navbar__menu">
-          <li>
-            <img src="https://img.icons8.com/ios-filled/30/000000/home.png" alt="Homes" />
+          <li onClick={() => handleClick("home")} className={active === "home" ? "active" : ""}>
+            {renderIcon("home", HomeImg, NewHomeImg, HomeVideo)}
             <span>Homes</span>
           </li>
-          <li>
-            <img src="https://img.icons8.com/emoji/30/000000/hot-air-balloon.png" alt="Experiences" />
+
+          <li onClick={() => handleClick("exper")} className={active === "exper" ? "active" : ""}>
+            {renderIcon("exper", ExperImg, NewExperImg, ExperVideo)}
             <span>Experiences</span>
-            <span className="new">NEW</span>
           </li>
-          <li className="active">
-            <img src="https://img.icons8.com/ios/30/000000/service-bell.png" alt="Services" />
+
+          <li onClick={() => handleClick("serve")} className={active === "serve" ? "active" : ""}>
+            {renderIcon("serve", ServeImg, NewServeImg, ServeVideo)}
             <span>Services</span>
-            <span className="new">NEW</span>
-            <div className="underline"></div>
           </li>
         </ul>
 
         <div className="navbar__right">
-          <span className="host">Become a host</span>
+          <button className="host">Become a host</button>
           <button className="icon-btn" type="button" aria-label="Language">
             <FaGlobe />
           </button>
-
-          {/* menu wrapper must include button + dropdown so outside clicks detect correctly */}
-          <div className="menu-wrapper" ref={menuRef}>
-            <button
-              className="icon-btn"
-              type="button"
-              aria-haspopup="true"
-              aria-expanded={menuOpen}
-              onClick={toggleMenu}
-            >
+          <div className="menu-wrapper">
+            <button className="icon-btn" type="button">
               <FaBars />
             </button>
-
-            {/* render conditionally for simpler CSS logic */}
-            {menuOpen && (
-              <div className="dropdown" role="menu" aria-label="User menu">
-                <ul>
-                  <li>
-                    <FaQuestionCircle className="icon" />
-                    <span>Help Centre</span>
-                  </li>
-                  <hr />
-                  <li>
-                    <div>
-                      <p className="bold">Become a host</p>
-                      <p className="small">It’s easy to start hosting and earn extra income.</p>
-                    </div>
-                  </li>
-                  <hr />
-                  <li>Refer a host</li>
-                  <li>Find a co-host</li>
-                  <li>Log in or sign up</li>
-                </ul>
-              </div>
-            )}
           </div>
         </div>
       </nav>
 
-      {/* Search (unchanged) */}
       <div className="search-box">
         <div className="search-item">
           <p className="title">Where</p>
@@ -122,7 +115,9 @@ const Navbar = () => {
           <p className="title">Who</p>
           <p className="subtitle">Add guests</p>
         </div>
-        <button className="search-btn" type="button"><FaSearch /></button>
+        <button className="search-btn" type="button">
+          <FaSearch />
+        </button>
       </div>
     </div>
   );
