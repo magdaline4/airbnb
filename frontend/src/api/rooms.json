@@ -1,0 +1,122 @@
+[
+  {
+    "id": 1,
+    "title": "Shared room in Shenoy Nagar",
+    "host": "GoEarthy",
+    "price": 4312,
+    "rating": 5.0,
+    "reviews": 17,
+    "location": { "lat": 13.0827, "lng": 80.2707 },
+    "image": "https://via.placeholder.com/300x200"
+  },
+  {
+    "id": 2,
+    "title": "Room in Chennai",
+    "host": "Diya",
+    "price": 5901,
+    "rating": 5.0,
+    "reviews": 21,
+    "location": { "lat": 13.05, "lng": 80.25 },
+    "image": "https://via.placeholder.com/300x200"
+  },
+  {
+    "id": 3,
+    "title": "Home in Nemmeli",
+    "host": "Private Stay",
+    "price": 15550,
+    "rating": 4.91,
+    "reviews": 11,
+    "location": { "lat": 12.8, "lng": 80.23 },
+    "image": "https://via.placeholder.com/300x200"
+  },
+  {
+    "id": 1,
+    "title": "Shared room in Shenoy Nagar",
+    "host": "GoEarthy",
+    "price": 4312,
+    "rating": 5.0,
+    "reviews": 17,
+    "location": { "lat": 13.0827, "lng": 80.2707 },
+    "image": "https://via.placeholder.com/300x200"
+  },
+  {
+    "id": 2,
+    "title": "Room in Chennai",
+    "host": "Diya",
+    "price": 5901,
+    "rating": 5.0,
+    "reviews": 21,
+    "location": { "lat": 13.05, "lng": 80.25 },
+    "image": "https://via.placeholder.com/300x200"
+  },
+  {
+    "id": 3,
+    "title": "Home in Nemmeli",
+    "host": "Private Stay",
+    "price": 15550,
+    "rating": 4.91,
+    "reviews": 11,
+    "location": { "lat": 12.8, "lng": 80.23 },
+    "image": "https://via.placeholder.com/300x200"
+  },
+  {
+    "id": 1,
+    "title": "Shared room in Shenoy Nagar",
+    "host": "GoEarthy",
+    "price": 4312,
+    "rating": 5.0,
+    "reviews": 17,
+    "location": { "lat": 13.0827, "lng": 80.2707 },
+    "image": "https://via.placeholder.com/300x200"
+  },
+  {
+    "id": 2,
+    "title": "Room in Chennai",
+    "host": "Diya",
+    "price": 5901,
+    "rating": 5.0,
+    "reviews": 21,
+    "location": { "lat": 13.05, "lng": 80.25 },
+    "image": "https://via.placeholder.com/300x200"
+  },
+  {
+    "id": 3,
+    "title": "Home in Nemmeli",
+    "host": "Private Stay",
+    "price": 15550,
+    "rating": 4.91,
+    "reviews": 11,
+    "location": { "lat": 12.8, "lng": 80.23 },
+    "image": "https://via.placeholder.com/300x200"
+  },
+  {
+    "id": 1,
+    "title": "Shared room in Shenoy Nagar",
+    "host": "GoEarthy",
+    "price": 4312,
+    "rating": 5.0,
+    "reviews": 17,
+    "location": { "lat": 13.0827, "lng": 80.2707 },
+    "image": "https://via.placeholder.com/300x200"
+  },
+  {
+    "id": 2,
+    "title": "Room in Chennai",
+    "host": "Diya",
+    "price": 5901,
+    "rating": 5.0,
+    "reviews": 21,
+    "location": { "lat": 13.05, "lng": 80.25 },
+    "image": "https://via.placeholder.com/300x200"
+  },
+  {
+    "id": 3,
+    "title": "Home in Nemmeli",
+    "host": "Private Stay",
+    "price": 15550,
+    "rating": 4.91,
+    "reviews": 11,
+    "location": { "lat": 12.8, "lng": 80.23 },
+    "image": "https://via.placeholder.com/300x200"
+  }
+]
