@@ -84,9 +84,10 @@ const Navbar = () => {
 
         <div className="navbar__right">
           <button className="host">Become a host</button>
-          <button className="icon-btn" type="button" aria-label="Language">
+          <div className="language-wrapper"><button className="icon-btn" type="button" aria-label="Language">
             <FaGlobe />
-          </button>
+          </button></div>
+          
           <div className="menu-wrapper">
             <button className="icon-btn" type="button">
               <FaBars />
