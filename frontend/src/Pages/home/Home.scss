@@ -72,7 +72,7 @@
       -ms-overflow-style: none; // IE/Edge
       scrollbar-width: none; // Firefox
 
-      > .listing-card {
+      .listing-card {
         flex: 0 0 calc((100% - 9rem) / 6); // 7 cards + 6 gaps (6 * 1.5rem = 9rem)
         max-width: calc((100% - 9rem) / 6);
       }
