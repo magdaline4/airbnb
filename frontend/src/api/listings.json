@@ -1,4 +1,6 @@
+
 {
+  
   "listings":
 [
 
@@ -9,8 +11,7 @@
     "price": 3650,
     "nights": 2,
     "rating": 4.96,
-    "image": "https://via.placeholder.com/400x250"
-  },
+    "image": "https://picsum.photos/200/300"},
   {
     "id": 2,
     "title": "Flat in Kilkattalai",
@@ -18,8 +19,7 @@
     "price": 3253,
     "nights": 2,
     "rating": 5.0,
-    "image": "https://via.placeholder.com/400x250"
-  },
+    "image": "https://picsum.photos/200/300"  },
   {
     "id": 3,
     "title": "Apartment in Pune City",
@@ -27,7 +27,7 @@
     "price": 6000,
     "nights": 2,
     "rating": 4.89,
-    "image": "https://via.placeholder.com/400x250"
+    "image": "https://picsum.photos/200/300"
   },
   {
     "id": 4,
@@ -36,7 +36,7 @@
     "price": 4508,
     "nights": 2,
     "rating": 4.94,
-    "image": "https://via.placeholder.com/400x250"
+    "image": "https://picsum.photos/200/300"
   },
    {
     "id": 5,
@@ -45,7 +45,7 @@
     "price": 3650,
     "nights": 2,
     "rating": 4.96,
-    "image": "https://via.placeholder.com/400x250"
+    "image": "https://picsum.photos/200/300"
   },
   {
     "id": 6,
@@ -54,7 +54,7 @@
     "price": 3253,
     "nights": 2,
     "rating": 5.0,
-    "image": "https://via.placeholder.com/400x250"
+    "image": "https://picsum.photos/200/300"
   },
   {
     "id": 7,
@@ -63,7 +63,7 @@
     "price": 6000,
     "nights": 2,
     "rating": 4.89,
-    "image": "https://via.placeholder.com/400x250"
+    "image": "https://picsum.photos/200/300"
   },
   {
     "id": 8,
@@ -72,7 +72,7 @@
     "price": 4508,
     "nights": 2,
     "rating": 4.94,
-    "image": "https://via.placeholder.com/400x250"
+    "image": "https://picsum.photos/200/300"
   },
   
   {
@@ -82,7 +82,7 @@
     "price": 3650,
     "nights": 2,
     "rating": 4.96,
-    "image": "https://via.placeholder.com/400x250"
+    "image": "https://picsum.photos/200/300"
   },
   {
     "id": 10,
@@ -91,7 +91,7 @@
     "price": 3253,
     "nights": 2,
     "rating": 5.0,
-    "image": "https://via.placeholder.com/400x250"
+    "image": "https://picsum.photos/200/300"
   },
   {
     "id": 11,
@@ -100,7 +100,7 @@
     "price": 6000,
     "nights": 2,
     "rating": 4.89,
-    "image": "https://via.placeholder.com/400x250"
+    "image": "https://picsum.photos/200/300"
   },
   {
     "id": 12,
@@ -109,7 +109,7 @@
     "price": 4508,
     "nights": 2,
     "rating": 4.94,
-    "image": "https://via.placeholder.com/400x250"
+    "image": "https://picsum.photos/200/300"
   },
    {
     "id": 13,
@@ -118,7 +118,7 @@
     "price": 3650,
     "nights": 2,
     "rating": 4.96,
-    "image": "https://via.placeholder.com/400x250"
+    "image": "https://picsum.photos/200/300"
   },
   {
     "id": 14,
@@ -127,7 +127,7 @@
     "price": 3253,
     "nights": 2,
     "rating": 5.0,
-    "image": "https://via.placeholder.com/400x250"
+    "image": "https://picsum.photos/200/300"
   },
   {
     "id": 15,
@@ -136,7 +136,7 @@
     "price": 6000,
     "nights": 2,
     "rating": 4.89,
-    "image": "https://via.placeholder.com/400x250"
+    "image": "https://picsum.photos/200/300"
   },
   {
     "id": 16,
@@ -145,7 +145,7 @@
     "price": 4508,
     "nights": 2,
     "rating": 4.94,
-    "image": "https://via.placeholder.com/400x250"
+    "image": "https://picsum.photos/200/300"
   },
   
   {
@@ -155,7 +155,7 @@
     "price": 3650,
     "nights": 2,
     "rating": 4.96,
-    "image": "https://via.placeholder.com/400x250"
+    "image": "https://picsum.photos/200/300"
   },
   {
     "id": 18,
@@ -164,7 +164,7 @@
     "price": 3253,
     "nights": 2,
     "rating": 5.0,
-    "image": "https://via.placeholder.com/400x250"
+    "image": "https://picsum.photos/200/300"
   },
   {
     "id": 19,
@@ -173,7 +173,7 @@
     "price": 6000,
     "nights": 2,
     "rating": 4.89,
-    "image": "https://via.placeholder.com/400x250"
+    "image": "https://picsum.photos/200/300"
   },
   {
     "id": 20,
@@ -182,7 +182,7 @@
     "price": 4508,
     "nights": 2,
     "rating": 4.94,
-    "image": "https://via.placeholder.com/400x250"
+    "image": "https://picsum.photos/200/300"
   },
    {
     "id": 21,
@@ -191,7 +191,7 @@
     "price": 3650,
     "nights": 2,
     "rating": 4.96,
-    "image": "https://via.placeholder.com/400x250"
+    "image": "https://picsum.photos/200/300"
   },
   {
     "id": 22,
@@ -200,7 +200,7 @@
     "price": 3253,
     "nights": 2,
     "rating": 5.0,
-    "image": "https://via.placeholder.com/400x250"
+   "image": "https://picsum.photos/200/300"
   },
   {
     "id": 23,
@@ -209,8 +209,8 @@
     "price": 6000,
     "nights": 2,
     "rating": 4.89,
-    "image": "https://via.placeholder.com/400x250"
-  },
+    "image": "https://picsum.photos/200/300"  
+    },
   {
     "id": 24,
     "title": "Apartment in Benaulim",
@@ -218,8 +218,54 @@
     "price": 4508,
     "nights": 2,
     "rating": 4.94,
-    "image": "https://via.placeholder.com/400x250"
+    "image": "https://picsum.photos/200/300"
+  },
+    {
+    "id": 25,
+    "title": "Apartment in Benaulim",
+    "location": "South Goa",
+    "price": 4508,
+    "nights": 2,
+    "rating": 4.94,
+    "image": "https://picsum.photos/200/300"
+  },
+  {
+    "id": 26,
+    "title": "Apartment in Bangalore Urban",
+    "location": "Bengaluru",
+    "price": 3650,
+    "nights": 2,
+    "rating": 4.96,
+    "image": "https://picsum.photos/200/300"
+  },
+  {
+    "id": 27,
+    "title": "Flat in Kilkattalai",
+    "location": "Chennai",
+    "price": 3253,
+    "nights": 2,
+    "rating": 5.0,
+   "image": "https://picsum.photos/200/300"
+  },
+  {
+    "id": 28,
+    "title": "Apartment in Bangalore Urban",
+    "location": "Bengaluru",
+    "price": 3650,
+    "nights": 2,
+    "rating": 4.96,
+    "image": "https://picsum.photos/200/300"
+  },
+  {
+    "id": 29,
+    "title": "Flat in Kilkattalai",
+    "location": "Chennai",
+    "price": 3253,
+    "nights": 2,
+    "rating": 5.0,
+   "image": "https://picsum.photos/200/300"
   }
+  
   
   
 ]

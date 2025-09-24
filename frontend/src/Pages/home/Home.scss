@@ -6,11 +6,13 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 1rem;
   }
 
   .listings-section {
     margin-bottom: 3rem;
 
+    // === Arrow Buttons ===
     .arrow-button {
       width: 32px;
       height: 32px;
@@ -22,7 +24,7 @@
       padding: 0;
 
       &::before {
-        content: '';
+        content: "";
         position: absolute;
         top: 50%;
         left: 50%;
@@ -46,6 +48,7 @@
       }
     }
 
+    // === Section Title ===
     .section-title {
       font-size: 1.5rem;
       font-weight: 700;
@@ -53,25 +56,42 @@
       color: #222;
     }
 
+    // === Horizontal Scroll Container ===
     .listings-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      display: flex;
+      flex-direction: row;
+      overflow-x: auto;
+      scroll-behavior: smooth;
       gap: 1.5rem;
+      padding-bottom: 0.5rem;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+
+      -ms-overflow-style: none; // IE/Edge
+      scrollbar-width: none; // Firefox
+
+      .listing-card {
+        flex: 0 0 calc((100% - 9rem) / 6); // 7 cards + 6 gaps (6 * 1.5rem = 9rem)
+        max-width: calc((100% - 9rem) / 6);
+      }
     }
 
+    // === Listing Card ===
     .listing-card {
       position: relative;
-      border: 1px solid #eee;
+      // border: 1px solid #eee;
       border-radius: 12px;
       overflow: hidden;
       background: #fff;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+      // box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
       transition: transform 0.2s, box-shadow 0.2s;
 
-      &:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
-      }
+      // &:hover {
+      //   transform: translateY(-4px);
+      //   // box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+      // }
 
       img,
       .image-placeholder {
@@ -79,6 +99,7 @@
         height: 180px;
         object-fit: cover;
         background: #ddd;
+        border-radius: 20px;
       }
 
       &.placeholder {
@@ -89,7 +110,7 @@
         }
       }
 
-      // ✅ overlay with badge + heart
+      // === Badge & Heart Overlay ===
       .card-overlay {
         position: absolute;
         top: 10px;
@@ -107,32 +128,42 @@
         border-radius: 20px;
         font-size: 12px;
         font-weight: 600;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
       }
-      
 
       .heart-icon {
-        font-size: 20px;
-        color: white;
-        background: rgba(0,0,0,0.5);
+        font-size: 30px;
+        color: rgb(253, 253, 253);
+        // fill: gray !important; // Fills inside the heart
+        // stroke: gray !important;
+        // background: rgba(0, 0, 0, 0.5);
         border-radius: 50%;
         padding: 6px;
         cursor: pointer;
         transition: color 0.3s, transform 0.2s;
 
         &:hover {
-       
           transform: scale(1.1);
         }
       }
 
+      // === Card Info ===
       .listing-info {
-        padding: 1rem;
+        // padding: 1rem;
+        // display: flex;
+        //   flex-direction: column;
+        //   justify-items: flex-start;
+        //   align-items: flex-start;
+        align-items: left;
+        margin: 0px;
 
         h3 {
           font-size: 15px;
           font-weight: 600;
           margin-bottom: 0.25rem;
+          margin: 0px;
+          display: flex;
+          align-items: left !important;
         }
 
         .location {
@@ -141,22 +172,46 @@
         }
 
         .price {
-           font-size: 14px;
-          margin-top: 0.5rem;
+          font-size: 14px;
+          // margin-top: 0.5rem;
           color: #5f5d5d;
-        }
+          margin: 0px;
 
+        }
       }
     }
   }
 }
 
-// shimmer effect for placeholders
+// === Shimmer Effect for Placeholder ===
 @keyframes shimmer {
   0% {
     background-position: -200% 0;
   }
   100% {
     background-position: 200% 0;
+  }
+}
+
+// === Responsive Layout ===
+@media (max-width: 1200px) {
+  .listings-page {
+    .listings-section {
+      .listings-grid > .listing-card {
+        flex: 0 0 calc((100% - 4.5rem) / 4); // Show 4 cards
+        max-width: calc((100% - 4.5rem) / 4);
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .listings-page {
+    .listings-section {
+      .listings-grid > .listing-card {
+        flex: 0 0 calc((100% - 1.5rem) / 2); // Show 2 cards
+        max-width: calc((100% - 1.5rem) / 2);
+      }
+    }
   }
 }
