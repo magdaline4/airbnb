@@ -1,0 +1,131 @@
+.footer {
+  background: #fff;
+  padding: 20px 40px;
+  color: #222;
+  font-family: Airbnb Cereal VF, Circular, -apple-system, BlinkMacSystemFont,
+    Roboto, Helvetica Neue, sans-serif !important;
+  .footer-title {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* Align columns to the left */
+    align-items: flex-start;
+    margin-bottom: 5px;
+    border-bottom: #f7f7f7 2px solid;
+  }
+  /* Top Columns */
+  .footer-columns {
+    display: flex;
+    justify-content: space-between;
+    gap: 40px;
+
+    .footer-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start; /* Align columns to the left */
+      align-items: flex-start;
+
+      h4 {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 12px;
+      }
+
+      ul {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start; /* Align columns to the left */
+        align-items: flex-start;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+
+        li {
+          margin: 8px 0;
+
+          a {
+            font-size: 14px;
+            color: #222;
+            text-decoration: none;
+
+            &:hover {
+              text-decoration: underline;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /* Bottom Section */
+  .footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 20px;
+    margin-top: 20px;
+    border-top: 1px solid #e5e5e5;
+    flex-wrap: wrap;
+
+    .footer-left {
+      font-size: 14px;
+      color: #717171;
+
+      a {
+        margin: 0 6px;
+        color: #717171;
+        text-decoration: none;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+
+    .footer-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+
+      .lang,
+      .currency {
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+        cursor: pointer;
+
+        svg {
+          margin-right: 6px;
+        }
+      }
+
+      .social-icons {
+        display: flex;
+        gap: 14px;
+
+        a {
+          font-size: 16px;
+          color: #222;
+
+          &:hover {
+            color: #000;
+          }
+        }
+      }
+    }
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .footer {
+    .footer-columns {
+      flex-direction: column;
+    }
+    .footer-bottom {
+      flex-direction: column;
+      gap: 10px;
+      text-align: center;
+    }
+  }
+}

@@ -7,7 +7,9 @@ const listingSchema = new mongoose.Schema({
   price: { type: Number, required: true },
   nights: { type: Number, required: true },
   rating: { type: Number, required: true },
-  image: { type: String, required: true }
-}, { timestamps: true });
+  image: { type: String, required: true },
+  isGuestFavorite: { type: Boolean, default: false } // new field added
+}, 
+{ timestamps: true });
 
 module.exports = mongoose.model("Listing", listingSchema);
