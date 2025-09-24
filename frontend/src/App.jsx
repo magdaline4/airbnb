@@ -1,7 +1,9 @@
+import { useState } from 'react'
+import './App.css'
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import HomePage from "./Pages/home/Home";
-import Service from "./Pages/services/service";
-import RoomPage from "./Pages/Room/RoomPage";
+import HomePage from "./Pages/home/Home.jsx";
+import Service from "./Pages/services/service.jsx";
+import RoomPage from "./Pages/Room/RoomPage.jsx";
 
 
 function App() {

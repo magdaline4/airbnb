@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./Home.scss";
 import ListingCard from "../../Components/ListingCard"; 
+import Navbar from "../../Components/Navbar/Navbar";
+import Footer from "../../Components/Footer/Footer";
 
 const HomePage = () => {
   const [listings, setListings] = useState([]);
@@ -53,6 +55,8 @@ const HomePage = () => {
   if (error) return <p>Error: {error.message}</p>;
 
   return (
+  <> 
+    <Navbar/>
     <div className="listings-page">
       {Object.keys(groupedListings).map((location) => (
         <section key={location} className="listings-section">
@@ -91,6 +95,8 @@ const HomePage = () => {
         </section>
       ))}
     </div>
+    <Footer/>
+    </> 
   );
 };
 
