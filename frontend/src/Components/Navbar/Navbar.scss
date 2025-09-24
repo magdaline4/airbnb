@@ -29,7 +29,7 @@
           font-weight: 500;
         }
 
-        img, 
+        img,
         .icon-video {
           width: 50px;
           height: 50px;
@@ -57,35 +57,51 @@
       gap: 12px;
 
       .host {
-        border: 1px solid #ddd;
+        // border: 1px solid #ddd;
         padding: 6px 14px;
-        border-radius: 20px;
+        border: none;
+        // border-radius: 20px;
         font-size: 14px;
         font-weight: 500;
         background: transparent;
         cursor: pointer;
-
-        &:hover {
-          background: #f7f7f7;
-        }
+      }
+      language-wrapper {
+        width: 80px;
+        height: 80px;
+        background-color: #444; /* Dark background */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 10px;
+        border-radius: 8px; /* Optional: rounded corners */
+        cursor: pointer;
       }
 
       .icon-btn {
         border: none;
         background: none;
         font-size: 18px;
+        width: 40px;
         cursor: pointer;
+        background-color: #777;
+        display: flex;
+        border-radius: 50px;
+        align-content: center;
+        justify-content: center;
       }
 
       .menu-wrapper {
         position: relative;
+        background-color: #777;
+        border-radius: 200px;
 
         .dropdown {
           position: absolute;
           right: 0;
           top: 40px;
           background: #fff;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
           border-radius: 8px;
           padding: 10px;
           width: 200px;
@@ -138,21 +154,27 @@
     align-items: center;
     justify-content: center;
     gap: 55px;
-    padding: 12px 20px;
+    padding: 10px;
     border: 1px solid #ddd;
     border-radius: 40px;
     width: fit-content;
-    margin: 16px auto;
+    margin: 12px auto;
+    padding-left: 25px;
 
     .search-item {
       .title {
-        font-size: 12px;
+        font-size: 15px;
         font-weight: 600;
+        margin: 0px;
+        display: flex;
+        align-items: left;
+      
       }
 
       .subtitle {
-        font-size: 12px;
+        font-size: 13px;
         color: #666;
+       margin: 0px;
       }
     }
 

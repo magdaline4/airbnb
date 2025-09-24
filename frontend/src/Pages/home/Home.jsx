@@ -1,18 +1,21 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./Home.scss";
-import ListingCard from "../../Components/ListingCard"; 
+import ListingCard from "../../Components/ListingCard";
 import Navbar from "../../Components/Navbar/Navbar";
 import Footer from "../../Components/Footer/Footer";
+
+const ITEMS_PER_PAGE = 7;
 
 const HomePage = () => {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [pageIndexes, setPageIndexes] = useState({}); // tracks current page per location
 
   useEffect(() => {
     axios
-      .get("/src/api/listings.json") 
+      .get("/src/api/listings.json")
       .then((res) => {
         setListings(res.data.listings || []);
       })
@@ -43,60 +46,70 @@ const HomePage = () => {
     Coimbatore: "Popular homes in Coimbatore >",
   };
 
-  const scrollLeft = (id) => {
-    document.getElementById(id)?.scrollBy({ left: -300, behavior: "smooth" });
-  };
+  const changePage = (location, direction) => {
+    setPageIndexes((prev) => {
+      const currentPage = prev[location] || 0;
+      const total = Math.ceil((groupedListings[location]?.length || 0) / ITEMS_PER_PAGE);
+      const nextPage = currentPage + direction;
 
-  const scrollRight = (id) => {
-    document.getElementById(id)?.scrollBy({ left: 300, behavior: "smooth" });
+      if (nextPage < 0 || nextPage >= total) return prev;
+
+      return {
+        ...prev,
+        [location]: nextPage,
+      };
+    });
   };
 
   if (loading) return <p>Loading listings...</p>;
   if (error) return <p>Error: {error.message}</p>;
 
   return (
-  <> 
-    <Navbar/>
-    <div className="listings-page">
-      {Object.keys(groupedListings).map((location) => (
-        <section key={location} className="listings-section">
-          <div className="title-btn">
-            <h2 className="section-title">
-              {sectionTitles[location] || `Homes in ${location}`}
-            </h2>
-            <div className="btn">
-              <button
-                className="arrow-button left"
-                onClick={() => scrollLeft(location)}
-              >
-                
-              </button>
-              <button
-                className="arrow-button right"
-                onClick={() => scrollRight(location)}
-              >
-                
-              </button>
-            </div>
-          </div>
+    <>
+      <Navbar />
+      <div className="listings-page">
+        {Object.keys(groupedListings).map((location) => {
+          const allListings = groupedListings[location];
+          const currentPage = pageIndexes[location] || 0;
+          const start = currentPage * ITEMS_PER_PAGE;
+          const visibleListings = allListings.slice(start, start + ITEMS_PER_PAGE);
+          const totalPages = Math.ceil(allListings.length / ITEMS_PER_PAGE);
 
-          <div
-            className="listings-grid"
-            id={location}
-            style={{ display: "flex", overflowX: "auto", gap: "1rem" }}
-          >
-            {groupedListings[location].map((home, index) => (
-              <ListingCard
-                key={home.id || `${location}-${index}`}
-                home={home}
-              />
-            ))}
-          </div>
-        </section>
-      ))}
-    </div>
-    <Footer/>
-    </> 
+          return (
+            <section key={location} className="listings-section">
+              <div className="title-btn">
+                <h2 className="section-title">
+                  {sectionTitles[location] || `Homes in ${location}`}
+                </h2>
+                <div className="btn">
+                  <button
+                    className="arrow-button left"
+                    onClick={() => changePage(location, -1)}
+                    disabled={currentPage === 0}
+                  />
+                  <button
+                    className="arrow-button right"
+                    onClick={() => changePage(location, 1)}
+                    disabled={currentPage === totalPages - 1}
+                  />
+                </div>
+              </div>
+
+              <div className="listings-grid">
+                {visibleListings.map((home, index) => (
+                  <ListingCard
+                    key={home.id || `${location}-${index}`}
+                    home={home}
+                    className="listing-card"
+                  />
+                ))}
+              </div>
+            </section>
+          );
+        })}
+      </div>
+      <Footer />
+    </>
   );
 };
 

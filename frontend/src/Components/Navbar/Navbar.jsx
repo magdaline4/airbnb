@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "./Navbar.scss";
-import { FaSearch, FaGlobe, FaBars, FaQuestionCircle } from "react-icons/fa";
+import { FaSearch, FaGlobe, FaBars } from "react-icons/fa";
+import { useNavigate } from "react-router-dom"; 
 
 // Default icons
 import HomeImg from "../../assets/Images/home.avif";
@@ -18,23 +19,21 @@ import ExperVideo from "../../assets/videos/balloon-selected.webm";
 import ServeVideo from "../../assets/videos/consierge-selected.webm";
 
 const Navbar = () => {
-  const [active, setActive] = useState(null); // which tab is active
-  const [playing, setPlaying] = useState(null); // which tab's video is playing
+  const [active, setActive] = useState(null);
+  const [playing, setPlaying] = useState(null);
+  const navigate = useNavigate(); // ✅ Hook for navigation
 
   const handleClick = (name) => {
-    // reset everything first
     setActive(name);
     setPlaying(name);
   };
 
   const handleVideoEnd = (name) => {
-    // stop playing, keep active as new image
     if (active === name) {
       setPlaying(null);
     }
   };
 
-  // helper function to render correct icon
   const renderIcon = (name, defaultImg, newImg, videoSrc) => {
     if (playing === name) {
       return (
@@ -53,6 +52,11 @@ const Navbar = () => {
     }
 
     return <img src={defaultImg} alt={name} />;
+  };
+
+  // ✅ When search icon is clicked
+  const handleSearchClick = () => {
+    navigate("/rooms");
   };
 
   return (
@@ -84,9 +88,10 @@ const Navbar = () => {
 
         <div className="navbar__right">
           <button className="host">Become a host</button>
-          <button className="icon-btn" type="button" aria-label="Language">
+          <div className="language-wrapper"><button className="icon-btn" type="button" aria-label="Language">
             <FaGlobe />
-          </button>
+          </button></div>
+          
           <div className="menu-wrapper">
             <button className="icon-btn" type="button">
               <FaBars />
@@ -115,7 +120,7 @@ const Navbar = () => {
           <p className="title">Who</p>
           <p className="subtitle">Add guests</p>
         </div>
-        <button className="search-btn" type="button">
+        <button className="search-btn" type="button" onClick={handleSearchClick}>
           <FaSearch />
         </button>
       </div>
