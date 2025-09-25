@@ -16,7 +16,7 @@ const RoomPage = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/listings")
+      .get("src/api/rooms.json")
       .then((res) => setRooms(res.data))
       .catch((err) => console.error("Error fetching rooms:", err));
   }, []);
