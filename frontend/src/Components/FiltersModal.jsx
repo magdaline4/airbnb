@@ -32,6 +32,14 @@ const FiltersModal = ({ isOpen, onClose }) => {
     setExpanded(expanded === section ? null : section);
   };
 
+  const histogramData = [
+  20, 0, 70, 30, 60, 90, 50, 80, 40, 70,
+  30, 60, 85, 45, 20, 70, 90, 50, 40, 60,
+  30, 80, 55, 40, 70, 30, 20, 60, 75, 90,
+  40, 30, 70, 60, 50, 80, 30, 60, 90, 40,
+];
+
+
   return (
     <div className="filters-overlay">
       <div className="filters-modal">
@@ -86,53 +94,68 @@ const FiltersModal = ({ isOpen, onClose }) => {
           </div>
         </div>
 
-        {/* Price Range */}
-        <div className="section">
-          <h4>Price range</h4>
-          <p className="sub-text">Nightly prices before fees and taxes</p>
+       {/* Price Range */}
+<div className="section price-section">
+  <h4>Price range</h4>
+  <p className="sub-text">Trip price, includes all fees</p>
 
-          <div className="price-range">
-            {/* Histogram */}
-            <div className="histogram">
-              {Array.from({ length: 20 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="bar"
-                  style={{ height: `${20 + Math.random() * 60}px` }}
-                />
-              ))}
-            </div>
+  <div className="price-range">
+    {/* Histogram */}
+    <div className="histogram">
+      {histogramData.map((h, i) => {
+        const barMin = (i / histogramData.length) * 50000;
+        const barMax = ((i + 1) / histogramData.length) * 50000;
 
-            {/* Dual sliders */}
-            <div className="slider-container">
-              <input
-                type="range"
-                min="0"
-                max="5000"
-                step="50"
-                value={minPrice}
-                onChange={(e) =>
-                  setMinPrice(Math.min(Number(e.target.value), maxPrice - 100))
-                }
-              />
-              <input
-                type="range"
-                min="0"
-                max="5000"
-                step="50"
-                value={maxPrice}
-                onChange={(e) =>
-                  setMaxPrice(Math.max(Number(e.target.value), minPrice + 100))
-                }
-              />
-            </div>
+        const isActive = barMin >= minPrice && barMax <= maxPrice;
 
-            <div className="price-values">
-              <span className="price-box">₹{minPrice}</span>
-              <span className="price-box">₹{maxPrice}</span>
-            </div>
-          </div>
-        </div>
+        return (
+          <div
+            key={i}
+            className={`bar ${isActive ? "active" : ""}`}
+            style={{ height: `${h}%` }}
+          />
+        );
+      })}
+    </div>
+
+    {/* Dual sliders */}
+    <div className="slider-container">
+      <input
+        type="range"
+        min="0"
+        max="50000"
+        step="500"
+        value={minPrice}
+        onChange={(e) =>
+          setMinPrice(Math.min(Number(e.target.value), maxPrice - 1000))
+        }
+      />
+      <input
+        type="range"
+        min="0"
+        max="50000"
+        step="500"
+        value={maxPrice}
+        onChange={(e) =>
+          setMaxPrice(Math.max(Number(e.target.value), minPrice + 1000))
+        }
+      />
+    </div>
+
+    {/* Price values */}
+    <div className="price-values">
+      <div className="price-box">
+        <span>Minimum</span>
+        <strong>₹{minPrice}</strong>
+      </div>
+      <div className="price-box">
+        <span>Maximum</span>
+        <strong>₹{maxPrice}+</strong>
+      </div>
+    </div>
+  </div>
+</div>
+
 
         {/* Rooms & Beds */}
         <div className="section">
@@ -170,31 +193,84 @@ const FiltersModal = ({ isOpen, onClose }) => {
           </div>
         </div>
 
-        {/* Amenities */}
-        <div className="section">
-          <h4>Amenities</h4>
-          <div className="amenities">
-            <button>
-              <FaWifi /> Wifi
-            </button>
-            <button>
-              <FaDumbbell /> Gym
-            </button>
-            <button>
-              <FaSwimmer /> Pool
-            </button>
-            <button>
-              <FaLaptop /> Workspace
-            </button>
-            <button>
-              <FaUmbrellaBeach /> Beachfront
-            </button>
-            <button>
-              <FaUtensils /> Kitchen
-            </button>
-          </div>
-          <p className="show-more">Show more</p>
+         {/* Amenities */}
+<div className="section">
+  <h4>Amenities</h4>
+
+  {/* Conditionally render based on expanded state */}
+  {expanded === "amenities" ? (
+    <div className="amenities-full">
+      <div className="amenity-group">
+        <h5>Popular</h5>
+        <div className="amenity-buttons">
+          <button><FaWifi /> Wifi</button>
+          <button>Air conditioning</button>
+          <button><FaSwimmer /> Pool</button>
+          <button>Dryer</button>
+          <button>Heating</button>
+          <button><FaLaptop /> Dedicated workspace</button>
         </div>
+      </div>
+
+      <div className="amenity-group">
+        <h5>Essentials</h5>
+        <div className="amenity-buttons">
+          <button><FaUtensils /> Kitchen</button>
+          <button>Washing machine</button>
+          <button>TV</button>
+          <button>Hair dryer</button>
+          <button>Iron</button>
+        </div>
+      </div>
+
+      <div className="amenity-group">
+        <h5>Features</h5>
+        <div className="amenity-buttons">
+          <button>Hot tub</button>
+          <button>Free parking</button>
+          <button>EV charger</button>
+          <button>Cot</button>
+          <button>King bed</button>
+          <button><FaDumbbell /> Gym</button>
+          <button>BBQ grill</button>
+          <button>Breakfast</button>
+          <button>Indoor fireplace</button>
+          <button>Smoking allowed</button>
+        </div>
+      </div>
+
+      <div className="amenity-group">
+        <h5>Safety</h5>
+        <div className="amenity-buttons">
+          <button>Smoke alarm</button>
+          <button>Carbon monoxide alarm</button>
+        </div>
+      </div>
+
+      <p
+        className="toggle-amenities"
+        onClick={() => setExpanded(null)}
+      >
+        Show less ▲
+      </p>
+    </div>
+  ) : (
+    <div className="amenities">
+      <button><FaWifi /> Wifi</button>
+      <button><FaDumbbell /> Gym</button>
+      <button><FaSwimmer /> Pool</button>
+      <button><FaLaptop /> Workspace</button>
+      <button><FaUmbrellaBeach /> Beachfront</button>
+      <button><FaUtensils /> Kitchen</button>
+      <p
+        className="toggle-amenities"
+        onClick={() => setExpanded("amenities")}
+      >
+        Show more ▼
+      </p>
+    </div>
+  )}
+</div>
 
         {/* Booking Options */}
         <div className="section">
@@ -233,89 +309,88 @@ const FiltersModal = ({ isOpen, onClose }) => {
           </div>
         </div>
 
-        {/* Accordion Sections */}
-        <div className="accordion">
-          {/* Property type */}
-          <div
-            className={`accordion-item ${
-              expanded === "property" ? "open" : ""
-            }`}
-          >
-            <button
-              className="accordion-header"
-              onClick={() => toggleSection("property")}
-            >
-              <span>Property type</span>
-              <span>{expanded === "property" ? "−" : "+"}</span>
-            </button>
-            {expanded === "property" && (
-              <div className="accordion-body">
-                <label>
-                  <input type="checkbox" /> Apartment
-                </label>
-                <label>
-                  <input type="checkbox" /> Villa
-                </label>
-                <label>
-                  <input type="checkbox" /> Cottage
-                </label>
-              </div>
-            )}
-          </div>
+       {/* Accordion Sections */}
+<div className="accordion">
 
-          {/* Accessibility */}
-          <div
-            className={`accordion-item ${
-              expanded === "accessibility" ? "open" : ""
-            }`}
-          >
-            <button
-              className="accordion-header"
-              onClick={() => toggleSection("accessibility")}
-            >
-              <span>Accessibility features</span>
-              <span>{expanded === "accessibility" ? "−" : "+"}</span>
-            </button>
-            {expanded === "accessibility" && (
-              <div className="accordion-body">
-                <label>
-                  <input type="checkbox" /> Wheelchair accessible
-                </label>
-                <label>
-                  <input type="checkbox" /> Step-free entrance
-                </label>
-              </div>
-            )}
-          </div>
+  {/* Property type */}
+  <div className={`accordion-item ${expanded === "property" ? "open" : ""}`}>
+    <button
+      className="accordion-header"
+      onClick={() => toggleSection("property")}
+    >
+      <span>Property type</span>
+      <span>{expanded === "property" ? "▲" : "▼"}</span>
+    </button>
+    {expanded === "property" && (
+      <div className="accordion-body property-options">
+        <button>House</button>
+        <button>Flat</button>
+        <button>Guest house</button>
+        <button>Hotel</button>
+      </div>
+    )}
+  </div>
 
-          {/* Host language */}
-          <div
-            className={`accordion-item ${
-              expanded === "language" ? "open" : ""
-            }`}
-          >
-            <button
-              className="accordion-header"
-              onClick={() => toggleSection("language")}
-            >
-              <span>Host language</span>
-              <span>{expanded === "language" ? "−" : "+"}</span>
-            </button>
-            {expanded === "language" && (
-              <div className="accordion-body">
-                <label>
-                  <input type="checkbox" /> English
-                </label>
-                <label>
-                  <input type="checkbox" /> Hindi
-                </label>
-                <label>
-                  <input type="checkbox" /> Tamil
-                </label>
-              </div>
-            )}
-          </div>
-        </div>
+  {/* Accessibility */}
+  <div className={`accordion-item ${expanded === "accessibility" ? "open" : ""}`}>
+    <button
+      className="accordion-header"
+      onClick={() => toggleSection("accessibility")}
+    >
+      <span>Accessibility features</span>
+      <span>{expanded === "accessibility" ? "▲" : "▼"}</span>
+    </button>
+    {expanded === "accessibility" && (
+      <div className="accordion-body accessibility-options">
+        <h5>Guest entrance and parking</h5>
+        <label><input type="checkbox" /> Step-free access</label>
+        <label><input type="checkbox" /> Disabled parking spot</label>
+        <label><input type="checkbox" /> Guest entrance wider than 32 inches</label>
+
+        <h5>Bedroom</h5>
+        <label><input type="checkbox" /> Step-free bedroom access</label>
+        <label><input type="checkbox" /> Bedroom entrance wider than 32 inches</label>
+
+        <h5>Bathroom</h5>
+        <label><input type="checkbox" /> Step-free bathroom access</label>
+        <label><input type="checkbox" /> Bathroom entrance wider than 32 inches</label>
+        <label><input type="checkbox" /> Toilet grab bar</label>
+        <label><input type="checkbox" /> Shower grab bar</label>
+        <label><input type="checkbox" /> Step-free shower</label>
+        <label><input type="checkbox" /> Shower or bath chair</label>
+
+        <h5>Adaptive equipment</h5>
+        <label><input type="checkbox" /> Ceiling or mobile hoist</label>
+      </div>
+    )}
+  </div>
+
+  {/* Host language */}
+  <div className={`accordion-item ${expanded === "language" ? "open" : ""}`}>
+    <button
+      className="accordion-header"
+      onClick={() => toggleSection("language")}
+    >
+      <span>Host language</span>
+      <span>{expanded === "language" ? "▲" : "▼"}</span>
+    </button>
+    {expanded === "language" && (
+      <div className="accordion-body language-options">
+        <label><input type="checkbox" /> English</label>
+        <label><input type="checkbox" /> French</label>
+        <label><input type="checkbox" /> Portuguese</label>
+        <label><input type="checkbox" /> Spanish</label>
+        <label><input type="checkbox" /> Hindi</label>
+        <label><input type="checkbox" /> Bengali</label>
+        <label><input type="checkbox" /> Tamil</label>
+        <label><input type="checkbox" /> Telugu</label>
+        <label><input type="checkbox" /> Sign Language</label>
+      </div>
+    )}
+  </div>
+
+</div>
+
 
         {/* Footer */}
         <div className="filters-footer">
