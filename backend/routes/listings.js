@@ -3,7 +3,7 @@ const router = express.Router();
 const Listing = require("../models/Listing");
 
 // POST: create one or multiple listings
-router.post("/api/listings", async (req, res) => {
+router.post("/", async (req, res) => {
   
   try {
     const payload = req.body;
@@ -24,7 +24,7 @@ router.post("/api/listings", async (req, res) => {
 });
 
 
-router.get("/api/listings", async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const listings = await Listing.find(); // fetch all
     return res.status(200).json({ success: true, count: listings.length, listings });

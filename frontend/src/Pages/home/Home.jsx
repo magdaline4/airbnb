@@ -11,7 +11,7 @@ const HomePage = () => {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [pageIndexes, setPageIndexes] = useState({}); // tracks current page per location
+  const [pageIndexes, setPageIndexes] = useState({}); 
 
   useEffect(() => {
     axios

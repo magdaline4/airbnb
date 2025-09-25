@@ -19,7 +19,7 @@ if (!process.env.MONGO_URI) {
 
 // ✅ Add your routes here
 const listingRoutes = require("./routes/listings.js");
-app.get("/api/listings", listingRoutes);
+app.use("/api/listings", listingRoutes);
 
 // Connect to MongoDB Atlas
 mongoose.connect(process.env.MONGO_URI, {
