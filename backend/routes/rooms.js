@@ -26,8 +26,8 @@ router.post("/", async (req, res) => {
 
 router.get("/", async (req, res) => {
   try {
-    const listings = await Room.find(); // fetch all
-    return res.status(200).json({ success: true, count: listings.length, listings });
+    const rooms = await Room.find(); // fetch all
+    return res.status(200).json({ success: true, count: rooms.length, rooms });
   } catch (err) {
     return res.status(500).json({ success: false, error: err.message });
   }
