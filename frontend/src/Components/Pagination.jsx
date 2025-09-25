@@ -1,5 +1,5 @@
 import "../Pages/Room/Room.scss";
-
+import { FaHeart, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   const pages = [];
 
@@ -18,7 +18,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
       >
-        &lt;
+        <FaChevronLeft />
       </button>
 
       {pages.map((p, index) =>
@@ -41,7 +41,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
       >
-        &gt;
+        <FaChevronRight />
       </button>
     </div>
   );

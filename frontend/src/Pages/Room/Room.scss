@@ -65,10 +65,9 @@
       button,
       .dots {
         margin: 0 0.3rem;
-
-        border: 1px solid #ddd;
+        background: none;
         border-radius: 50%;
-        background: #fff;
+        border: none;
         cursor: pointer;
         font-size: 0.9rem;
         min-width: 2.2rem;
@@ -182,37 +181,52 @@
     }
 
     /* Arrows */
-    .arrow {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      background: #ffffffd8;
-      border: none;
-      border-radius: 50%;
-      padding: 8px;
-      align-content: center;
-      justify-content: center;
-      display: flex;
-      cursor: pointer;
+  // .slider {
+  // position: relative;
 
-      svg {
-        font-size: 14px;
-        color: #333;
-      }
+  .arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #ffffffd8;
+    border: none;
+    border-radius: 50%;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
 
-      &:hover {
-        background: #ffffff;
-      }
+    // hide by default
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
 
-      &.left {
-        left: 10px;
-      }
+    svg {
+      font-size: 14px;
+      color: #333;
+    }
 
-      &.right {
-        right: 10px;
-      }
+    &:hover {
+      background: #ffffff;
+    }
+
+    &.left {
+      left: 10px;
+    }
+
+    &.right {
+      right: 10px;
     }
   }
+
+  // show arrows only when hovering the parent
+  &:hover .arrow {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
 
   .room-info {
     text-align: start;
