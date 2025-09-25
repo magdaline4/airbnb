@@ -1,31 +1,36 @@
-const express = require("express");
-const cors = require("cors");
-const mongoose = require("mongoose");
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
+
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
 
 const app = express();
-const PORT = 5000;
-
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// MongoDB connection
-const MONGO_URI = "mongodb://localhost:27017/airbnb"; // Change "airbnb" to your DB name
+// Debugging
+console.log("MONGO_URI from .env =>", process.env.MONGO_URI);
 
-mongoose
-  .connect(MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => console.log("✅ MongoDB connected successfully"))
-  .catch((err) => console.error("❌ MongoDB connection error:", err));
+if (!process.env.MONGO_URI) {
+  console.error("❌ ERROR: MONGO_URI is undefined!");
+  process.exit(1);
+}
 
-// Test route
-app.get("/", (req, res) => {
-  res.send("Backend server is running 🚀 and MongoDB is connected!");  
-});
+// ✅ Add your routes here
+const listingRoutes = require("./routes/listings.js");
+app.get("/api/listings", listingRoutes);
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+// Connect to MongoDB Atlas
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => console.log("✅ MongoDB connected"))
+.catch((err) => console.error("❌ MongoDB connection error:", err));
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+
+
+

@@ -43,34 +43,38 @@ const FiltersModal = ({ isOpen, onClose }) => {
           </button>
         </div>
 
+    
+
         {/* Recommended for you */}
         <div className="section">
           <h4>Recommended for you</h4>
           <div className="recommended">
             <div className="item">
               <img
-                src="https://img.icons8.com/ios/100/washing-machine.png"
+                src="https://a0.muscache.com/im/pictures/airbnb-platform-assets/AirbnbPlatformAssets-recommended-filters/original/075ae1dc-92de-4410-8aa4-642ec5fe4868.png"
                 alt="washing"
               />
               <span>Washing machine</span>
             </div>
             <div className="item">
-              <img src="https://img.icons8.com/ios/100/tv.png" alt="tv" />
+              <img src="https://a0.muscache.com/im/pictures/airbnb-platform-assets/AirbnbPlatformAssets-recommended-filters/original/b702d0fd-3b23-49b6-a6c8-65d743771368.png" alt="tv" />
               <span>TV</span>
             </div>
             <div className="item">
-              <img src="https://img.icons8.com/ios/100/parking.png" alt="parking" />
+              <img src="https://a0.muscache.com/im/pictures/airbnb-platform-assets/AirbnbPlatformAssets-recommended-filters/original/8336ae3d-9381-4c82-bad9-e7730f04ef4e.png" alt="parking" />
               <span>Free parking</span>
             </div>
             <div className="item">
               <img
-                src="https://img.icons8.com/ios/100/air-conditioner.png"
+                src="https://a0.muscache.com/im/pictures/airbnb-platform-assets/AirbnbPlatformAssets-recommended-filters/original/bd215e32-ec6d-483e-b39b-7da4a2a6a312.png"
                 alt="ac"
               />
               <span>Air conditioning</span>
             </div>
           </div>
         </div>
+
+       
 
         {/* Type of place */}
         <div className="section">
