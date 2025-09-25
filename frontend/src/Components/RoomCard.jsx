@@ -32,20 +32,28 @@ const RoomCard = ({ room }) => {
         </button>
 
         {/* Arrows */}
+        <div>
+        <div className="hover-zone left-zone"></div>
+        <div className="hover-zone right-zone"></div>
         <button className="arrow left">
           <FaChevronLeft />
         </button>
         <button className="arrow right">
           <FaChevronRight />
         </button>
+        </div>
       </div>
 
       <div className="room-info">
-        <div style={{ display: "flex", gap: "5px" }}>
-          <h3>{room.title}</h3> <h2> ★ {room.rating}({room.reviews})</h2>
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <h3>{room.title}</h3>{" "}
+          <h2>
+            {" "}
+            ★ {room.rating}({room.reviews})
+          </h2>
         </div>
         <p>Stay with {room.host}</p>
-        
+
         <p className="price">
           ₹{room.price.toLocaleString()} <span>for 5 nights</span>{" "}
         </p>
