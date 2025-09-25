@@ -11,11 +11,11 @@ const HomePage = () => {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [pageIndexes, setPageIndexes] = useState({}); // tracks current page per location
+  const [pageIndexes, setPageIndexes] = useState({}); 
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/listings")
+      .get("src/api/listings.json")
       .then((res) => {
         setListings(res.data.listings || []);
       })
