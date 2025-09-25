@@ -15,7 +15,7 @@ const HomePage = () => {
 
   useEffect(() => {
     axios
-      .get("/src/api/listings.json")
+      .get("http://localhost:5000/api/listings")
       .then((res) => {
         setListings(res.data.listings || []);
       })
