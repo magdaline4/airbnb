@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "../Pages/Room/FiltersModal.scss";
-import { FaTimes } from "react-icons/fa";
+import { FaHotel, FaTimes ,FaChevronDown, FaChevronUp } from "react-icons/fa";
 import {
   FaWifi,
   FaDumbbell,
@@ -11,6 +11,7 @@ import {
   FaBolt,
   FaSearch,
   FaDog,
+  FaHome,
 } from "react-icons/fa";
 
 const FiltersModal = ({ isOpen, onClose }) => {
@@ -33,7 +34,7 @@ const FiltersModal = ({ isOpen, onClose }) => {
   };
 
   const histogramData = [
-  20, 0, 70, 30, 60, 90, 50, 80, 40, 70,
+  20, 10, 70, 30, 60, 90, 50, 80, 40, 70,
   30, 60, 85, 45, 20, 70, 90, 50, 40, 60,
   30, 80, 55, 40, 70, 30, 20, 60, 75, 90,
   40, 30, 70, 60, 50, 80, 30, 60, 90, 40,
@@ -204,7 +205,7 @@ const FiltersModal = ({ isOpen, onClose }) => {
         <h5>Popular</h5>
         <div className="amenity-buttons">
           <button><FaWifi /> Wifi</button>
-          <button>Air conditioning</button>
+          <button> Air conditioning</button>
           <button><FaSwimmer /> Pool</button>
           <button>Dryer</button>
           <button>Heating</button>
@@ -251,7 +252,7 @@ const FiltersModal = ({ isOpen, onClose }) => {
         className="toggle-amenities"
         onClick={() => setExpanded(null)}
       >
-        Show less ▲
+        Show less <FaChevronUp className="arrow" /> 
       </p>
     </div>
   ) : (
@@ -266,7 +267,7 @@ const FiltersModal = ({ isOpen, onClose }) => {
         className="toggle-amenities"
         onClick={() => setExpanded("amenities")}
       >
-        Show more ▼
+        Show more  <FaChevronDown className="arrow" />
       </p>
     </div>
   )}
@@ -319,14 +320,14 @@ const FiltersModal = ({ isOpen, onClose }) => {
       onClick={() => toggleSection("property")}
     >
       <span>Property type</span>
-      <span>{expanded === "property" ? "▲" : "▼"}</span>
+      <span>{expanded === "property" ? <FaChevronUp /> : <FaChevronDown /> }</span>
     </button>
     {expanded === "property" && (
       <div className="accordion-body property-options">
-        <button>House</button>
-        <button>Flat</button>
-        <button>Guest house</button>
-        <button>Hotel</button>
+        <button> <FaHome/> House</button>
+        <button>  Flat</button>
+        <button> Guest house</button>
+        <button> <FaHotel/> Hotel</button>
       </div>
     )}
   </div>
@@ -338,22 +339,22 @@ const FiltersModal = ({ isOpen, onClose }) => {
       onClick={() => toggleSection("accessibility")}
     >
       <span>Accessibility features</span>
-      <span>{expanded === "accessibility" ? "▲" : "▼"}</span>
+      <span>{expanded === "accessibility" ?  <FaChevronUp /> : <FaChevronDown />}</span>
     </button>
     {expanded === "accessibility" && (
       <div className="accordion-body accessibility-options">
         <h5>Guest entrance and parking</h5>
         <label><input type="checkbox" /> Step-free access</label>
         <label><input type="checkbox" /> Disabled parking spot</label>
-        <label><input type="checkbox" /> Guest entrance wider than 32 inches</label>
+        <label><input type="checkbox" /> Guest entrance wider than 32 inches (81 centimetres)</label>
 
         <h5>Bedroom</h5>
         <label><input type="checkbox" /> Step-free bedroom access</label>
-        <label><input type="checkbox" /> Bedroom entrance wider than 32 inches</label>
+        <label><input type="checkbox" /> Bedroom entrance wider than 32 inches (81 centimetres)</label>
 
         <h5>Bathroom</h5>
         <label><input type="checkbox" /> Step-free bathroom access</label>
-        <label><input type="checkbox" /> Bathroom entrance wider than 32 inches</label>
+        <label><input type="checkbox" /> Bathroom entrance wider than 32 inches (81 centimetres)</label>
         <label><input type="checkbox" /> Toilet grab bar</label>
         <label><input type="checkbox" /> Shower grab bar</label>
         <label><input type="checkbox" /> Step-free shower</label>
@@ -372,18 +373,35 @@ const FiltersModal = ({ isOpen, onClose }) => {
       onClick={() => toggleSection("language")}
     >
       <span>Host language</span>
-      <span>{expanded === "language" ? "▲" : "▼"}</span>
+      <span>{expanded === "language" ?  <FaChevronUp /> : <FaChevronDown />}</span>
     </button>
     {expanded === "language" && (
       <div className="accordion-body language-options">
+        <label><input type="checkbox" /> Chinese (Simplified)</label>
         <label><input type="checkbox" /> English</label>
-        <label><input type="checkbox" /> French</label>
-        <label><input type="checkbox" /> Portuguese</label>
-        <label><input type="checkbox" /> Spanish</label>
-        <label><input type="checkbox" /> Hindi</label>
-        <label><input type="checkbox" /> Bengali</label>
-        <label><input type="checkbox" /> Tamil</label>
-        <label><input type="checkbox" /> Telugu</label>
+        <label><input type="checkbox" /> German</label>
+        <label><input type="checkbox" /> Japanese </label>
+        <label><input type="checkbox" /> Russian </label>
+        <label><input type="checkbox" /> Spanish </label>
+        <label><input type="checkbox" /> Arabic </label>
+        <label><input type="checkbox" /> Danish </label>
+        <label><input type="checkbox" /> Dutch </label>
+        <label><input type="checkbox" /> Hindi </label>
+        <label><input type="checkbox" /> Hungarian </label>
+        <label><input type="checkbox" />Indonesian </label>
+        <label><input type="checkbox" />Malay </label>
+        <label><input type="checkbox" /> Norwegian </label>
+        <label><input type="checkbox" /> Swedish </label>
+        <label><input type="checkbox" />Thai </label>
+        <label><input type="checkbox" /> Bengali </label>
+        <label><input type="checkbox" /> Gujarati </label> 
+        <label><input type="checkbox" /> Kannada </label>
+        <label><input type="checkbox" />Punjabi </label>
+        <label><input type="checkbox" /> Swahili </label>
+        <label><input type="checkbox" />Tamil </label>
+        <label><input type="checkbox" /> Telugu </label>
+        <label><input type="checkbox" /> Urdu</label>
+        <label><input type="checkbox" />Vietnamese </label> 
         <label><input type="checkbox" /> Sign Language</label>
       </div>
     )}
