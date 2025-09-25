@@ -6,6 +6,7 @@ import Service from "./Pages/services/service.jsx";
 import RoomPage from "./Pages/Room/RoomPage.jsx";
 
 
+
 function App() {
   return (
     <Router>
@@ -13,6 +14,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/services" element={<Service/>} />
          <Route path="/rooms" element={<RoomPage/>} />
+         
       </Routes>
     </Router>
   );

@@ -3,19 +3,22 @@ import RoomCard from "../../Components/RoomCard";
 import Pagination from "../../Components/Pagination";
 import "../Room/Room.scss";
 import axios from "axios";
-
+import { MdFilterList } from "react-icons/md";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import Navbar from "../../Components/Navbar/Navbar";
 import Footer from "../../Components/Footer/Footer";
+import FiltersModal from "../../Components/FiltersModal";  // ✅ import modal
 
 const RoomPage = () => {
   const [rooms, setRooms] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isFilterOpen, setIsFilterOpen] = useState(false); // ✅ state
   const roomsPerPage = 9;
 
   useEffect(() => {
     axios
+
       .get("src/api/rooms.json")
       .then((res) => setRooms(res.data))
       .catch((err) => console.error("Error fetching rooms:", err));
@@ -29,6 +32,12 @@ const RoomPage = () => {
   return (
     <>
       <Navbar />
+
+      {/* ✅ Filter Button */}
+      <button className="filter-btn" onClick={() => setIsFilterOpen(true)}>
+        <MdFilterList /> Filters
+      </button>
+
       <div className="room-page">
         <div className="room-list">
           {/* Header */}
@@ -77,7 +86,11 @@ const RoomPage = () => {
           </MapContainer>
         </div>
       </div>
+
       <Footer />
+
+      {/*  Filters Popup */}
+      <FiltersModal isOpen={isFilterOpen} onClose={() => setIsFilterOpen(false)} />
     </>
   );
 };
