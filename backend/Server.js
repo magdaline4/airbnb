@@ -21,6 +21,10 @@ if (!process.env.MONGO_URI) {
 const listingRoutes = require("./routes/listings.js");
 app.use("/api/listings", listingRoutes);
 
+const roomsRoutes = require("./routes/rooms.js");
+app.use("/api/rooms", roomsRoutes);
+
+
 // Connect to MongoDB Atlas
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
