@@ -259,7 +259,7 @@ const FiltersModal = ({ isOpen, onClose }) => {
       <button><FaWifi /> Wifi</button>
       <button><FaDumbbell /> Gym</button>
       <button><FaSwimmer /> Pool</button>
-      <button><FaLaptop /> Workspace</button>
+      <button><FaLaptop />Didicated Workspace</button>
       <button><FaUmbrellaBeach /> Beachfront</button>
       <button><FaUtensils /> Kitchen</button>
       <p
