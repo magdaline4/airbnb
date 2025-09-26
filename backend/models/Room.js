@@ -1,18 +1,26 @@
 const mongoose = require("mongoose");
 
+const locationSchema = new mongoose.Schema({
+  lat: { type: Number, required: true },
+  lng: { type: Number, required: true }
+}, { _id: false }); // _id: false prevents Mongoose from creating an extra _id for this subdoc
+
 const roomSchema = new mongoose.Schema({
-    id: {type: Number, required: true },
   title: { type: String, required: true },
-  location: { type: String, required: true },
+  type: { type: String, required: true },
+
+  // Use subdocument schema
+  location: { type: locationSchema, required: true },
+
   price: { type: Number, required: true },
   nights: { type: Number, required: true },
   rating: { type: Number, required: true },
-  reviewCount: { type: Number, default: 0 },
-  beds: { type: Number, required: true },
+  reviewCount: { type: Number, required: true },
+  isGuestFavorite: { type: Boolean, default: false },
+  beds: { type: Number },
   checkIn: { type: String },
   checkOut: { type: String },
-  images: [{ type: String, required: true }],
-  isGuestFavorite: { type: Boolean, default: false }
+  images: [{ type: String }]
 }, { timestamps: true });
 
 module.exports = mongoose.model("Room", roomSchema);

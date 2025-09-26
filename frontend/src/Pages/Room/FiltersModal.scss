@@ -19,26 +19,30 @@
   flex-direction: column;
 
   /* Header */
-  .filters-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.filters-header {
+  display: flex;
+  justify-content: flex-end; /* push close button to right */
+  align-items: center;
+  position: relative;
+  padding: 0.5rem 1rem;
 
-    h3 {
-      display: flex;
-      text-align: center;
-      font-size: 1.5rem;
-      font-weight: 600;
-
-    }
-
-    .close-btn {
-      background: none;
-      border: none;
-      font-size: 1.2rem;
-      cursor: pointer;
-    }
+  h3 {
+    position: absolute; /* keeps it perfectly centered */
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
   }
+
+  .close-btn {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+  }
+}
+
 
   /* Sections */
   .section {
@@ -206,6 +210,12 @@ p{
       }
     }
   }
+  hr {
+  border: none;
+  border-top: 1px solid #b0a7a7ba;
+  width: 100%;
+}
+
 
   /* Type of place */
   .type-buttons {

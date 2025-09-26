@@ -34,12 +34,10 @@ const FiltersModal = ({ isOpen, onClose }) => {
   };
 
   const histogramData = [
-  20, 10, 70, 30, 60, 90, 50, 80, 40, 70,
-  30, 60, 85, 45, 20, 70, 90, 50, 40, 60,
-  30, 80, 55, 40, 70, 30, 20, 60, 75, 90,
-  40, 30, 70, 60, 50, 80, 30, 60, 90, 40,
-];
-
+    20, 10, 70, 30, 60, 90, 50, 80, 40, 70, 30, 60, 85, 45, 20, 70, 90, 50, 40,
+    60, 30, 80, 55, 40, 70, 30, 20, 60, 75, 90, 40, 30, 70, 60, 50, 80, 30, 60,
+    90, 40,
+  ];
 
   return (
     <div className="filters-overlay">
@@ -51,9 +49,7 @@ const FiltersModal = ({ isOpen, onClose }) => {
             <FaTimes />
           </button>
         </div>
-
-    
-
+        <hr />
         {/* Recommended for you */}
         <div className="section">
           <h4>Recommended for you</h4>
@@ -66,11 +62,17 @@ const FiltersModal = ({ isOpen, onClose }) => {
               <span>Washing machine</span>
             </div>
             <div className="item">
-              <img src="https://a0.muscache.com/im/pictures/airbnb-platform-assets/AirbnbPlatformAssets-recommended-filters/original/b702d0fd-3b23-49b6-a6c8-65d743771368.png" alt="tv" />
+              <img
+                src="https://a0.muscache.com/im/pictures/airbnb-platform-assets/AirbnbPlatformAssets-recommended-filters/original/b702d0fd-3b23-49b6-a6c8-65d743771368.png"
+                alt="tv"
+              />
               <span>TV</span>
             </div>
             <div className="item">
-              <img src="https://a0.muscache.com/im/pictures/airbnb-platform-assets/AirbnbPlatformAssets-recommended-filters/original/8336ae3d-9381-4c82-bad9-e7730f04ef4e.png" alt="parking" />
+              <img
+                src="https://a0.muscache.com/im/pictures/airbnb-platform-assets/AirbnbPlatformAssets-recommended-filters/original/8336ae3d-9381-4c82-bad9-e7730f04ef4e.png"
+                alt="parking"
+              />
               <span>Free parking</span>
             </div>
             <div className="item">
@@ -82,8 +84,7 @@ const FiltersModal = ({ isOpen, onClose }) => {
             </div>
           </div>
         </div>
-
-       
+        <hr />
 
         {/* Type of place */}
         <div className="section">
@@ -94,70 +95,69 @@ const FiltersModal = ({ isOpen, onClose }) => {
             <button>Entire home</button>
           </div>
         </div>
+<hr />
+        {/* Price Range */}
+        <div className="section price-section">
+          <h4>Price range</h4>
+          <p className="sub-text">Trip price, includes all fees</p>
 
-       {/* Price Range */}
-<div className="section price-section">
-  <h4>Price range</h4>
-  <p className="sub-text">Trip price, includes all fees</p>
+          <div className="price-range">
+            {/* Histogram */}
+            <div className="histogram">
+              {histogramData.map((h, i) => {
+                const barMin = (i / histogramData.length) * 50000;
+                const barMax = ((i + 1) / histogramData.length) * 50000;
 
-  <div className="price-range">
-    {/* Histogram */}
-    <div className="histogram">
-      {histogramData.map((h, i) => {
-        const barMin = (i / histogramData.length) * 50000;
-        const barMax = ((i + 1) / histogramData.length) * 50000;
+                const isActive = barMin >= minPrice && barMax <= maxPrice;
 
-        const isActive = barMin >= minPrice && barMax <= maxPrice;
+                return (
+                  <div
+                    key={i}
+                    className={`bar ${isActive ? "active" : ""}`}
+                    style={{ height: `${h}%` }}
+                  />
+                );
+              })}
+            </div>
 
-        return (
-          <div
-            key={i}
-            className={`bar ${isActive ? "active" : ""}`}
-            style={{ height: `${h}%` }}
-          />
-        );
-      })}
-    </div>
+            {/* Dual sliders */}
+            <div className="slider-container">
+              <input
+                type="range"
+                min="0"
+                max="50000"
+                step="500"
+                value={minPrice}
+                onChange={(e) =>
+                  setMinPrice(Math.min(Number(e.target.value), maxPrice - 1000))
+                }
+              />
+              <input
+                type="range"
+                min="0"
+                max="50000"
+                step="500"
+                value={maxPrice}
+                onChange={(e) =>
+                  setMaxPrice(Math.max(Number(e.target.value), minPrice + 1000))
+                }
+              />
+            </div>
 
-    {/* Dual sliders */}
-    <div className="slider-container">
-      <input
-        type="range"
-        min="0"
-        max="50000"
-        step="500"
-        value={minPrice}
-        onChange={(e) =>
-          setMinPrice(Math.min(Number(e.target.value), maxPrice - 1000))
-        }
-      />
-      <input
-        type="range"
-        min="0"
-        max="50000"
-        step="500"
-        value={maxPrice}
-        onChange={(e) =>
-          setMaxPrice(Math.max(Number(e.target.value), minPrice + 1000))
-        }
-      />
-    </div>
-
-    {/* Price values */}
-    <div className="price-values">
-      <div className="price-box">
-        <span>Minimum</span>
-        <strong>₹{minPrice}</strong>
-      </div>
-      <div className="price-box">
-        <span>Maximum</span>
-        <strong>₹{maxPrice}+</strong>
-      </div>
-    </div>
-  </div>
-</div>
-
-
+            {/* Price values */}
+            <div className="price-values">
+              <div className="price-box">
+                <span>Minimum</span>
+                <strong>₹{minPrice}</strong>
+              </div>
+              <div className="price-box">
+                <span>Maximum</span>
+                <strong>₹{maxPrice}+</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+<hr />
         {/* Rooms & Beds */}
         <div className="section">
           <h4>Rooms and beds</h4>
@@ -193,10 +193,10 @@ const FiltersModal = ({ isOpen, onClose }) => {
             </div>
           </div>
         </div>
-
-         {/* Amenities */}
-<div className="section">
-  <h4>Amenities</h4>
+<hr />
+        {/* Amenities */}
+        <div className="section">
+          <h4>Amenities</h4>
 
   {/* Conditionally render based on expanded state */}
   {expanded === "amenities" ? (
@@ -248,31 +248,41 @@ const FiltersModal = ({ isOpen, onClose }) => {
         </div>
       </div>
 
-      <p
-        className="toggle-amenities"
-        onClick={() => setExpanded(null)}
-      >
-        Show less <FaChevronUp className="arrow" /> 
-      </p>
-    </div>
-  ) : (
-    <div className="amenities">
-      <button><FaWifi /> Wifi</button>
-      <button><FaDumbbell /> Gym</button>
-      <button><FaSwimmer /> Pool</button>
-      <button><FaLaptop />Didicated Workspace</button>
-      <button><FaUmbrellaBeach /> Beachfront</button>
-      <button><FaUtensils /> Kitchen</button>
-      <p
-        className="toggle-amenities"
-        onClick={() => setExpanded("amenities")}
-      >
-        Show more  <FaChevronDown className="arrow" />
-      </p>
-    </div>
-  )}
-</div>
-
+              <p className="toggle-amenities" onClick={() => setExpanded(null)}>
+                Show less <FaChevronUp className="arrow" />
+              </p>
+            </div>
+          ) : (
+            <div className="amenities">
+              <button>
+                <FaWifi /> Wifi
+              </button>
+              <button>
+                <FaDumbbell /> Gym
+              </button>
+              <button>
+                <FaSwimmer /> Pool
+              </button>
+              <button>
+                <FaLaptop />
+                Didicated Workspace
+              </button>
+              <button>
+                <FaUmbrellaBeach /> Beachfront
+              </button>
+              <button>
+                <FaUtensils /> Kitchen
+              </button>
+              <p
+                className="toggle-amenities"
+                onClick={() => setExpanded("amenities")}
+              >
+                Show more <FaChevronDown className="arrow" />
+              </p>
+            </div>
+          )}
+        </div>
+<hr />
         {/* Booking Options */}
         <div className="section">
           <h4>Booking options</h4>
@@ -288,7 +298,7 @@ const FiltersModal = ({ isOpen, onClose }) => {
             </button>
           </div>
         </div>
-
+<hr />
         {/* Standout stays */}
         <div className="section standout">
           <h4>Standout stays</h4>
@@ -348,67 +358,148 @@ const FiltersModal = ({ isOpen, onClose }) => {
         <label><input type="checkbox" /> Disabled parking spot</label>
         <label><input type="checkbox" /> Guest entrance wider than 32 inches (81 centimetres)</label>
 
-        <h5>Bedroom</h5>
-        <label><input type="checkbox" /> Step-free bedroom access</label>
-        <label><input type="checkbox" /> Bedroom entrance wider than 32 inches (81 centimetres)</label>
+                <h5>Bedroom</h5>
+                <label>
+                  <input type="checkbox" /> Step-free bedroom access
+                </label>
+                <label>
+                  <input type="checkbox" /> Bedroom entrance wider than 32
+                  inches (81 centimetres)
+                </label>
 
-        <h5>Bathroom</h5>
-        <label><input type="checkbox" /> Step-free bathroom access</label>
-        <label><input type="checkbox" /> Bathroom entrance wider than 32 inches (81 centimetres)</label>
-        <label><input type="checkbox" /> Toilet grab bar</label>
-        <label><input type="checkbox" /> Shower grab bar</label>
-        <label><input type="checkbox" /> Step-free shower</label>
-        <label><input type="checkbox" /> Shower or bath chair</label>
+                <h5>Bathroom</h5>
+                <label>
+                  <input type="checkbox" /> Step-free bathroom access
+                </label>
+                <label>
+                  <input type="checkbox" /> Bathroom entrance wider than 32
+                  inches (81 centimetres)
+                </label>
+                <label>
+                  <input type="checkbox" /> Toilet grab bar
+                </label>
+                <label>
+                  <input type="checkbox" /> Shower grab bar
+                </label>
+                <label>
+                  <input type="checkbox" /> Step-free shower
+                </label>
+                <label>
+                  <input type="checkbox" /> Shower or bath chair
+                </label>
 
-        <h5>Adaptive equipment</h5>
-        <label><input type="checkbox" /> Ceiling or mobile hoist</label>
-      </div>
-    )}
-  </div>
-
-  {/* Host language */}
-  <div className={`accordion-item ${expanded === "language" ? "open" : ""}`}>
-    <button
-      className="accordion-header"
-      onClick={() => toggleSection("language")}
-    >
-      <span>Host language</span>
-      <span>{expanded === "language" ?  <FaChevronUp /> : <FaChevronDown />}</span>
-    </button>
-    {expanded === "language" && (
-      <div className="accordion-body language-options">
-        <label><input type="checkbox" /> Chinese (Simplified)</label>
-        <label><input type="checkbox" /> English</label>
-        <label><input type="checkbox" /> German</label>
-        <label><input type="checkbox" /> Japanese </label>
-        <label><input type="checkbox" /> Russian </label>
-        <label><input type="checkbox" /> Spanish </label>
-        <label><input type="checkbox" /> Arabic </label>
-        <label><input type="checkbox" /> Danish </label>
-        <label><input type="checkbox" /> Dutch </label>
-        <label><input type="checkbox" /> Hindi </label>
-        <label><input type="checkbox" /> Hungarian </label>
-        <label><input type="checkbox" />Indonesian </label>
-        <label><input type="checkbox" />Malay </label>
-        <label><input type="checkbox" /> Norwegian </label>
-        <label><input type="checkbox" /> Swedish </label>
-        <label><input type="checkbox" />Thai </label>
-        <label><input type="checkbox" /> Bengali </label>
-        <label><input type="checkbox" /> Gujarati </label> 
-        <label><input type="checkbox" /> Kannada </label>
-        <label><input type="checkbox" />Punjabi </label>
-        <label><input type="checkbox" /> Swahili </label>
-        <label><input type="checkbox" />Tamil </label>
-        <label><input type="checkbox" /> Telugu </label>
-        <label><input type="checkbox" /> Urdu</label>
-        <label><input type="checkbox" />Vietnamese </label> 
-        <label><input type="checkbox" /> Sign Language</label>
-      </div>
-    )}
-  </div>
-
-</div>
-
+                <h5>Adaptive equipment</h5>
+                <label>
+                  <input type="checkbox" /> Ceiling or mobile hoist
+                </label>
+              </div>
+            )}
+          </div>
+          {/* Host language */}
+          <div
+            className={`accordion-item ${
+              expanded === "language" ? "open" : ""
+            }`}
+          >
+            <button
+              className="accordion-header"
+              onClick={() => toggleSection("language")}
+            >
+              <span>Host language</span>
+              <span>
+                {expanded === "language" ? <FaChevronUp /> : <FaChevronDown />}
+              </span>
+            </button>
+            {expanded === "language" && (
+              <div className="accordion-body language-options">
+                <label>
+                  <input type="checkbox" /> Chinese (Simplified)
+                </label>
+                <label>
+                  <input type="checkbox" /> English
+                </label>
+                <label>
+                  <input type="checkbox" /> German
+                </label>
+                <label>
+                  <input type="checkbox" /> Japanese{" "}
+                </label>
+                <label>
+                  <input type="checkbox" /> Russian{" "}
+                </label>
+                <label>
+                  <input type="checkbox" /> Spanish{" "}
+                </label>
+                <label>
+                  <input type="checkbox" /> Arabic{" "}
+                </label>
+                <label>
+                  <input type="checkbox" /> Danish{" "}
+                </label>
+                <label>
+                  <input type="checkbox" /> Dutch{" "}
+                </label>
+                <label>
+                  <input type="checkbox" /> Hindi{" "}
+                </label>
+                <label>
+                  <input type="checkbox" /> Hungarian{" "}
+                </label>
+                <label>
+                  <input type="checkbox" />
+                  Indonesian{" "}
+                </label>
+                <label>
+                  <input type="checkbox" />
+                  Malay{" "}
+                </label>
+                <label>
+                  <input type="checkbox" /> Norwegian{" "}
+                </label>
+                <label>
+                  <input type="checkbox" /> Swedish{" "}
+                </label>
+                <label>
+                  <input type="checkbox" />
+                  Thai{" "}
+                </label>
+                <label>
+                  <input type="checkbox" /> Bengali{" "}
+                </label>
+                <label>
+                  <input type="checkbox" /> Gujarati{" "}
+                </label>
+                <label>
+                  <input type="checkbox" /> Kannada{" "}
+                </label>
+                <label>
+                  <input type="checkbox" />
+                  Punjabi{" "}
+                </label>
+                <label>
+                  <input type="checkbox" /> Swahili{" "}
+                </label>
+                <label>
+                  <input type="checkbox" />
+                  Tamil{" "}
+                </label>
+                <label>
+                  <input type="checkbox" /> Telugu{" "}
+                </label>
+                <label>
+                  <input type="checkbox" /> Urdu
+                </label>
+                <label>
+                  <input type="checkbox" />
+                  Vietnamese{" "}
+                </label>
+                <label>
+                  <input type="checkbox" /> Sign Language
+                </label>
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* Footer */}
         <div className="filters-footer">
