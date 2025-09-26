@@ -24,13 +24,32 @@ router.post("/", async (req, res) => {
 
 
 
+// GET with pagination
 router.get("/", async (req, res) => {
   try {
-    const rooms = await Room.find(); // fetch all
-    return res.status(200).json({ success: true, count: rooms.length, rooms });
+    // query params with defaults
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 9;
+
+    const skip = (page - 1) * limit;
+
+    const [rooms, total] = await Promise.all([
+      Room.find().skip(skip).limit(limit),
+      Room.countDocuments()
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      page,
+      totalPages: Math.ceil(total / limit),
+      count: rooms.length,
+      totalRooms: total,
+      rooms,
+    });
   } catch (err) {
     return res.status(500).json({ success: false, error: err.message });
   }
 });
+
 
 module.exports = router;
