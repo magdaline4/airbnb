@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "../Pages/Room/FiltersModal.scss";
-import { FaHotel, FaTimes ,FaChevronDown, FaChevronUp ,} from "react-icons/fa";
+import { FaHotel, FaTimes ,FaChevronDown, FaChevronUp, FaBuilding ,} from "react-icons/fa";
 import {
   FaUmbrellaBeach,
   FaBolt,
@@ -49,7 +49,7 @@ const FiltersModal = ({ isOpen, onClose }) => {
             <FaTimes />
           </button>
         </div>
-        <hr />
+        
         {/* Recommended for you */}
         <div className="section">
           <h4>Recommended for you</h4>
@@ -335,7 +335,7 @@ const FiltersModal = ({ isOpen, onClose }) => {
     {expanded === "property" && (
       <div className="accordion-body property-options">
         <button> <FaHome/> House</button>
-        <button> Flat</button>
+        <button> <FaBuilding/> Flat</button>
         <button> <GiHouse/> Guest house</button>
         <button> <FaHotel/> Hotel</button>
       </div>

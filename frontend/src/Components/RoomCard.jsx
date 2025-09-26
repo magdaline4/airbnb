@@ -115,10 +115,12 @@ const RoomCard = ({ room = {} }) => {
 
       <div className="room-info">
         <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <h3>{room.title}</h3>
-          <h2>★ {room.rating} ({room.reviews})</h2>
+          <h3>{room.type}</h3>
+          <h2>★ {room.rating} ({room.reviewCount})</h2>
         </div>
-        <p>Stay with {room.host}</p>
+        <p>Stay with {room.title}</p>
+        <p>{room.beds} beds</p>
+        <p>{room.checkIn} - {room.checkOut} </p>
         <p className="price">
           ₹{room.price?.toLocaleString?.() || room.price} <span>for {room.nights || 1} nights</span>
         </p>

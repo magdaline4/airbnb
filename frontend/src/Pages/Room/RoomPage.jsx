@@ -14,7 +14,7 @@ const RoomPage = () => {
   const [rooms, setRooms] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [isFilterOpen, setIsFilterOpen] = useState(false); // ✅ state
-  const roomsPerPage = 9;
+  const roomsPerPage = 18;
 
   useEffect(() => {
     axios
