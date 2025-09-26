@@ -4,23 +4,23 @@ const Room = require("../models/Room");
 
 // POST only — create one or multiple rooms
 router.post("/", async (req, res) => {
-  try {
-    const payload = req.body;
-
-    if (Array.isArray(payload)) {
-      // Insert many
-      const docs = await Room.insertMany(payload, { ordered: false });
-      return res.status(201).json({ success: true, count: docs.length, rooms: docs });
-    } else {
-      // Insert single
-      const room = new Room(payload);
-      await room.save();
-      return res.status(201).json({ success: true, room });
+   try {
+      const payload = req.body;
+  
+      if (Array.isArray(payload)) {
+        // Insert multiple
+        const docs = await Room.insertMany(payload);
+        return res.status(201).json({ success: true, count: docs.length, rooms: docs });
+      } else {
+        // Insert single
+        const room = new Room(payload);
+        await room.save();
+        return res.status(201).json({ success: true, room });
+      }
+    } catch (err) {
+      return res.status(400).json({ success: false, error: err.message });
     }
-  } catch (err) {
-    return res.status(400).json({ success: false, error: err.message });
-  }
-});
+  });
 
 
 
