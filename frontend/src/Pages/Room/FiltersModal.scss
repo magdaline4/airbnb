@@ -42,7 +42,7 @@
 
   /* Sections */
   .section {
-    margin: 1.5rem 0;
+    // margin: 1.5rem 0;
     
 
     h4 {
@@ -259,10 +259,11 @@ p{
     .slider-container {
       position: relative;
       width: 100%;
+      bottom: 30px;
 
       input[type="range"] {
         position: absolute;
-        left: 0;
+        left: -8px;
         right: 0;
         width: 100%;
         -webkit-appearance: none;
@@ -377,22 +378,24 @@ p{
         gap: 0.8rem;
         border: 1px solid #ddd;
         border-radius: 12px;
-        padding: 0.8rem;
+        padding: 1.8rem;
         cursor: pointer;
 
         img {
-          width: 32px;
-          height: 32px;
+          width: 55px;
+          height: 55px;
         }
 
         h5 {
           font-size: 0.95rem;
           font-weight: 600;
+          margin: unset;
         }
 
         p {
           font-size: 0.85rem;
           color: #555;
+            margin: unset;
         }
 
         &:hover {

@@ -1,18 +1,18 @@
 import React, { useState } from "react";
 import "../Pages/Room/FiltersModal.scss";
-import { FaHotel, FaTimes ,FaChevronDown, FaChevronUp } from "react-icons/fa";
+import { FaHotel, FaTimes ,FaChevronDown, FaChevronUp ,} from "react-icons/fa";
 import {
-  FaWifi,
-  FaDumbbell,
-  FaSwimmer,
-  FaLaptop,
   FaUmbrellaBeach,
-  FaUtensils,
   FaBolt,
   FaSearch,
   FaDog,
   FaHome,
 } from "react-icons/fa";
+import { 
+  FaWifi, FaSwimmer, FaLaptop, FaUtensils, FaDumbbell, FaTv, FaCar, FaChargingStation, 
+  FaBed, FaHotTub, FaFire, FaSmoking, FaWind, FaTshirt, FaBath
+} from "react-icons/fa";
+import { GiAlarmClock, GiBarbecue, GiBowlOfRice, GiComb, GiHouse, GiTimeTrap, GiWashingMachine } from "react-icons/gi";
 
 const FiltersModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
@@ -205,11 +205,11 @@ const FiltersModal = ({ isOpen, onClose }) => {
         <h5>Popular</h5>
         <div className="amenity-buttons">
           <button><FaWifi /> Wifi</button>
-          <button> Air conditioning</button>
+          <button><FaWind /> Air conditioning</button>
           <button><FaSwimmer /> Pool</button>
-          <button>Dryer</button>
-          <button>Heating</button>
-          <button><FaLaptop /> Dedicated workspace</button>
+          <button><FaTshirt /> Dryer</button>
+          <button><FaBath /> Heating</button>
+          <button><FaLaptop /> Workspace</button>
         </div>
       </div>
 
@@ -217,34 +217,34 @@ const FiltersModal = ({ isOpen, onClose }) => {
         <h5>Essentials</h5>
         <div className="amenity-buttons">
           <button><FaUtensils /> Kitchen</button>
-          <button>Washing machine</button>
-          <button>TV</button>
-          <button>Hair dryer</button>
-          <button>Iron</button>
+          <button><GiWashingMachine /> Washing machine</button>
+          <button><FaTv /> TV</button>
+          <button> <GiComb/> Hair dryer</button>
+          <button><FaBath /> Iron</button>
         </div>
       </div>
 
       <div className="amenity-group">
         <h5>Features</h5>
         <div className="amenity-buttons">
-          <button>Hot tub</button>
-          <button>Free parking</button>
-          <button>EV charger</button>
-          <button>Cot</button>
-          <button>King bed</button>
+          <button><FaHotTub /> Hot tub</button>
+          <button><FaCar /> Free parking</button>
+          <button><FaChargingStation /> EV charger</button>
+          <button><FaBed /> Cot</button>
+          <button><FaBed /> King bed</button>
           <button><FaDumbbell /> Gym</button>
-          <button>BBQ grill</button>
-          <button>Breakfast</button>
-          <button>Indoor fireplace</button>
-          <button>Smoking allowed</button>
+          <button><GiBarbecue /> BBQ grill</button>
+          <button> <GiBowlOfRice/> Breakfast</button>
+          <button><FaFire /> Indoor fireplace</button>
+          <button><FaSmoking /> Smoking allowed</button>
         </div>
       </div>
 
       <div className="amenity-group">
         <h5>Safety</h5>
         <div className="amenity-buttons">
-          <button>Smoke alarm</button>
-          <button>Carbon monoxide alarm</button>
+          <button><GiAlarmClock/> Smoke alarm</button>
+          <button><GiTimeTrap/> Carbon monoxide alarm</button>
         </div>
       </div>
 
@@ -294,14 +294,14 @@ const FiltersModal = ({ isOpen, onClose }) => {
           <h4>Standout stays</h4>
           <div className="standout-options">
             <div className="option-card">
-              <img src="/icons/favorite.svg" alt="Guest favourite" />
+              <img src="https://i.etsystatic.com/25032573/r/il/c16171/2528485574/il_fullxfull.2528485574_i4eh.jpg" alt="Guest favourite" />
               <div>
                 <h5>Guest favourite</h5>
                 <p>The most loved homes on Airbnb</p>
               </div>
             </div>
             <div className="option-card">
-              <img src="/icons/luxe.svg" alt="Luxe" />
+              <img src="https://cdn1.iconfinder.com/data/icons/restaurant-138/512/Food_Delivery_delivery_food_service_catering_restaurant-512.png" alt="Luxe" />
               <div>
                 <h5>Luxe</h5>
                 <p>Luxury homes with elevated design</p>
@@ -325,8 +325,8 @@ const FiltersModal = ({ isOpen, onClose }) => {
     {expanded === "property" && (
       <div className="accordion-body property-options">
         <button> <FaHome/> House</button>
-        <button>  Flat</button>
-        <button> Guest house</button>
+        <button> Flat</button>
+        <button> <GiHouse/> Guest house</button>
         <button> <FaHotel/> Hotel</button>
       </div>
     )}
