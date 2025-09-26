@@ -13,8 +13,9 @@ import FiltersModal from "../../Components/FiltersModal";  // ✅ import modal
 const RoomPage = () => {
   const [rooms, setRooms] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+   const [totalPages, setTotalPages] = useState(1);
   const [isFilterOpen, setIsFilterOpen] = useState(false); // ✅ state
-  const roomsPerPage = 18;
+  const roomsPerPage = 9;
 
   useEffect(() => {
     axios
