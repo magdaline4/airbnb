@@ -52,7 +52,7 @@ const RoomPage = () => {
           {/* Cards */}
           <div className="room-grid">
             {currentRooms.map((room) => (
-              <RoomCard key={room.id} room={room} />
+              <RoomCard key={room._id} room={room} />
             ))}
           </div>
 
@@ -77,7 +77,7 @@ const RoomPage = () => {
             />
             {currentRooms.map((room) => (
               <Marker
-                key={room._idin}
+                key={room._id}
                 position={[13.0827, 80.2707]}
                 
               >
