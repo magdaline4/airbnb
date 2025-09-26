@@ -8,7 +8,9 @@
     "reviews": 17,
     "location": { "lat": 13.0827, "lng": 80.2707 },
     "image": ["https://picsum.photos/200/300",
-              "https://picsum.photos/200/300"]
+              "https://www.atulhost.com/wp-content/uploads/2019/05/create-a-website.jpg",
+              "https://tse4.mm.bing.net/th/id/OIP.I5tMgeqizT3bRY8CedorLgHaHa?w=1024&h=1024&rs=1&pid=ImgDetMain&o=7&rm=3"
+              ]
   },
   {
     "id": 2,

@@ -1,24 +1,19 @@
 /* ---------- Page Layout ---------- */
 
-   .filter-btn{
-    height: 40px;
-    background-color: white;
-    border: 1px solid #7d7878;
-    padding: 10px 10px;
-    margin: 10px;
-   font-size: 16px;
-    border-radius: 17px;
+.filter-btn {
+  height: 40px;
+  background-color: white;
+  border: 1px solid #7d7878;
+  padding: 10px 10px;
+  margin: 10px;
+  font-size: 16px;
+  border-radius: 17px;
+}
 
-   
-   }
-   
 .room-page {
   display: flex;
   flex-direction: row;
   height: 100vh;
-  // overflow: hidden;
-  // font-family: "Airbnb Cereal VF", Circular, -apple-system, BlinkMacSystemFont,
-  //   Roboto, "Helvetica Neue", sans-serif !important;
   font-family: Airbnb Cereal VF, Circular, -apple-system, BlinkMacSystemFont,
     Roboto, Helvetica Neue, sans-serif;
 
@@ -128,14 +123,8 @@
 .room-card {
   border-radius: 16px;
   background: #fff;
-
   display: flex;
   flex-direction: column;
-
-  // &:hover {
-  //   transform: translateY(-4px);
-  //   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
-  // }
 
   .room-image {
     position: relative;
@@ -160,7 +149,6 @@
       border-radius: 20px;
       display: flex;
       align-items: center;
-      // box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     }
 
     /* Heart button */
@@ -194,52 +182,88 @@
     }
 
     /* Arrows */
-  // .slider {
-  // position: relative;
+    .arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #ffffffd8;
+      border: none;
+      border-radius: 50%;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
 
-  .arrow {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: #ffffffd8;
-    border: none;
-    border-radius: 50%;
-    padding: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
 
-    // hide by default
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
+      svg {
+        font-size: 14px;
+        color: #333;
+      }
 
-    svg {
-      font-size: 14px;
-      color: #333;
+      &:hover {
+        background: #ffffff;
+      }
+
+      &.left {
+        left: 10px;
+      }
+
+      &.right {
+        right: 10px;
+      }
     }
 
-    &:hover {
-      background: #ffffff;
+    /* show arrows only when hovering the parent */
+    &:hover .arrow {
+      opacity: 1;
+      visibility: visible;
     }
 
-    &.left {
-      left: 10px;
+    /* ---------- NEW: Hover Zones ---------- */
+    .hover-zone {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 38%;
+      cursor: pointer;
+      z-index: 2; // below arrows
+    }
+    .left-zone {
+      left: 0;
+    }
+    .right-zone {
+      right: 0;
     }
 
-    &.right {
-      right: 10px;
+    /* ---------- NEW: Dots Indicator ---------- */
+    .dots {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 6px;
+      z-index: 5;
+    }
+
+    .dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: rgba(177, 176, 176, 0.7);
+      border: none;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .dot.active {
+      background: rgb(243, 242, 242);
     }
   }
-
-  // show arrows only when hovering the parent
-  &:hover .arrow {
-    opacity: 1;
-    visibility: visible;
-  }
-}
-
 
   .room-info {
     text-align: start;
