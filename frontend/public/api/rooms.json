@@ -17,7 +17,7 @@
     "rating": 5.0,
     "reviews": 21,
     "location": { "lat": 13.05, "lng": 80.25 },
-    "image": "https://picsum.photos/200/300"
+    "image": "https://picsum.photos/200/300,"
   },
   {
     "id": 3,
