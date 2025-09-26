@@ -19,7 +19,7 @@ const RoomPage = () => {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:5000/api/rooms?page=${currentPage}&limit=${roomsPerPage}`)
+      .get(`https://airbnbbackend-airbnbweb710-1108-hyasas-projects.vercel.app/api/rooms?page=${currentPage}&limit=${roomsPerPage}`)
       .then((res) => {
         setRooms(res.data.rooms);
         setTotalPages(res.data.totalPages); // ✅ backend gives totalPages
