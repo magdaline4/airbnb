@@ -3,15 +3,12 @@ const mongoose = require("mongoose");
 const locationSchema = new mongoose.Schema({
   lat: { type: Number, required: true },
   lng: { type: Number, required: true }
-}, { _id: false }); // _id: false prevents Mongoose from creating an extra _id for this subdoc
+}, { _id: false });
 
 const roomSchema = new mongoose.Schema({
   title: { type: String, required: true },
   type: { type: String, required: true },
-
-  // Use subdocument schema
   location: { type: locationSchema, required: true },
-
   price: { type: Number, required: true },
   nights: { type: Number, required: true },
   rating: { type: Number, required: true },
