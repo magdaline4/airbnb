@@ -13,21 +13,19 @@ import FiltersModal from "../../Components/FiltersModal";  // ✅ import modal
 const RoomPage = () => {
   const [rooms, setRooms] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+   const [totalPages, setTotalPages] = useState(1);
   const [isFilterOpen, setIsFilterOpen] = useState(false); // ✅ state
-  const roomsPerPage = 18;
+  const roomsPerPage = 9;
 
   useEffect(() => {
     axios
-
-      .get("http://localhost:5000/api/rooms")
-      .then((res) => setRooms(res.data.rooms))
+      .get(`https://airbnbbackend-airbnbweb710-1108-hyasas-projects.vercel.app/api/rooms?page=${currentPage}&limit=${roomsPerPage}`)
+      .then((res) => {
+        setRooms(res.data.rooms);
+        setTotalPages(res.data.totalPages); // ✅ backend gives totalPages
+      })
       .catch((err) => console.error("Error fetching rooms:", err));
-  }, []);
-
-  // Pagination logic
-  const totalPages = Math.ceil(rooms.length / roomsPerPage);
-  const startIndex = (currentPage - 1) * roomsPerPage;
-  const currentRooms = rooms.slice(startIndex, startIndex + roomsPerPage);
+  }, [currentPage]); // ✅ refetch when page changes
 
   return (
     <>
@@ -51,7 +49,7 @@ const RoomPage = () => {
 
           {/* Cards */}
           <div className="room-grid">
-            {currentRooms.map((room) => (
+            {rooms.map((room) => (
               <RoomCard key={room._id} room={room} />
             ))}
           </div>
@@ -64,6 +62,7 @@ const RoomPage = () => {
           />
         </div>
 
+        {/* Map */}
         <div className="room-map">
           <MapContainer
             center={[13.0827, 80.2707]}
@@ -75,12 +74,8 @@ const RoomPage = () => {
               attribution="&copy; OpenStreetMap contributors"
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-            {currentRooms.map((room) => (
-              <Marker
-                key={room._id}
-                position={[13.0827, 80.2707]}
-                
-              >
+            {rooms.map((room) => (
+              <Marker key={room._id} position={[13.0827, 80.2707]}>
                 <Popup>₹{room.price.toLocaleString()}</Popup>
               </Marker>
             ))}
@@ -90,7 +85,7 @@ const RoomPage = () => {
 
       <Footer />
 
-      {/*  Filters Popup */}
+      {/* Filters Popup */}
       <FiltersModal isOpen={isFilterOpen} onClose={() => setIsFilterOpen(false)} />
     </>
   );
