@@ -4,6 +4,7 @@ require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const connectDB = require('./config/database'); // Add this line
 
 const app = express();
 app.use(cors());
@@ -17,6 +18,9 @@ if (!process.env.MONGO_URI) {
   process.exit(1);
 }
 
+// Connect to MongoDB
+connectDB();
+
 // ✅ Use routes correctly
 const listingRoutes = require("./routes/listings.js");
 app.use("/api/listings", listingRoutes);
@@ -24,14 +28,27 @@ app.use("/api/listings", listingRoutes);
 const roomsRoutes = require("./routes/rooms.js");
 app.use("/api/rooms", roomsRoutes);
 
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'DINOSER API is running!',
+    timestamp: new Date().toISOString()
+  });
+});
 
-// Connect to MongoDB Atlas
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log("✅ MongoDB connected"))
-.catch((err) => console.error("❌ MongoDB connection error:", err));
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    database: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected',
+    timestamp: new Date().toISOString()
+  });
+});
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+// Only start server if not in Vercel environment
+if (process.env.VERCEL !== '1') {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+}
+
+module.exports = app;
