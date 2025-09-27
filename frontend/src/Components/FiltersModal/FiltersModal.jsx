@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "../Pages/Room/FiltersModal.scss";
+import "./FiltersModal.scss";
 import { FaHotel, FaTimes ,FaChevronDown, FaChevronUp, FaBuilding ,} from "react-icons/fa";
 import {
   FaUmbrellaBeach,

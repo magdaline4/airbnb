@@ -1,0 +1,322 @@
+/* ---------- Page Layout ---------- */
+
+.room-page {
+    display: flex;
+    flex-direction: row;
+    min-height: 100vh;
+    padding-top: 80px;
+    /* Account for fixed navbar */
+
+    .room-list {
+        width: 60%;
+        padding: 1.5rem 1.5rem 1.5rem 2rem;
+        display: flex;
+        flex-direction: column;
+        margin-right: 40%;
+
+        /* Account for fixed map */
+        /* ----- Header above cards ----- */
+        .room-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.2rem;
+
+            p {
+                font-size: 1rem;
+                font-weight: 600;
+            }
+
+            .fees-info {
+                display: flex;
+                align-items: center;
+                font-size: 0.9rem;
+                color: #444;
+
+                .tag-icon {
+                    margin-right: 0.4rem;
+                    font-size: 1.2rem;
+                }
+            }
+        }
+
+        /* ----- Room Grid ----- */
+        .room-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.2rem;
+        }
+
+        /* ----- Pagination below cards ----- */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin: 2rem 0;
+
+            button,
+            .dots {
+                margin: 0 0.3rem;
+                background: none;
+                border-radius: 50%;
+                border: none;
+                cursor: pointer;
+                font-size: 0.9rem;
+                min-width: 2.2rem;
+                height: 2.2rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            button:hover:not(.active) {
+                background: #f5f5f5;
+            }
+
+            button.active {
+                background: #000;
+                color: #fff;
+                border-color: #000;
+            }
+
+            button:disabled {
+                opacity: 0.4;
+                cursor: not-allowed;
+            }
+        }
+    }
+
+    /* ---------- Map Section ---------- */
+    .room-map {
+        position: fixed;
+        top: 125px;
+        right: 0;
+        width: 40%;
+        bottom: 25px;
+        overflow: hidden;
+
+        .leaflet-container {
+            height: 100%;
+            width: 100%;
+            border-radius: 40px;
+        }
+    }
+}
+
+/* ---------- Card Styling ---------- */
+.room-card {
+    border-radius: 16px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .room-image {
+        position: relative;
+
+        img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 16px;
+        }
+
+        /* Top-left label */
+        .label {
+            position: absolute;
+            top: 16px;
+            left: 10px;
+            background: #fff;
+            color: #000;
+            font-size: 15px;
+            font-weight: 525;
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Heart button */
+        .heart-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: unset;
+            border: none;
+            border-radius: 50%;
+            padding: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            svg {
+                display: block;
+                fill: rgba(0, 0, 0, 0.5);
+                height: 24px;
+                width: 24px;
+                stroke: var(--linaria-theme_palette-icon-primary-inverse);
+                stroke-width: 2;
+                overflow: visible;
+                color: #333;
+                font-size: 20px;
+            }
+
+            &:hover {
+                transform: scale(1.1);
+            }
+
+            &.liked {
+                svg {
+                    fill: #ff385c;
+                    color: #ff385c;
+                }
+            }
+        }
+
+        /* Arrows */
+        .arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #ffffffd8;
+            border: none;
+            border-radius: 50%;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+
+            svg {
+                font-size: 14px;
+                color: #333;
+            }
+
+            &:hover {
+                background: #ffffff;
+            }
+
+            &.left {
+                left: 10px;
+            }
+
+            &.right {
+                right: 10px;
+            }
+        }
+
+        /* show arrows only when hovering the parent */
+        &:hover .arrow {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* ---------- NEW: Hover Zones ---------- */
+        .hover-zone {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 38%;
+            cursor: pointer;
+            z-index: 2; // below arrows
+        }
+
+        .left-zone {
+            left: 0;
+        }
+
+        .right-zone {
+            right: 0;
+        }
+
+        /* ---------- NEW: Dots Indicator ---------- */
+        .dots {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 6px;
+            z-index: 5;
+        }
+
+        .dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: rgba(177, 176, 176, 0.7);
+            border: none;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .dot.active {
+            background: rgb(243, 242, 242);
+        }
+    }
+
+    .room-info {
+        text-align: start;
+
+        h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0;
+
+        }
+
+        h2 {
+            font-size: 1rem;
+            margin: 0;
+        }
+
+        p {
+            font-size: 15px;
+            color: #6a6a6a;
+            font-weight: 500;
+            margin: 0 0;
+            line-height: 22px;
+        }
+
+        .price {
+            font-weight: 600;
+            margin-top: 0.6rem;
+            font-size: 0.95rem;
+
+            span {
+                color: #847c7c9b;
+                font-weight: 400;
+            }
+        }
+    }
+}
+
+.room-info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+
+    h3 {
+        margin: 0;
+        font-weight: 600;
+    }
+
+    h2 {
+        margin: 0;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+}

@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
-import "../Pages/Room/Room.scss";
+import { useNavigate } from "react-router-dom";
+import "./roomcard.scss";
 import { FaHeart, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
 const RoomCard = ({ room = {} }) => {
+  const navigate = useNavigate();
   const [currentImage, setCurrentImage] = useState(0);
   const [liked, setLiked] = useState(false);
 
@@ -24,6 +26,14 @@ const RoomCard = ({ room = {} }) => {
     console.log("RoomCard — images:", images);
   }, [images]);
 
+  const handleCardClick = () => {
+    // Navigate to room detail page
+    const roomId = room._id || room.id;
+    if (roomId) {
+      navigate(`/rooms/${roomId}`);
+    }
+  };
+
   const handlePrev = (e) => {
     e?.stopPropagation();
     if (!images.length) return;
@@ -44,7 +54,7 @@ const RoomCard = ({ room = {} }) => {
   // graceful fallback
   if (!images.length) {
     return (
-      <div className="room-card">
+      <div className="room-card" onClick={handleCardClick}>
         <div className="room-image placeholder">
           <img
             src="https://via.placeholder.com/600x400?text=No+Image"
@@ -60,7 +70,7 @@ const RoomCard = ({ room = {} }) => {
   }
 
   return (
-    <div className="room-card">
+    <div className="room-card" onClick={handleCardClick}>
       <div className="room-image" role="presentation" aria-label={room.title || "Room image"}>
         <img
           src={images[currentImage]}
@@ -114,7 +124,7 @@ const RoomCard = ({ room = {} }) => {
       </div>
 
       <div className="room-info">
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <div className="room-info-header">
           <h3>{room.type}</h3>
           <h2>★ {room.rating} ({room.reviewCount})</h2>
         </div>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./Home.scss";
-import ListingCard from "../../Components/ListingCard";
+import ListingCard from "../../Components/ListingCard/ListingCard";
 import Navbar from "../../Components/Navbar/Navbar";
 import Footer from "../../Components/Footer/Footer";
 
@@ -61,12 +61,14 @@ const HomePage = () => {
     });
   };
 
+
   if (loading) return <p>Loading listings...</p>;
   if (error) return <p>Error: {error.message}</p>;
 
   return (
     <>
       <Navbar />
+
       <div className="listings-page">
         {Object.keys(groupedListings).map((location) => {
           const allListings = groupedListings[location];
