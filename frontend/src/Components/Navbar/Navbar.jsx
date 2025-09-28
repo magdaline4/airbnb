@@ -10,7 +10,7 @@ import HomeImg from "../../assets/Images/home.avif";
 import ExperImg from "../../assets/Images/experience.avif";
 import ServeImg from "../../assets/Images/service.avif";
 
-// New icons after video
+// Active state icons
 import NewHomeImg from "../../assets/Images/Homeopen.avif";
 import NewExperImg from "../../assets/Images/experinenceopen.avif";
 import NewServeImg from "../../assets/Images/servieceopen.avif";
@@ -21,6 +21,8 @@ import ExperVideo from "../../assets/videos/balloon-selected.webm";
 import ServeVideo from "../../assets/videos/consierge-selected.webm";
 
 // Constants
+const LOGO_URL = "https://upload.wikimedia.org/wikipedia/commons/6/69/Airbnb_Logo_B%C3%A9lo.svg";
+
 const NAV_ITEMS = {
   HOME: {
     key: 'home',
@@ -56,13 +58,14 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showFilterButton, setShowFilterButton] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [imageErrors, setImageErrors] = useState({});
 
   // Set filter button based on current page
   useEffect(() => {
-    if (location.pathname === '/rooms') {
-      setShowFilterButton(true);
-    } else {
+    if (location.pathname === '/') {
       setShowFilterButton(false);
+    } else {
+      setShowFilterButton(true);
     }
   }, [location.pathname]);
 
@@ -80,16 +83,14 @@ const Navbar = () => {
     setIsFilterOpen(true);
   };
 
-  // Search functionality - toggles filter button state
+  // Search functionality - navigates to rooms page
   const handleSearchClick = () => {
-    setShowFilterButton(prev => !prev);
+    setShowFilterButton(true);
     navigate("/rooms");
   };
 
-  // Room search functionality - toggles filter button state
-  const handleRoomSearchClick = () => {
-    setShowFilterButton(prev => !prev);
-    navigate("/rooms");
+  const handleRoomSearchClick = () => {   
+    setShowFilterButton(false); 
   };
 
   const handleHostClick = () => {
@@ -97,8 +98,27 @@ const Navbar = () => {
     setIsMenuOpen(false);
   };
 
+  const handleLogoClick = () => {
+    navigate('/');
+  };
+
+  const handleLanguageClick = () => {
+    // TODO: Implement language selection functionality
+    console.log('Language selector clicked');
+  };
+
+  const handleLogoError = () => {
+    // Fallback to text if logo fails to load
+    console.warn('Logo image failed to load');
+  };
+
   // Check if current page is home
   const isHomePage = location.pathname === '/';
+
+  // Handle image loading errors
+  const handleImageError = (itemKey) => {
+    setImageErrors(prev => ({ ...prev, [itemKey]: true }));
+  };
 
   // Helper function to render icon based on state
   const renderIcon = (item) => {
@@ -110,17 +130,22 @@ const Navbar = () => {
           loop
           onEnded={() => setPlaying(null)}
           style={{ width: '24px', height: '24px' }}
+          onError={() => setPlaying(null)}
         >
           <source src={item.video} type="video/webm" />
         </video>
       );
     }
-    
+
+    const imageSrc = active === item.key ? item.activeImg : item.defaultImg;
+    const hasError = imageErrors[item.key];
+
     return (
       <img
-        src={active === item.key ? item.activeImg : item.defaultImg}
+        src={hasError ? item.defaultImg : imageSrc}
         alt={`${item.label} icon`}
         style={{ width: '24px', height: '24px' }}
+        onError={() => handleImageError(item.key)}
       />
     );
   };
@@ -133,35 +158,84 @@ const Navbar = () => {
     return location.pathname.startsWith(path);
   };
 
+  // Handle keyboard navigation
+  const handleKeyDown = (event, action) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      action();
+    }
+  };
+
   return (
     <div className="navbar-wrapper">
       <nav className="navbar">
         {/* Logo */}
         <div className="logo-section">
           <img
-            src="https://upload.wikimedia.org/wikipedia/commons/6/69/Airbnb_Logo_B%C3%A9lo.svg"
-            alt="Airbnb"
+            src={LOGO_URL}
+            alt="Airbnb logo"
             className="logo"
+            onClick={handleLogoClick}
+            onError={handleLogoError}
+            style={{ cursor: 'pointer' }}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => handleKeyDown(e, handleLogoClick)}
           />
         </div>
 
-        {/* Navigation Items */}
-        <div className="nav-items">
-          {Object.values(NAV_ITEMS).map((item) => (
-            <button
-              key={item.key}
-              className={`nav-item ${isActivePath(item.path) ? 'active' : ''}`}
-              onClick={() => handleNavClick(item)}
-              onMouseEnter={() => setActive(item.key)}
-              onMouseLeave={() => setActive(null)}
-              type="button"
-              aria-label={`Navigate to ${item.label}`}
-            >
-              {renderIcon(item)}
-              <span className="nav-label">{item.label}</span>
-            </button>
-          ))}
-        </div>
+        {!showFilterButton && (
+          <div className="nav-items">
+            {Object.values(NAV_ITEMS).map((item) => (
+              <button
+                key={item.key}
+                className={`nav-item ${isActivePath(item.path) ? 'active' : ''}`}
+                onClick={() => handleNavClick(item)}
+                onMouseEnter={() => setActive(item.key)}
+                onMouseLeave={() => setActive(null)}
+                type="button"
+                aria-label={`Navigate to ${item.label}`}
+              >
+                {renderIcon(item)}
+                <span className="nav-label">{item.label}</span>
+              </button>
+            ))}
+          </div>)
+        }
+
+        
+        {showFilterButton && (
+
+          <div className="search-box-section">
+            <div className="search-box" onClick={handleRoomSearchClick}>
+              <div className="search-item">
+                <span className="search-label">AnyWhere</span>
+
+              </div>
+              <div className="search-item">
+                <span className="search-label">Any week</span>
+              </div>
+              <div className="search-item noborder">
+                <span className="search-label">Add guests</span>
+              </div>
+              <button className="search-btn" type="button">
+                <FaSearch />
+              </button>
+            </div>
+
+            <div className="filter-section">
+              <button
+                className="filter-btn"
+                onClick={handleFilterClick}
+                type="button"
+                aria-label="Open filters"
+              >
+                <MdFilterList />
+                <span>Filters</span>
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Right Side Actions */}
         <div className="right-actions">
@@ -170,6 +244,7 @@ const Navbar = () => {
             <button
               className="language-btn"
               type="button"
+              onClick={handleLanguageClick}
               aria-label="Select language"
             >
               <FaGlobe aria-hidden="true" />
@@ -224,25 +299,12 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Filter Button */}
-        {showFilterButton && (
-          <div className="filter-section">
-            <button
-              className="filter-btn"
-              onClick={handleFilterClick}
-              type="button"
-              aria-label="Open filters"
-            >
-              <MdFilterList />
-              <span>Filters</span>
-            </button>
-          </div>
-        )}
+
       </nav>
 
       {/* Search Box - Only show on home page */}
-      {isHomePage && (
-        <div className="search-box" onClick={handleRoomSearchClick}>
+      {!showFilterButton && (
+        <div className="search-box" onClick={handleSearchClick}>
           <div className="search-item">
             <span className="search-label">Where</span>
             <span className="search-placeholder">Search destinations</span>
