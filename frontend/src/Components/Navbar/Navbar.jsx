@@ -209,7 +209,7 @@ const Navbar = () => {
           <div className="search-box-section">
             <div className="search-box" onClick={handleRoomSearchClick}>
               <div className="search-item">
-                <span className="search-label">AnyWhere</span>
+                <span className="search-label">Anywhere</span>
 
               </div>
               <div className="search-item">

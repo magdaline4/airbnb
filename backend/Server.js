@@ -4,7 +4,11 @@ require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const connectDB = require('./config/database'); // Add this line
+const connectDB = require('./config/database');
+const errorHandler = require('./middleware/errorHandler');
+const listingRoutes = require("./routes/listings.js");
+const roomsRoutes = require("./routes/rooms.js");
+
 
 const app = express();
 app.use(cors());
@@ -14,7 +18,7 @@ app.use(express.json());
 console.log("MONGO_URI from .env =>", process.env.MONGO_URI);
 
 if (!process.env.MONGO_URI) {
-  console.error("❌ ERROR: MONGO_URI is undefined!");
+  console.error("ERROR: MONGO_URI is undefined!");
   process.exit(1);
 }
 
@@ -22,16 +26,14 @@ if (!process.env.MONGO_URI) {
 connectDB();
 
 // ✅ Use routes correctly
-const listingRoutes = require("./routes/listings.js");
-app.use("/api/listings", listingRoutes);
 
-const roomsRoutes = require("./routes/rooms.js");
+app.use("/api/listings", listingRoutes);
 app.use("/api/rooms", roomsRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
   res.json({ 
-    message: 'DINOSER API is running!',
+    message: 'API is running!',
     timestamp: new Date().toISOString()
   });
 });
@@ -44,6 +46,16 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
+
+// Handle 404 routes - catch all unmatched routes
+app.use((req, res, next) => {
+  const error = new Error(`Route ${req.originalUrl} not found`);
+  error.statusCode = 404;
+  next(error);
+});
+
+// Global error handling middleware (must be last)
+app.use(errorHandler);
 
 // Only start server if not in Vercel environment
 if (process.env.VERCEL !== '1') {

@@ -249,16 +249,21 @@
       .search-item {
         border-right: 1px solid #ccc;
         padding: 0 10px;
+        font-size: 14px;
 
         &.noborder {
           border-right: none;
         }
       }
 
+      .search-label {
+        font-size: 14px;
+      }
+
       .search-btn {
         width: 35px;
         height: 35px;
-      }
+      } 
     }
 
 
