@@ -76,10 +76,6 @@ const Navbar = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  const handleMenuClose = () => {
-    setIsMenuOpen(false);
-  };
-
   const handleFilterClick = () => {
     setIsFilterOpen(true);
   };
@@ -245,7 +241,7 @@ const Navbar = () => {
       </nav>
 
       {/* Search Box - Only show on home page */}
-      {!showFilterButton && (
+      {isHomePage && (
         <div className="search-box" onClick={handleRoomSearchClick}>
           <div className="search-item">
             <span className="search-label">Where</span>
@@ -269,7 +265,7 @@ const Navbar = () => {
         </div>
       )}
 
-      {/* Filters Popup - Now part of Navbar */}
+      {/* Filters Popup */}
       <FiltersModal isOpen={isFilterOpen} onClose={() => setIsFilterOpen(false)} />
     </div>
   );
