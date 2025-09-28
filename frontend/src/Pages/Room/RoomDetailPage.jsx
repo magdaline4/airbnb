@@ -25,20 +25,23 @@ const RoomDetailPage = () => {
   useEffect(() => {
     const fetchRoomDetails = async () => {
       try {
-        // For now, we'll fetch from the rooms API and find by ID
-        // In a real app, you'd have a specific endpoint like /api/rooms/:id
-        const response = await axios.get("http://localhost:5000/api/rooms");
-        const foundRoom = response.data.rooms?.find(r => r._id === id) || 
-                         response.data.find(r => r.id === parseInt(id));
+        // Fetch room by ID using the specific endpoint
+        const response = await axios.get(`http://localhost:5000/api/rooms/${id}`);
         
-        if (foundRoom) {
-          setRoom(foundRoom);
+        if (response.data.success && response.data.room) {
+          setRoom(response.data.room);
         } else {
           setError("Room not found");
         }
       } catch (err) {
         console.error("Error fetching room details:", err);
-        setError("Failed to load room details");
+        if (err.response?.status === 404) {
+          setError("Room not found");
+        } else if (err.response?.status === 400) {
+          setError("Invalid room ID");
+        } else {
+          setError("Failed to load room details");
+        }
       } finally {
         setLoading(false);
       }
@@ -209,11 +212,11 @@ const RoomDetailPage = () => {
                   <div className="rating-section">
                     <FaStar className="star-icon" />
                     <span className="rating">{room.rating || 4.8}</span>
-                    <span className="review-count">({room.reviews || room.reviewCount || 24} reviews)</span>
+                    <span className="review-count">({room.reviewCount || 24} reviews)</span>
                   </div>
                   <div className="location-section">
                     <MdLocationOn className="location-icon" />
-                    <span>Shenoy Nagar, Chennai</span>
+                    <span>{room.type || "Shenoy Nagar, Chennai"}</span>
                   </div>
                 </div>
               </div>
@@ -269,8 +272,15 @@ const RoomDetailPage = () => {
               <div className="feature">
                 <FaRuler className="feature-icon" />
                 <div>
-                  <strong>{room.size || "85"} sq ft</strong>
-                  <p>Spacious and comfortable</p>
+                  <strong>{room.guests || 1} guests</strong>
+                  <p>Maximum occupancy</p>
+                </div>
+              </div>
+              <div className="feature">
+                <FaBed className="feature-icon" />
+                <div>
+                  <strong>{room.bedrooms || 1} bedrooms</strong>
+                  <p>Private sleeping areas</p>
                 </div>
               </div>
             </div>
@@ -287,12 +297,20 @@ const RoomDetailPage = () => {
             <div className="amenities-section">
               <h2>What this place offers</h2>
               <div className="amenities-grid">
-                {amenities.map((amenity, index) => (
-                  <div key={index} className="amenity-item">
-                    {amenity.icon}
-                    <span>{amenity.name}</span>
-                  </div>
-                ))}
+                {room.amenities && room.amenities.length > 0 ? (
+                  room.amenities.map((amenity, index) => (
+                    <div key={index} className="amenity-item">
+                      <span>{amenity}</span>
+                    </div>
+                  ))
+                ) : (
+                  amenities.map((amenity, index) => (
+                    <div key={index} className="amenity-item">
+                      {amenity.icon}
+                      <span>{amenity.name}</span>
+                    </div>
+                  ))
+                )}
               </div>
               <button className="show-all-amenities">Show all amenities</button>
             </div>
@@ -303,7 +321,7 @@ const RoomDetailPage = () => {
                 <div className="reviews-summary">
                   <FaStar className="star-icon" />
                   <span className="overall-rating">{room.rating || 4.8}</span>
-                  <span className="review-count">· {room.reviews || room.reviewCount || 24} reviews</span>
+                  <span className="review-count">· {room.reviewCount || 24} reviews</span>
                 </div>
               </div>
               
@@ -366,10 +384,11 @@ const RoomDetailPage = () => {
                 <div className="guests-input">
                   <label>GUESTS</label>
                   <select>
-                    <option>1 guest</option>
-                    <option>2 guests</option>
-                    <option>3 guests</option>
-                    <option>4 guests</option>
+                    {Array.from({ length: room.guests || 4 }, (_, i) => (
+                      <option key={i + 1} value={i + 1}>
+                        {i + 1} {i === 0 ? 'guest' : 'guests'}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 
@@ -380,8 +399,8 @@ const RoomDetailPage = () => {
               
               <div className="price-breakdown">
                 <div className="price-item">
-                  <span>₹{room.price?.toLocaleString?.() || room.price} × 3 nights</span>
-                  <span>₹{(room.price * 3)?.toLocaleString?.() || (room.price * 3)}</span>
+                  <span>₹{room.price?.toLocaleString?.() || room.price} × {room.nights || 3} nights</span>
+                  <span>₹{((room.price || 0) * (room.nights || 3))?.toLocaleString?.()}</span>
                 </div>
                 <div className="price-item">
                   <span>Cleaning fee</span>
@@ -393,7 +412,7 @@ const RoomDetailPage = () => {
                 </div>
                 <div className="price-item total">
                   <span>Total</span>
-                  <span>₹{((room.price * 3) + 500 + 800)?.toLocaleString?.() || ((room.price * 3) + 500 + 800)}</span>
+                  <span>₹{(((room.price || 0) * (room.nights || 3)) + 500 + 800)?.toLocaleString?.()}</span>
                 </div>
               </div>
             </div>
