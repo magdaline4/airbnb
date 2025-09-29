@@ -1,20 +1,17 @@
 import React, { useState, useEffect } from "react";
-import RoomCard from "../../Components/RoomCard";
-import Pagination from "../../Components/Pagination";
-import "../Room/Room.scss";
+import RoomCard from "../../Components/RoomCard/RoomCard";
+import Pagination from "../../Components/Pagination/Pagination";
+import "./Room.scss";
 import axios from "axios";
-import { MdFilterList } from "react-icons/md";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import Navbar from "../../Components/Navbar/Navbar";
 import Footer from "../../Components/Footer/Footer";
-import FiltersModal from "../../Components/FiltersModal";  // ✅ import modal
 
 const RoomPage = () => {
   const [rooms, setRooms] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-   const [totalPages, setTotalPages] = useState(1);
-  const [isFilterOpen, setIsFilterOpen] = useState(false); // ✅ state
+  const [totalPages, setTotalPages] = useState(1);
   const roomsPerPage = 9;
 
   useEffect(() => {
@@ -22,19 +19,14 @@ const RoomPage = () => {
       .get(`https://airbnbbackend-airbnbweb710-1108-hyasas-projects.vercel.app/api/rooms?page=${currentPage}&limit=${roomsPerPage}`)
       .then((res) => {
         setRooms(res.data.rooms);
-        setTotalPages(res.data.totalPages); // ✅ backend gives totalPages
+        setTotalPages(res.data.totalPages);
       })
       .catch((err) => console.error("Error fetching rooms:", err));
-  }, [currentPage]); // ✅ refetch when page changes
+  }, [currentPage]);
 
   return (
     <>
       <Navbar />
-
-      {/* ✅ Filter Button */}
-      <button className="filter-btn" onClick={() => setIsFilterOpen(true)}>
-        <MdFilterList /> Filters
-      </button>
 
       <div className="room-page">
         <div className="room-list">
@@ -84,9 +76,6 @@ const RoomPage = () => {
       </div>
 
       <Footer />
-
-      {/* Filters Popup */}
-      <FiltersModal isOpen={isFilterOpen} onClose={() => setIsFilterOpen(false)} />
     </>
   );
 };

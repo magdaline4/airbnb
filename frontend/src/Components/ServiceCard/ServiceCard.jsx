@@ -1,6 +1,6 @@
 import React from "react";
 import { CiHeart } from "react-icons/ci";
-import "../Pages/services/service.scss";
+import "../../Pages/services/Service.scss";
 
 
 const ServiceCard = ({ service }) => {

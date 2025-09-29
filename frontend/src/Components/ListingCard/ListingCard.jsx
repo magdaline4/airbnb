@@ -1,5 +1,5 @@
 import React from "react";
-import "../Pages/home/Home.scss";
+import "../../Pages/home/Home.scss";
 import { CiHeart } from "react-icons/ci";
 
 const ListingCard = ({ home }) => {
