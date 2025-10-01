@@ -14,7 +14,7 @@ router.post("/", async (req, res) => {
       return res.status(201).json({ success: true, count: docs.length, listings: docs });
     } else {
       // Insert single
-      const listing = new Listing(payload);
+      const listing = new Listing(payload); 
       await listing.save();
       return res.status(201).json({ success: true, listing });
     }

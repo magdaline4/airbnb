@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./FiltersModal.scss";
-import { FaHotel, FaTimes ,FaChevronDown, FaChevronUp, FaBuilding ,} from "react-icons/fa";
+import { FaHotel, FaTimes ,FaChevronDown, FaChevronUp, FaBuilding } from "react-icons/fa";
 import {
   FaUmbrellaBeach,
   FaBolt,
@@ -17,6 +17,9 @@ import { GiAlarmClock, GiBarbecue, GiBowlOfRice, GiComb, GiHouse, GiTimeTrap, Gi
 const FiltersModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
+  // ✅ State for selected filters
+  const [selectedFilters, setSelectedFilters] = useState([]);
+
   // State for price range
   const [minPrice, setMinPrice] = useState(500);
   const [maxPrice, setMaxPrice] = useState(2000);
@@ -31,6 +34,29 @@ const FiltersModal = ({ isOpen, onClose }) => {
 
   const toggleSection = (section) => {
     setExpanded(expanded === section ? null : section);
+  };
+
+  // ✅ Toggle filter selection
+  const toggleFilter = (filter) => {
+    setSelectedFilters((prev) =>
+      prev.includes(filter) ? prev.filter((f) => f !== filter) : [...prev, filter]
+    );
+  };
+
+  // ✅ Clear all filters
+  const clearAll = () => {
+    setSelectedFilters([]);
+    setMinPrice(500);
+    setMaxPrice(2000);
+    setBedrooms(1);
+    setBeds(1);
+    setBathrooms(1);
+  };
+
+  // ✅ Apply filters
+  const applyFilters = () => {
+    console.log("Applied Filters:", selectedFilters);
+    alert("Filters applied:\n" + (selectedFilters.length ? selectedFilters.join(", ") : "No filters selected"));
   };
 
   const histogramData = [
@@ -49,37 +75,39 @@ const FiltersModal = ({ isOpen, onClose }) => {
             <FaTimes />
           </button>
         </div>
-        
+
+        {/* ✅ Selected Filters Summary */}
+        {selectedFilters.length > 0 && (
+          <div className="selected-filters">
+            <h4>Selected </h4>
+            <div className="selected-tags">
+              {selectedFilters.map((filter, i) => (
+                <span key={i} className="tag">
+                  {filter} <button onClick={() => toggleFilter(filter)}>×</button>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Recommended for you */}
         <div className="section">
           <h4>Recommended for you</h4>
           <div className="recommended">
-            <div className="item">
-              <img
-                src="https://a0.muscache.com/im/pictures/airbnb-platform-assets/AirbnbPlatformAssets-recommended-filters/original/075ae1dc-92de-4410-8aa4-642ec5fe4868.png"
-                alt="washing"
-              />
+            <div className="item" onClick={() => toggleFilter("Washing machine")}>
+              <img src="https://a0.muscache.com/im/pictures/airbnb-platform-assets/AirbnbPlatformAssets-recommended-filters/original/075ae1dc-92de-4410-8aa4-642ec5fe4868.png" alt="washing"/>
               <span>Washing machine</span>
             </div>
-            <div className="item">
-              <img
-                src="https://a0.muscache.com/im/pictures/airbnb-platform-assets/AirbnbPlatformAssets-recommended-filters/original/b702d0fd-3b23-49b6-a6c8-65d743771368.png"
-                alt="tv"
-              />
+            <div className="item" onClick={() => toggleFilter("TV")}>
+              <img src="https://a0.muscache.com/im/pictures/airbnb-platform-assets/AirbnbPlatformAssets-recommended-filters/original/b702d0fd-3b23-49b6-a6c8-65d743771368.png" alt="tv"/>
               <span>TV</span>
             </div>
-            <div className="item">
-              <img
-                src="https://a0.muscache.com/im/pictures/airbnb-platform-assets/AirbnbPlatformAssets-recommended-filters/original/8336ae3d-9381-4c82-bad9-e7730f04ef4e.png"
-                alt="parking"
-              />
+            <div className="item" onClick={() => toggleFilter("Free parking")}>
+              <img src="https://a0.muscache.com/im/pictures/airbnb-platform-assets/AirbnbPlatformAssets-recommended-filters/original/8336ae3d-9381-4c82-bad9-e7730f04ef4e.png" alt="parking"/>
               <span>Free parking</span>
             </div>
-            <div className="item">
-              <img
-                src="https://a0.muscache.com/im/pictures/airbnb-platform-assets/AirbnbPlatformAssets-recommended-filters/original/bd215e32-ec6d-483e-b39b-7da4a2a6a312.png"
-                alt="ac"
-              />
+            <div className="item" onClick={() => toggleFilter("Air conditioning")}>
+              <img src="https://a0.muscache.com/im/pictures/airbnb-platform-assets/AirbnbPlatformAssets-recommended-filters/original/bd215e32-ec6d-483e-b39b-7da4a2a6a312.png" alt="ac"/>
               <span>Air conditioning</span>
             </div>
           </div>
@@ -90,12 +118,13 @@ const FiltersModal = ({ isOpen, onClose }) => {
         <div className="section">
           <h4>Type of place</h4>
           <div className="type-buttons">
-            <button className="active">Any type</button>
-            <button>Room</button>
-            <button>Entire home</button>
+            <button onClick={() => toggleFilter("Any type")}>Any type</button>
+            <button onClick={() => toggleFilter("Room")}>Room</button>
+            <button onClick={() => toggleFilter("Entire home")}>Entire home</button>
           </div>
         </div>
-<hr />
+        <hr />
+
         {/* Price Range */}
         <div className="section price-section">
           <h4>Price range</h4>
@@ -107,40 +136,20 @@ const FiltersModal = ({ isOpen, onClose }) => {
               {histogramData.map((h, i) => {
                 const barMin = (i / histogramData.length) * 50000;
                 const barMax = ((i + 1) / histogramData.length) * 50000;
-
                 const isActive = barMin >= minPrice && barMax <= maxPrice;
-
                 return (
-                  <div
-                    key={i}
-                    className={`bar ${isActive ? "active" : ""}`}
-                    style={{ height: `${h}%` }}
-                  />
+                  <div key={i} className={`bar ${isActive ? "active" : ""}`} style={{ height: `${h}%` }}/>
                 );
               })}
             </div>
 
             {/* Dual sliders */}
             <div className="slider-container">
-              <input
-                type="range"
-                min="0"
-                max="50000"
-                step="500"
-                value={minPrice}
-                onChange={(e) =>
-                  setMinPrice(Math.min(Number(e.target.value), maxPrice - 1000))
-                }
+              <input type="range" min="0" max="50000" step="500" value={minPrice}
+                onChange={(e) => setMinPrice(Math.min(Number(e.target.value), maxPrice - 1000))}
               />
-              <input
-                type="range"
-                min="0"
-                max="50000"
-                step="500"
-                value={maxPrice}
-                onChange={(e) =>
-                  setMaxPrice(Math.max(Number(e.target.value), minPrice + 1000))
-                }
+              <input type="range" min="0" max="50000" step="500" value={maxPrice}
+                onChange={(e) => setMaxPrice(Math.max(Number(e.target.value), minPrice + 1000))}
               />
             </div>
 
@@ -157,22 +166,19 @@ const FiltersModal = ({ isOpen, onClose }) => {
             </div>
           </div>
         </div>
-<hr />
+        <hr />
+
         {/* Rooms & Beds */}
         <div className="section">
           <h4>Rooms and beds</h4>
-
           <div className="counter">
             <span>Bedrooms</span>
             <div className="controls">
-              <button onClick={() => setBedrooms(Math.max(0, bedrooms - 1))}>
-                −
-              </button>
+              <button onClick={() => setBedrooms(Math.max(0, bedrooms - 1))}>−</button>
               <span>{bedrooms}</span>
               <button onClick={() => setBedrooms(bedrooms + 1)}>+</button>
             </div>
           </div>
-
           <div className="counter">
             <span>Beds</span>
             <div className="controls">
@@ -181,70 +187,66 @@ const FiltersModal = ({ isOpen, onClose }) => {
               <button onClick={() => setBeds(beds + 1)}>+</button>
             </div>
           </div>
-
           <div className="counter">
             <span>Bathrooms</span>
             <div className="controls">
-              <button onClick={() => setBathrooms(Math.max(0, bathrooms - 1))}>
-                −
-              </button>
+              <button onClick={() => setBathrooms(Math.max(0, bathrooms - 1))}>−</button>
               <span>{bathrooms}</span>
               <button onClick={() => setBathrooms(bathrooms + 1)}>+</button>
             </div>
           </div>
         </div>
-<hr />
+        <hr />
+
         {/* Amenities */}
         <div className="section">
           <h4>Amenities</h4>
+          {expanded === "amenities" ? (
+            <div className="amenities-full">
+              <div className="amenity-group">
+                <h5>Popular</h5>
+                <div className="amenity-buttons">
+                  <button onClick={() => toggleFilter("Wifi")}><FaWifi /> Wifi</button>
+                  <button onClick={() => toggleFilter("Air conditioning")}><FaWind /> Air conditioning</button>
+                  <button onClick={() => toggleFilter("Pool")}><FaSwimmer /> Pool</button>
+                  <button onClick={() => toggleFilter("Dryer")}><FaTshirt /> Dryer</button>
+                  <button onClick={() => toggleFilter("Heating")}><FaBath /> Heating</button>
+                  <button onClick={() => toggleFilter("Workspace")}><FaLaptop /> Workspace</button>
+                </div>
+              </div>
+              <div className="amenity-group">
+                <h5>Essentials</h5>
+                <div className="amenity-buttons">
+                  <button onClick={() => toggleFilter("Kitchen")}><FaUtensils /> Kitchen</button>
+                  <button onClick={() => toggleFilter("Washing machine")}><GiWashingMachine /> Washing machine</button>
+                  <button onClick={() => toggleFilter("TV")}><FaTv /> TV</button>
+                  <button onClick={() => toggleFilter("Hair dryer")}><GiComb/> Hair dryer</button>
+                  <button onClick={() => toggleFilter("Iron")}><FaBath /> Iron</button>
+                </div>
+              </div>
 
-  {/* Conditionally render based on expanded state */}
-  {expanded === "amenities" ? (
-    <div className="amenities-full">
-      <div className="amenity-group">
-        <h5>Popular</h5>
-        <div className="amenity-buttons">
-          <button><FaWifi /> Wifi</button>
-          <button><FaWind /> Air conditioning</button>
-          <button><FaSwimmer /> Pool</button>
-          <button><FaTshirt /> Dryer</button>
-          <button><FaBath /> Heating</button>
-          <button><FaLaptop /> Workspace</button>
-        </div>
-      </div>
-
-      <div className="amenity-group">
-        <h5>Essentials</h5>
-        <div className="amenity-buttons">
-          <button><FaUtensils /> Kitchen</button>
-          <button><GiWashingMachine /> Washing machine</button>
-          <button><FaTv /> TV</button>
-          <button> <GiComb/> Hair dryer</button>
-          <button><FaBath /> Iron</button>
-        </div>
-      </div>
-
+              
       <div className="amenity-group">
         <h5>Features</h5>
         <div className="amenity-buttons">
-          <button><FaHotTub /> Hot tub</button>
-          <button><FaCar /> Free parking</button>
-          <button><FaChargingStation /> EV charger</button>
-          <button><FaBed /> Cot</button>
-          <button><FaBed /> King bed</button>
-          <button><FaDumbbell /> Gym</button>
-          <button><GiBarbecue /> BBQ grill</button>
-          <button> <GiBowlOfRice/> Breakfast</button>
-          <button><FaFire /> Indoor fireplace</button>
-          <button><FaSmoking /> Smoking allowed</button>
+          <button onClick={() => toggleFilter("Hot tub")}><FaHotTub /> Hot tub</button>
+          <button onClick={() => toggleFilter("Free parking")}><FaCar /> Free parking</button>
+          <button onClick={() => toggleFilter("EV charger")}><FaChargingStation /> EV charger</button>
+          <button onClick={() => toggleFilter(" Cot")}><FaBed /> Cot</button>
+          <button onClick={() => toggleFilter("King bed")}><FaBed /> King bed</button>
+          <button onClick={() => toggleFilter("Gym")}> <FaDumbbell /> Gym</button>
+          <button onClick={() => toggleFilter("BBQ grill")}><GiBarbecue /> BBQ grill</button>
+          <button onClick={() => toggleFilter("Breakfast")}> <GiBowlOfRice/> Breakfast</button>
+          <button onClick={() => toggleFilter("Indoor fireplace")}><FaFire /> Indoor fireplace</button>
+          <button onClick={() => toggleFilter("Smoking allowed")}><FaSmoking /> Smoking allowed</button>
         </div>
       </div>
 
       <div className="amenity-group">
         <h5>Safety</h5>
         <div className="amenity-buttons">
-          <button><GiAlarmClock/> Smoke alarm</button>
-          <button><GiTimeTrap/> Carbon monoxide alarm</button>
+          <button onClick={() => toggleFilter("Smoke alarm")}><GiAlarmClock/> Smoke alarm</button>
+          <button onClick={() => toggleFilter("Carbon monoxide alarm")}><GiTimeTrap/> Carbon monoxide alarm</button>
         </div>
       </div>
 
@@ -254,257 +256,208 @@ const FiltersModal = ({ isOpen, onClose }) => {
             </div>
           ) : (
             <div className="amenities">
-              <button>
-                <FaWifi /> Wifi
-              </button>
-              <button>
-                <FaDumbbell /> Gym
-              </button>
-              <button>
-                <FaSwimmer /> Pool
-              </button>
-              <button>
-                <FaLaptop />
-                Didicated Workspace
-              </button>
-              <button>
-                <FaUmbrellaBeach /> Beachfront
-              </button>
-              <button>
-                <FaUtensils /> Kitchen
-              </button>
-              <p
-                className="toggle-amenities"
-                onClick={() => setExpanded("amenities")}
-              >
+              <button onClick={() => toggleFilter("Wifi")}><FaWifi /> Wifi</button>
+              <button onClick={() => toggleFilter("Gym")}><FaDumbbell /> Gym</button>
+              <button onClick={() => toggleFilter("Pool")}><FaSwimmer /> Pool</button>
+              <button onClick={() => toggleFilter("Workspace")}><FaLaptop /> Workspace</button>
+              <button onClick={() => toggleFilter("Beachfront")}><FaUmbrellaBeach /> Beachfront</button>
+              <button onClick={() => toggleFilter("Kitchen")}><FaUtensils /> Kitchen</button>
+              <p className="toggle-amenities" onClick={() => setExpanded("amenities")}>
                 Show more <FaChevronDown className="arrow" />
               </p>
             </div>
           )}
         </div>
-<hr />
+        <hr />
+
         {/* Booking Options */}
         <div className="section">
           <h4>Booking options</h4>
           <div className="booking-options">
-            <button>
-              <FaBolt /> Instant Book
-            </button>
-            <button>
-              <FaSearch /> Self check-in
-            </button>
-            <button>
-              <FaDog /> Allows pets
-            </button>
+            <button onClick={() => toggleFilter("Instant Book")}><FaBolt /> Instant Book</button>
+            <button onClick={() => toggleFilter("Self check-in")}><FaSearch /> Self check-in</button>
+            <button onClick={() => toggleFilter("Allows pets")}><FaDog /> Allows pets</button>
           </div>
         </div>
-<hr />
-        {/* Standout stays */}
-        <div className="section standout">
-          <h4>Standout stays</h4>
-          <div className="standout-options">
-            <div className="option-card">
-              <img src="https://i.etsystatic.com/25032573/r/il/c16171/2528485574/il_fullxfull.2528485574_i4eh.jpg" alt="Guest favourite" />
-              <div>
-                <h5>Guest favourite</h5>
-                <p>The most loved homes on Airbnb</p>
-              </div>
-            </div>
-            <div className="option-card">
-              <img src="https://cdn1.iconfinder.com/data/icons/restaurant-138/512/Food_Delivery_delivery_food_service_catering_restaurant-512.png" alt="Luxe" />
-              <div>
-                <h5>Luxe</h5>
-                <p>Luxury homes with elevated design</p>
-              </div>
-            </div>
-          </div>
-        </div>
+        
 
-       {/* Accordion Sections */}
+{/* Accordion Wrapper */}
 <div className="accordion">
-
   {/* Property type */}
   <div className={`accordion-item ${expanded === "property" ? "open" : ""}`}>
-    <button
-      className="accordion-header"
-      onClick={() => toggleSection("property")}
-    >
+    <button className="accordion-header" onClick={() => toggleSection("property")}>
       <span>Property type</span>
-      <span>{expanded === "property" ? <FaChevronUp /> : <FaChevronDown /> }</span>
+      <span>{expanded === "property" ? <FaChevronUp /> : <FaChevronDown />}</span>
     </button>
     {expanded === "property" && (
       <div className="accordion-body property-options">
-        <button> <FaHome/> House</button>
-        <button> <FaBuilding/> Flat</button>
-        <button> <GiHouse/> Guest house</button>
-        <button> <FaHotel/> Hotel</button>
+        <button onClick={() => toggleFilter("House")}><FaHome /> House</button>
+        <button onClick={() => toggleFilter("Flat")}><FaBuilding /> Flat</button>
+        <button onClick={() => toggleFilter("Guest house")}><GiHouse /> Guest house</button>
+        <button onClick={() => toggleFilter("Hotel")}><FaHotel /> Hotel</button>
       </div>
     )}
   </div>
 
   {/* Accessibility */}
   <div className={`accordion-item ${expanded === "accessibility" ? "open" : ""}`}>
-    <button
-      className="accordion-header"
-      onClick={() => toggleSection("accessibility")}
-    >
+    <button className="accordion-header" onClick={() => toggleSection("accessibility")}>
       <span>Accessibility features</span>
-      <span>{expanded === "accessibility" ?  <FaChevronUp /> : <FaChevronDown />}</span>
+      <span>{expanded === "accessibility" ? <FaChevronUp /> : <FaChevronDown />}</span>
     </button>
     {expanded === "accessibility" && (
       <div className="accordion-body accessibility-options">
-        <h5>Guest entrance and parking</h5>
-        <label><input type="checkbox" /> Step-free access</label>
-        <label><input type="checkbox" /> Disabled parking spot</label>
-        <label><input type="checkbox" /> Guest entrance wider than 32 inches (81 centimetres)</label>
+        <label>
+          <input type="checkbox" onChange={() => toggleFilter("Step-free access")} />
+          Step-free access
+        </label>
+        <label>
+          <input type="checkbox" onChange={() => toggleFilter("Disabled parking spot")} />
+          Disabled parking spot
+        </label>
+        <label>
+          <input type="checkbox" onChange={() => toggleFilter("Guest entrance wider than 32 inches")} />
+          Guest entrance wider than 32 inches (81 centimetres)
+        </label>
 
-                <h5>Bedroom</h5>
+        <h5>Bedroom</h5>
                 <label>
-                  <input type="checkbox" /> Step-free bedroom access
+                  <input type="checkbox" onChange={() => toggleFilter("Step-free bedroom access")} /> Step-free bedroom access
                 </label>
                 <label>
-                  <input type="checkbox" /> Bedroom entrance wider than 32
+                  <input type="checkbox" onChange={() => toggleFilter(" Bedroom entrance wider than 32 inches (81 centimetres) ")} /> Bedroom entrance wider than 32
                   inches (81 centimetres)
                 </label>
 
-                <h5>Bathroom</h5>
+        <h5>Bathroom</h5>
                 <label>
-                  <input type="checkbox" /> Step-free bathroom access
+                  <input type="checkbox" onChange={() => toggleFilter("Step-free bathroom access")} /> Step-free bathroom access
                 </label>
                 <label>
-                  <input type="checkbox" /> Bathroom entrance wider than 32
+                  <input type="checkbox" onChange={() => toggleFilter("Bathroom entrance wider than 32  inches (81 centimetres) ")} /> Bathroom entrance wider than 32
                   inches (81 centimetres)
                 </label>
                 <label>
-                  <input type="checkbox" /> Toilet grab bar
+                  <input type="checkbox" onChange={() => toggleFilter("Toilet grab bar")} /> Toilet grab bar
                 </label>
                 <label>
-                  <input type="checkbox" /> Shower grab bar
+                  <input type="checkbox" onChange={() => toggleFilter("Shower grab bar")} /> Shower grab bar
                 </label>
                 <label>
-                  <input type="checkbox" /> Step-free shower
+                  <input type="checkbox" onChange={() => toggleFilter("Step-free shower")} /> Step-free shower
                 </label>
                 <label>
-                  <input type="checkbox" /> Shower or bath chair
+                  <input type="checkbox" onChange={() => toggleFilter("Shower or bath chair")} /> Shower or bath chair
                 </label>
 
-                <h5>Adaptive equipment</h5>
+            <h5>Adaptive equipment</h5>
                 <label>
-                  <input type="checkbox" /> Ceiling or mobile hoist
+                  <input type="checkbox" onChange={() => toggleFilter(" Ceiling or mobile hoist")} /> Ceiling or mobile hoist
                 </label>
-              </div>
-            )}
-          </div>
-          {/* Host language */}
-          <div
-            className={`accordion-item ${
-              expanded === "language" ? "open" : ""
-            }`}
-          >
-            <button
-              className="accordion-header"
-              onClick={() => toggleSection("language")}
-            >
-              <span>Host language</span>
-              <span>
-                {expanded === "language" ? <FaChevronUp /> : <FaChevronDown />}
-              </span>
-            </button>
-            {expanded === "language" && (
-              <div className="accordion-body language-options">
-                <label>
-                  <input type="checkbox" /> Chinese (Simplified)
+
+      </div>
+    )}
+  </div>
+
+  {/* Host language */}
+  <div className={`accordion-item ${expanded === "language" ? "open" : ""}`}>
+    <button className="accordion-header" onClick={() => toggleSection("language")}>
+      <span>Host language</span>
+      <span>{expanded === "language" ? <FaChevronUp /> : <FaChevronDown />}</span>
+    </button>
+    {expanded === "language" && (
+      <div className="accordion-body language-options">
+
+        <label>
+                  <input type="checkbox" onChange={() => toggleFilter("Chinese (Simplified)")} /> Chinese (Simplified)
                 </label>
                 <label>
-                  <input type="checkbox" /> English
+                  <input type="checkbox" onChange={() => toggleFilter("English")} /> English
                 </label>
                 <label>
-                  <input type="checkbox" /> German
+                  <input type="checkbox" onChange={() => toggleFilter("German")} /> German
                 </label>
                 <label>
-                  <input type="checkbox" /> Japanese{" "}
+                  <input type="checkbox" onChange={() => toggleFilter("Japanese")} /> Japanese
                 </label>
                 <label>
-                  <input type="checkbox" /> Russian{" "}
+                  <input type="checkbox" onChange={() => toggleFilter("Russian")} /> Russian
                 </label>
                 <label>
-                  <input type="checkbox" /> Spanish{" "}
+                  <input type="checkbox" onChange={() => toggleFilter(" Spanish")} /> Spanish
                 </label>
                 <label>
-                  <input type="checkbox" /> Arabic{" "}
+                  <input type="checkbox" onChange={() => toggleFilter("Arabic")} /> Arabic
                 </label>
                 <label>
-                  <input type="checkbox" /> Danish{" "}
+                  <input type="checkbox" onChange={() => toggleFilter(" Danish")} /> Danish
                 </label>
                 <label>
-                  <input type="checkbox" /> Dutch{" "}
+                  <input type="checkbox" onChange={() => toggleFilter("Dutch")} /> Dutch
                 </label>
                 <label>
-                  <input type="checkbox" /> Hindi{" "}
+                  <input type="checkbox" onChange={() => toggleFilter("Hindi")} /> Hindi
                 </label>
                 <label>
-                  <input type="checkbox" /> Hungarian{" "}
+                  <input type="checkbox" onChange={() => toggleFilter("Hungarian")} /> Hungarian
                 </label>
                 <label>
-                  <input type="checkbox" />
-                  Indonesian{" "}
+                  <input type="checkbox" onChange={() => toggleFilter("Indonesian")} />Indonesian
                 </label>
                 <label>
-                  <input type="checkbox" />
-                  Malay{" "}
+                  <input type="checkbox" onChange={() => toggleFilter("Malay")} /> Malay
                 </label>
                 <label>
-                  <input type="checkbox" /> Norwegian{" "}
+                  <input type="checkbox" onChange={() => toggleFilter("Norwegian")} /> Norwegian
                 </label>
                 <label>
-                  <input type="checkbox" /> Swedish{" "}
+                  <input type="checkbox" onChange={() => toggleFilter("Swedish")} /> Swedish
                 </label>
                 <label>
-                  <input type="checkbox" />
-                  Thai{" "}
+                  <input type="checkbox" onChange={() => toggleFilter("Thai")} /> Thai
                 </label>
                 <label>
-                  <input type="checkbox" /> Bengali{" "}
+                  <input type="checkbox" onChange={() => toggleFilter("Bengali")} /> Bengali
                 </label>
                 <label>
-                  <input type="checkbox" /> Gujarati{" "}
+                  <input type="checkbox" onChange={() => toggleFilter("Gujarati")} /> Gujarati
                 </label>
                 <label>
-                  <input type="checkbox" /> Kannada{" "}
+                  <input type="checkbox" onChange={() => toggleFilter("Kannada")} /> Kannada
                 </label>
                 <label>
-                  <input type="checkbox" />
-                  Punjabi{" "}
+                  <input type="checkbox" onChange={() => toggleFilter("Punjabi")} /> Punjabi
                 </label>
                 <label>
-                  <input type="checkbox" /> Swahili{" "}
+                  <input type="checkbox" onChange={() => toggleFilter("Swahili")} /> Swahili
                 </label>
                 <label>
-                  <input type="checkbox" />
-                  Tamil{" "}
+                  <input type="checkbox" onChange={() => toggleFilter("Tamil")} /> Tamil
                 </label>
                 <label>
-                  <input type="checkbox" /> Telugu{" "}
+                  <input type="checkbox" onChange={() => toggleFilter("Telugu")} /> Telugu
                 </label>
                 <label>
-                  <input type="checkbox" /> Urdu
+                  <input type="checkbox" onChange={() => toggleFilter("Urdu")} /> Urdu
                 </label>
                 <label>
-                  <input type="checkbox" />
-                  Vietnamese{" "}
+                  <input type="checkbox" onChange={() => toggleFilter("Vietnamese")} />
+                  Vietnamese
                 </label>
                 <label>
-                  <input type="checkbox" /> Sign Language
+                  <input type="checkbox" onChange={() => toggleFilter("Sign Language")} /> Sign Language
                 </label>
-              </div>
-            )}
-          </div>
-        </div>
+
+      </div>
+    )}
+  </div>
+</div>
+
 
         {/* Footer */}
         <div className="filters-footer">
-          <button className="clear-btn">Clear all</button>
-          <button className="show-btn">Show 1,000+ places</button>
+          <button className="clear-btn" onClick={clearAll}>Clear all</button>
+          <button className="show-btn" onClick={applyFilters}>Show 1,000+ places</button>
         </div>
       </div>
     </div>

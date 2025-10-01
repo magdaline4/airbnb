@@ -4,25 +4,25 @@ import "./Navbar.scss";
 import { FaGlobe, FaBars, FaSearch } from "react-icons/fa";
 import { MdFilterList } from "react-icons/md";
 import FiltersModal from "../FiltersModal/FiltersModal";
-
+ 
 // Default icons
 import HomeImg from "../../assets/Images/home.avif";
 import ExperImg from "../../assets/Images/experience.avif";
 import ServeImg from "../../assets/Images/service.avif";
-
+ 
 // Active state icons
 import NewHomeImg from "../../assets/Images/Homeopen.avif";
 import NewExperImg from "../../assets/Images/experinenceopen.avif";
 import NewServeImg from "../../assets/Images/servieceopen.avif";
-
+ 
 // Videos
 import HomeVideo from "../../assets/videos/house-selected.webm";
 import ExperVideo from "../../assets/videos/balloon-selected.webm";
 import ServeVideo from "../../assets/videos/consierge-selected.webm";
-
+ 
 // Constants
 const LOGO_URL = "https://upload.wikimedia.org/wikipedia/commons/6/69/Airbnb_Logo_B%C3%A9lo.svg";
-
+ 
 const NAV_ITEMS = {
   HOME: {
     key: 'home',
@@ -49,7 +49,7 @@ const NAV_ITEMS = {
     video: ServeVideo
   }
 };
-
+ 
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -59,7 +59,7 @@ const Navbar = () => {
   const [showFilterButton, setShowFilterButton] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [imageErrors, setImageErrors] = useState({});
-
+ 
   // Set filter button based on current page
   useEffect(() => {
     if (location.pathname === '/') {
@@ -68,58 +68,58 @@ const Navbar = () => {
       setShowFilterButton(true);
     }
   }, [location.pathname]);
-
+ 
   const handleNavClick = (item) => {
     setActive(item.key);
     setPlaying(item.key);
     navigate(item.path);
   };
-
+ 
   const handleMenuToggle = () => {
     setIsMenuOpen(!isMenuOpen);
   };
-
+ 
   const handleFilterClick = () => {
     setIsFilterOpen(true);
   };
-
+ 
   // Search functionality - navigates to rooms page
   const handleSearchClick = () => {
     setShowFilterButton(true);
     navigate("/rooms");
   };
-
-  const handleRoomSearchClick = () => {   
-    setShowFilterButton(false); 
+ 
+  const handleRoomSearchClick = () => {  
+    setShowFilterButton(false);
   };
-
+ 
   const handleHostClick = () => {
     navigate("/host/onboarding");
     setIsMenuOpen(false);
   };
-
+ 
   const handleLogoClick = () => {
     navigate('/');
   };
-
+ 
   const handleLanguageClick = () => {
     // TODO: Implement language selection functionality
     console.log('Language selector clicked');
   };
-
+ 
   const handleLogoError = () => {
     // Fallback to text if logo fails to load
     console.warn('Logo image failed to load');
   };
-
+ 
   // Check if current page is home
   const isHomePage = location.pathname === '/';
-
+ 
   // Handle image loading errors
   const handleImageError = (itemKey) => {
     setImageErrors(prev => ({ ...prev, [itemKey]: true }));
   };
-
+ 
   // Helper function to render icon based on state
   const renderIcon = (item) => {
     if (playing === item.key) {
@@ -136,10 +136,10 @@ const Navbar = () => {
         </video>
       );
     }
-
+ 
     const imageSrc = active === item.key ? item.activeImg : item.defaultImg;
     const hasError = imageErrors[item.key];
-
+ 
     return (
       <img
         src={hasError ? item.defaultImg : imageSrc}
@@ -149,7 +149,7 @@ const Navbar = () => {
       />
     );
   };
-
+ 
   // Helper function to check if path is active
   const isActivePath = (path) => {
     if (path === '/') {
@@ -157,7 +157,7 @@ const Navbar = () => {
     }
     return location.pathname.startsWith(path);
   };
-
+ 
   // Handle keyboard navigation
   const handleKeyDown = (event, action) => {
     if (event.key === 'Enter' || event.key === ' ') {
@@ -165,7 +165,7 @@ const Navbar = () => {
       action();
     }
   };
-
+ 
   return (
     <div className="navbar-wrapper">
       <nav className="navbar">
@@ -183,7 +183,7 @@ const Navbar = () => {
             onKeyDown={(e) => handleKeyDown(e, handleLogoClick)}
           />
         </div>
-
+ 
         {!showFilterButton && (
           <div className="nav-items">
             {Object.values(NAV_ITEMS).map((item) => (
@@ -202,15 +202,15 @@ const Navbar = () => {
             ))}
           </div>)
         }
-
-        
+ 
+       
         {showFilterButton && (
-
+ 
           <div className="search-box-section">
             <div className="search-box" onClick={handleRoomSearchClick}>
               <div className="search-item">
                 <span className="search-label">Anywhere</span>
-
+ 
               </div>
               <div className="search-item">
                 <span className="search-label">Any week</span>
@@ -222,7 +222,7 @@ const Navbar = () => {
                 <FaSearch />
               </button>
             </div>
-
+ 
             <div className="filter-section">
               <button
                 className="filter-btn"
@@ -236,7 +236,7 @@ const Navbar = () => {
             </div>
           </div>
         )}
-
+ 
         {/* Right Side Actions */}
         <div className="right-actions">
           {/* Language Selector */}
@@ -250,7 +250,7 @@ const Navbar = () => {
               <FaGlobe aria-hidden="true" />
             </button>
           </div>
-
+ 
           {/* User Menu */}
           <div className="menu-wrapper">
             <button
@@ -262,7 +262,7 @@ const Navbar = () => {
             >
               <FaBars aria-hidden="true" />
             </button>
-
+ 
             {isMenuOpen && (
               <div className="dropdown" role="menu" aria-label="User menu">
                 <ul>
@@ -298,10 +298,10 @@ const Navbar = () => {
             )}
           </div>
         </div>
-
-
+ 
+ 
       </nav>
-
+ 
       {/* Search Box - Only show on home page */}
       {!showFilterButton && (
         <div className="search-box" onClick={handleSearchClick}>
@@ -326,11 +326,11 @@ const Navbar = () => {
           </button>
         </div>
       )}
-
+ 
       {/* Filters Popup */}
       <FiltersModal isOpen={isFilterOpen} onClose={() => setIsFilterOpen(false)} />
     </div>
   );
 };
-
+ 
 export default Navbar;
