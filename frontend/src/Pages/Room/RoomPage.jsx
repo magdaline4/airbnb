@@ -70,7 +70,7 @@ const API_URL = import.meta.env.VITE_API_URL;
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
             {rooms.map((room) => (
-              <Marker key={room._id} position={[13.0827, 80.2707]}>
+              <Marker key={room._id} position={[room.location.lat, room.location.lng]}>
                 <Popup>₹{room.price.toLocaleString()}</Popup>
               </Marker>
             ))}
