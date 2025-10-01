@@ -14,9 +14,12 @@ const RoomPage = () => {
   const [totalPages, setTotalPages] = useState(1);
   const roomsPerPage = 9;
 
+const API_URL = import.meta.env.VITE_API_URL;
+
+
   useEffect(() => {
     axios
-      .get(`https://airbnbbackend-airbnbweb710-1108-hyasas-projects.vercel.app/api/rooms?page=${currentPage}&limit=${roomsPerPage}`)
+      .get(`${API_URL}/api/rooms?page=${currentPage}&limit=${roomsPerPage}`)
       .then((res) => {
         setRooms(res.data.rooms);
         setTotalPages(res.data.totalPages);

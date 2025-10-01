@@ -13,9 +13,12 @@ const HomePage = () => {
   const [error, setError] = useState(null);
   const [pageIndexes, setPageIndexes] = useState({}); 
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
+
   useEffect(() => {
     axios
-      .get("api/listings.json")
+      .get(`${API_URL}/api/listings`)
       .then((res) => {
         setListings(res.data.listings || []);
       })
