@@ -2,8 +2,8 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import "./Navbar.scss";
 import { FaGlobe, FaBars, FaSearch } from "react-icons/fa";
-import { MdFilterList } from "react-icons/md";
 import FiltersModal from "../FiltersModal/FiltersModal";
+import { getFilterCount } from '../FiltersModal/filterUtils.js';
  
 // Default icons
 import HomeImg from "../../assets/Images/home.avif";
@@ -19,7 +19,7 @@ import NewServeImg from "../../assets/Images/servieceopen.avif";
 import HomeVideo from "../../assets/videos/house-selected.webm";
 import ExperVideo from "../../assets/videos/balloon-selected.webm";
 import ServeVideo from "../../assets/videos/consierge-selected.webm";
- 
+
 // Constants
 const LOGO_URL = "https://upload.wikimedia.org/wikipedia/commons/6/69/Airbnb_Logo_B%C3%A9lo.svg";
  
@@ -53,13 +53,28 @@ const NAV_ITEMS = {
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+
+  // State declarations - ALL AT THE TOP
   const [active, setActive] = useState(null);
   const [playing, setPlaying] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [showFilterButton, setShowFilterButton] = useState(false);
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [imageErrors, setImageErrors] = useState({});
- 
+  const [showFilterButton, setShowFilterButton] = useState(false); // ✅ FIXED: Added this state
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  
+  // Filters state
+  const [filters, setFilters] = useState({
+    minPrice: 30000,
+    maxPrice: 50000,
+    bedrooms: 1,
+    beds: 1,
+    bathrooms: 1,
+    amenities: []
+  });
+
+  // Calculate the total count of active filters
+  const filterCount = getFilterCount(filters);
+    
   // Set filter button based on current page
   useEffect(() => {
     if (location.pathname === '/') {
@@ -79,20 +94,11 @@ const Navbar = () => {
     setIsMenuOpen(!isMenuOpen);
   };
  
-  const handleFilterClick = () => {
-    setIsFilterOpen(true);
-  };
- 
   // Search functionality - navigates to rooms page
   const handleSearchClick = () => {
-    setShowFilterButton(true);
     navigate("/rooms");
   };
- 
-  const handleRoomSearchClick = () => {  
-    setShowFilterButton(false);
-  };
- 
+
   const handleHostClick = () => {
     navigate("/host/onboarding");
     setIsMenuOpen(false);
@@ -103,17 +109,12 @@ const Navbar = () => {
   };
  
   const handleLanguageClick = () => {
-    // TODO: Implement language selection functionality
     console.log('Language selector clicked');
   };
  
   const handleLogoError = () => {
-    // Fallback to text if logo fails to load
     console.warn('Logo image failed to load');
   };
- 
-  // Check if current page is home
-  const isHomePage = location.pathname === '/';
  
   // Handle image loading errors
   const handleImageError = (itemKey) => {
@@ -184,6 +185,7 @@ const Navbar = () => {
           />
         </div>
  
+        {/* Show navigation items only on home page */}
         {!showFilterButton && (
           <div className="nav-items">
             {Object.values(NAV_ITEMS).map((item) => (
@@ -200,17 +202,15 @@ const Navbar = () => {
                 <span className="nav-label">{item.label}</span>
               </button>
             ))}
-          </div>)
-        }
+          </div>
+        )}
  
-       
+        {/* Show search box and filters on rooms page */}
         {showFilterButton && (
- 
           <div className="search-box-section">
-            <div className="search-box" onClick={handleRoomSearchClick}>
+            <div className="search-box">
               <div className="search-item">
                 <span className="search-label">Anywhere</span>
- 
               </div>
               <div className="search-item">
                 <span className="search-label">Any week</span>
@@ -224,14 +224,21 @@ const Navbar = () => {
             </div>
  
             <div className="filter-section">
-              <button
-                className="filter-btn"
-                onClick={handleFilterClick}
-                type="button"
-                aria-label="Open filters"
+              <button 
+                className="filter-btn" 
+                onClick={() => setIsFilterModalOpen(true)}
               >
-                <MdFilterList />
+                <svg 
+                  viewBox="0 0 16 16" 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  style={{ height: '14px', width: '14px' }}
+                >
+                  <path d="M5 8c1.306 0 2.418.835 2.83 2H14v2H7.829A3.001 3.001 0 1 1 5 8zm0 2a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm6-8a3 3 0 1 1-2.829 4H2V4h6.171A3.001 3.001 0 0 1 11 2zm0 2a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"></path>
+                </svg>
                 <span>Filters</span>
+                {filterCount > 0 && (
+                  <span className="filter-badge">{filterCount}</span>
+                )}
               </button>
             </div>
           </div>
@@ -298,8 +305,6 @@ const Navbar = () => {
             )}
           </div>
         </div>
- 
- 
       </nav>
  
       {/* Search Box - Only show on home page */}
@@ -327,10 +332,15 @@ const Navbar = () => {
         </div>
       )}
  
-      {/* Filters Popup */}
-      <FiltersModal isOpen={isFilterOpen} onClose={() => setIsFilterOpen(false)} />
+      {/* Filters Modal - Single instance */}
+      <FiltersModal
+        isOpen={isFilterModalOpen}  
+        onClose={() => setIsFilterModalOpen(false)}  
+        filters={filters}
+        setFilters={setFilters}
+      />
     </div>
   );
 };
- 
+
 export default Navbar;

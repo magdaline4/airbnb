@@ -21,4 +21,7 @@ router.put("/:id", roomController.updateRoom);
 // DELETE - delete room by ID
 router.delete("/:id", roomController.deleteRoom);
 
+// In your routes file
+router.get("/test-filters", roomController.testFilters);
+
 module.exports = router;
