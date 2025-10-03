@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect , useContext} from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./Navbar.scss";
 import { FaGlobe, FaBars, FaSearch } from "react-icons/fa";
@@ -19,6 +19,7 @@ import NewServeImg from "../../assets/Images/servieceopen.avif";
 import HomeVideo from "../../assets/videos/house-selected.webm";
 import ExperVideo from "../../assets/videos/balloon-selected.webm";
 import ServeVideo from "../../assets/videos/consierge-selected.webm";
+import { FiltersContext } from "../Context/FiltersContext.jsx";
 
 // Constants
 const LOGO_URL = "https://upload.wikimedia.org/wikipedia/commons/6/69/Airbnb_Logo_B%C3%A9lo.svg";
@@ -51,6 +52,7 @@ const NAV_ITEMS = {
 };
 
 const Navbar = () => {
+  const { filters, setFilters } = useContext(FiltersContext);
   const navigate = useNavigate();
   const location = useLocation();
   const [active, setActive] = useState(null);
@@ -59,7 +61,7 @@ const Navbar = () => {
   const [showFilterButton, setShowFilterButton] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [imageErrors, setImageErrors] = useState({});
-
+  
   // Set filter button based on current page
   useEffect(() => {
     if (location.pathname === '/') {
@@ -85,13 +87,13 @@ const Navbar = () => {
 
   // Search functionality - navigates to rooms page
   const handleSearchClick = () => {
-    setShowFilterButton(true);
     navigate("/rooms");
   };
 
-  const handleRoomSearchClick = () => {   
-    setShowFilterButton(false); 
-  };
+  // Remove this function entirely as it's causing the issue
+  // const handleRoomSearchClick = () => {   
+  //   setShowFilterButton(false); 
+  // };
 
   const handleHostClick = () => {
     navigate("/host/onboarding");
@@ -111,9 +113,6 @@ const Navbar = () => {
     // Fallback to text if logo fails to load
     console.warn('Logo image failed to load');
   };
-
-  // Check if current page is home
-  const isHomePage = location.pathname === '/';
 
   // Handle image loading errors
   const handleImageError = (itemKey) => {
@@ -184,6 +183,7 @@ const Navbar = () => {
           />
         </div>
 
+        {/* Show navigation items only on home page */}
         {!showFilterButton && (
           <div className="nav-items">
             {Object.values(NAV_ITEMS).map((item) => (
@@ -200,17 +200,16 @@ const Navbar = () => {
                 <span className="nav-label">{item.label}</span>
               </button>
             ))}
-          </div>)
-        }
+          </div>
+        )}
 
-        
+        {/* Show search box and filters on rooms page */}
         {showFilterButton && (
-
           <div className="search-box-section">
-            <div className="search-box" onClick={handleRoomSearchClick}>
+            {/* Remove the onClick from search-box as it was causing the issue */}
+            <div className="search-box">
               <div className="search-item">
                 <span className="search-label">Anywhere</span>
-
               </div>
               <div className="search-item">
                 <span className="search-label">Any week</span>
@@ -298,8 +297,6 @@ const Navbar = () => {
             )}
           </div>
         </div>
-
-
       </nav>
 
       {/* Search Box - Only show on home page */}
@@ -328,7 +325,12 @@ const Navbar = () => {
       )}
 
       {/* Filters Popup */}
-      <FiltersModal isOpen={isFilterOpen} onClose={() => setIsFilterOpen(false)} />
+      <FiltersModal
+        isOpen={isFilterOpen}  
+        onClose={() => setIsFilterOpen(false)}  
+        filters={filters}
+        setFilters={setFilters}
+      />
     </div>
   );
 };

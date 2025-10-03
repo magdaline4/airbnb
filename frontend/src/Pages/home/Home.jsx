@@ -13,14 +13,14 @@ const HomePage = () => {
   const [error, setError] = useState(null);
   const [pageIndexes, setPageIndexes] = useState({}); 
 
-  const API_URL = import.meta.env.VITE_API_URL;
-
+const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
-    axios
-      .get(`${API_URL}/api/listings`)
+    axios.get(`${API_URL}/api/listings`)
       .then((res) => {
         setListings(res.data.listings || []);
+        console.log("Fetching from:", `${API_URL}/api/listings`);
+
       })
       .catch((err) => {
         console.error("Error fetching data:", err);
@@ -28,6 +28,8 @@ const HomePage = () => {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  
 
   const groupedListings = Array.isArray(listings)
     ? listings.reduce((groups, item) => {
