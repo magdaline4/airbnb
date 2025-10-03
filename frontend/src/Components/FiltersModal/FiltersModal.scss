@@ -576,3 +576,41 @@
     }
   }
 }
+
+.selected {
+  border: 1px solid black !important;
+  border-radius: 8px;
+}
+
+.selected-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 0;
+  background-color: white;
+
+}
+
+.selected-item {
+  background-color: white;
+  padding: 10px 8px;
+  border-radius: 60px;
+  cursor: pointer;
+  font-weight: 500;
+      border: 2px solid black !important;
+
+}
+
+.show-btn {
+  background: #ff385c;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  
+  &:hover {
+    background: #e31c5f;
+  }
+}
