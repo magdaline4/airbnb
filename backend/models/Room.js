@@ -12,6 +12,7 @@ const PROPERTY_TYPES = [
 const ROOM_TYPES = [
   "Any type Room",
   "Entire home",
+  "Room",
 ];
 
 // ✅ Allowed amenities based on your list
