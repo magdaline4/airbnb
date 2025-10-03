@@ -14,8 +14,7 @@ const RoomPage = () => {
   const [totalPages, setTotalPages] = useState(1);
   const roomsPerPage = 9;
 
-const API_URL = import.meta.env.VITE_API_URL;
-
+  const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     axios
@@ -44,8 +43,8 @@ const API_URL = import.meta.env.VITE_API_URL;
 
           {/* Cards */}
           <div className="room-grid">
-            {rooms.map((room) => (
-              <RoomCard key={room._id} room={room} />
+            {rooms.map((room, index) => (
+              <RoomCard key={index} room={room} />
             ))}
           </div>
 
@@ -61,17 +60,23 @@ const API_URL = import.meta.env.VITE_API_URL;
         <div className="room-map">
           <MapContainer
             center={[13.0827, 80.2707]}
-            zoom={11}
+            zoom={8}
             scrollWheelZoom={false}
             style={{ height: "100%", width: "100%" }}
           >
             <TileLayer
-              attribution="&copy; OpenStreetMap contributors"
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             />
-            {rooms.map((room) => (
-              <Marker key={room._id} position={[13.0827, 80.2707]}>
-                <Popup>₹{room.price.toLocaleString()}</Popup>
+            {rooms.map((room, index) => (
+              <Marker
+                key={index}
+                position={[room.location.lat, room.location.lng]} // ✅ dynamic location
+              >
+                <Popup>
+                  <b>{room.title}</b>
+                  <br />₹{room.price.toLocaleString()}
+                </Popup>
               </Marker>
             ))}
           </MapContainer>
