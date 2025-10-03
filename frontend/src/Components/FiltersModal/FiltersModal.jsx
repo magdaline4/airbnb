@@ -11,7 +11,7 @@ const FiltersModal = ({ isOpen, onClose, filters, setFilters }) => {
   if (!isOpen) return null;
 
   // Use the filters from props instead of local state
-const [minPrice, setMinPrice] = useState(filters.minPrice || 30000);
+  const [minPrice, setMinPrice] = useState(filters.minPrice || 30000);
   const [maxPrice, setMaxPrice] = useState(filters.maxPrice || 50000);
   
   const [bedrooms, setBedrooms] = useState(filters.bedrooms || 1);
