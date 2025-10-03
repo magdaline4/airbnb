@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./Navbar.scss";
 import { FaGlobe, FaBars, FaSearch } from "react-icons/fa";
@@ -19,6 +19,7 @@ import NewServeImg from "../../assets/Images/servieceopen.avif";
 import HomeVideo from "../../assets/videos/house-selected.webm";
 import ExperVideo from "../../assets/videos/balloon-selected.webm";
 import ServeVideo from "../../assets/videos/consierge-selected.webm";
+import { FiltersContext } from "../Context/FiltersContext.jsx";
 
 // Constants
 const LOGO_URL = "https://upload.wikimedia.org/wikipedia/commons/6/69/Airbnb_Logo_B%C3%A9lo.svg";
@@ -62,15 +63,8 @@ const Navbar = () => {
   const [showFilterButton, setShowFilterButton] = useState(false); // ✅ FIXED: Added this state
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   
-  // Filters state
-  const [filters, setFilters] = useState({
-    minPrice: 30000,
-    maxPrice: 50000,
-    bedrooms: 1,
-    beds: 1,
-    bathrooms: 1,
-    amenities: []
-  });
+  
+  const {filters, setFilters}= useContext(FiltersContext)
 
   // Calculate the total count of active filters
   const filterCount = getFilterCount(filters);

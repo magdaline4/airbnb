@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-<<<<<<< HEAD
 const Listing = require("../models/Listing");
 
 // POST: create one or multiple listings
@@ -33,9 +32,7 @@ router.get("/", async (req, res) => {
     return res.status(500).json({ success: false, error: err.message });
   }
 });
-=======
 const { createListing, getListings } = require("../controllers/listingController");
->>>>>>> f7e10aa0d8eca40f70e9a3144a91ec6493525e18
 
 router.post("/", createListing);
 router.get("/", getListings);

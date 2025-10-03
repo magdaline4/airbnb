@@ -1,29 +1,32 @@
 export const getFilterCount = (filters) => {
+  if (!filters) return 0;
+  
   let count = 0;
   
-  // Count all amenities/selections in the amenities array
-  // This includes: Recommended items, Type of place, Amenities, 
-  // Booking options, Property types, Accessibility, Languages, etc.
+  // Count all amenities/selections
   if (filters.amenities && filters.amenities.length > 0) {
     count += filters.amenities.length;
   }
   
-  // Count if price range is modified from default (30000-50000)
-  if (filters.minPrice !== 30000 || filters.maxPrice !== 50000) {
+  // Only count price if BOTH min and max are changed from defaults
+  // Check if either value is different from defaults (30000-50000)
+  const isPriceChanged = (filters.minPrice && filters.minPrice !== 10000) || 
+                         (filters.maxPrice && filters.maxPrice !== 40000);
+  if (isPriceChanged) {
     count += 1;
   }
   
-  // Count if bedrooms is modified from default (1)
+  // Only count if bedrooms is greater than 1 (default is 1)
   if (filters.bedrooms && filters.bedrooms > 1) {
     count += 1;
   }
   
-  // Count if beds is modified from default (1)
+  // Only count if beds is greater than 1 (default is 1)
   if (filters.beds && filters.beds > 1) {
     count += 1;
   }
   
-  // Count if bathrooms is modified from default (1)
+  // Only count if bathrooms is greater than 1 (default is 1)
   if (filters.bathrooms && filters.bathrooms > 1) {
     count += 1;
   }

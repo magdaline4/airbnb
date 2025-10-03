@@ -57,12 +57,6 @@ const FiltersModal = ({ isOpen, onClose, filters, setFilters }) => {
     setBathrooms(1);
   };
 
-  // ✅ Apply filters
-  const applyFilters = () => {
-    console.log("Applied Filters:", selectedFilters);
-    alert("Filters applied:\n" + (selectedFilters.length ? selectedFilters.join(", ") : "No filters selected"));
-  };
-
  
   const handleShowResults = () => {
     setFilters({
