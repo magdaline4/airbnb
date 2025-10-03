@@ -9,7 +9,7 @@ exports.createRoom = asyncHandler(async (req, res) => {
     if (Array.isArray(payload)) {
       // Multiple insert
       const rooms = await Room.insertMany(payload, { ordered: false });
-    return res.status(201).json({ 
+      return res.status(201).json({ 
       success: true, 
       count: rooms.length, 
       rooms,
