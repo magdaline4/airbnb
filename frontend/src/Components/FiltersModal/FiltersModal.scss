@@ -55,6 +55,57 @@
     }
   }
 
+  
+  /* ---------- Selected Filters ---------- */
+  .selected-filters {
+    padding: 0.8rem 1.5rem;
+    background: #ffffff;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid rgb(206, 204, 204);
+
+    h4 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .selected-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+
+      .tag {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        background: #f2f1f1;
+        color: black;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 1.1rem;
+        font-weight: 500;
+        border: 2px solid rgb(0, 0, 0);
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover {
+          opacity: 0.85;
+          background: rgba(231, 225, 225, 0.869);
+        }
+
+        button {
+          background: none;
+          border: none;
+          color: #0b0b0b;
+          font-weight: bold;
+          cursor: pointer;
+          margin-left: 0.3rem;
+          font-size: 25px;
+        }
+      }
+    }
+  }
+
   /* ---------- Section wrapper ---------- */
   .section {
     padding: 0.4rem 22px ; // each section has padding
@@ -89,12 +140,16 @@
 
       &:hover {
         border-color: #000;
+        background: rgba(231, 225, 225, 0.869);
+         
       }
 
       &.active {
         border-color: #000;
-        background: #f7f7f7;
+        background: #b0b0b0;
         font-weight: 600;
+        
+        
       }
     }
 
@@ -134,11 +189,12 @@
 
       &:hover {
         border-color: #000;
+        background: rgba(231, 225, 225, 0.869);
       }
 
       &.active {
         border-color: #000;
-        background: #f7f7f7;
+        background: #aba9a9;
         font-weight: 600;
       }
     }
@@ -160,6 +216,7 @@
 
       &:hover {
         text-decoration: underline;
+        background: rgba(231, 225, 225, 0.869);
       }
 
       .arrow {
@@ -192,12 +249,14 @@
 
       &:hover {
         border-color: #000;
+        background: rgba(231, 225, 225, 0.869);
       }
 
       &.active {
         border-color: #000;
         font-weight: 600;
         background: #f7f7f7;
+        
       }
     }
   }
@@ -221,8 +280,8 @@
       transition: all 0.2s ease;
 
       img {
-        width: 40px;
-        height: 40px;
+        width: 60px;
+        height: 60px;
         margin-bottom: 0.5rem;
       }
 
@@ -232,12 +291,17 @@
 
       &:hover {
         border-color: #000;
+        background: rgba(231, 225, 225, 0.869);
+
       }
 
       &.active {
-        border-color: #000;
+        border-color:1px solid #000;
         background: #bab7b7;
         font-weight: 600;
+    
+        
+       
       }
     }
   }
@@ -265,6 +329,7 @@
 
       &:hover {
         border-color: #000;
+        background: rgba(231, 225, 225, 0.869);
       }
 
       &.active {
@@ -397,6 +462,7 @@
 
         &:hover {
           border-color: #000;
+          background: rgba(231, 225, 225, 0.869);
         }
       }
 
@@ -445,6 +511,8 @@
 
         &:hover {
           border-color: #000;
+          background: rgba(231, 225, 225, 0.869);
+        
         }
       }
     }
@@ -459,7 +527,7 @@
         width: 100%;
         display: flex;
         justify-content: space-between;
-        padding: 1rem;
+        padding: 2rem;
         font-size: 1.2rem;
         font-weight: 500;
         background: none;
@@ -505,6 +573,7 @@
 
           &:hover {
             border-color: #000;
+            background: rgba(231, 225, 225, 0.869);
           }
 
           &.active {
@@ -530,6 +599,7 @@
 
           &:hover {
             border-color: #000;
+            background: rgba(231, 225, 225, 0.869);
           }
 
           &.active {
@@ -572,45 +642,9 @@
 
       &:hover {
         opacity: 0.9;
+        
       }
     }
   }
 }
 
-.selected {
-  border: 1px solid black !important;
-  border-radius: 8px;
-}
-
-.selected-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 8px 0;
-  background-color: white;
-
-}
-
-.selected-item {
-  background-color: white;
-  padding: 10px 8px;
-  border-radius: 60px;
-  cursor: pointer;
-  font-weight: 500;
-      border: 2px solid black !important;
-
-}
-
-.show-btn {
-  background: #ff385c;
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  
-  &:hover {
-    background: #e31c5f;
-  }
-}

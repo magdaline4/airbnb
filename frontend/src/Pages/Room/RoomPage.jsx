@@ -19,7 +19,7 @@ const RoomPage = () => {
   const roomsPerPage = 9;
 
   // Use your deployed backend URL directly
-  const API_URL = "https://airbnbbackend-airbnbweb710-1108-hyasas-projects.vercel.app";
+const API_URL = import.meta.env.VITE_API_URL;
 
   // Fetch rooms whenever filters or page change
   useEffect(() => {
@@ -197,6 +197,7 @@ const fetchRooms = async () => {
               attribution="&copy; OpenStreetMap contributors"
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
+            
             {rooms.map(
               (room) =>
                 room.location && (

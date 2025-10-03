@@ -5,7 +5,7 @@ export const FiltersContext = createContext();
 
 export const FiltersProvider = ({ children }) => {
   const [filters, setFilters] = useState({
-  minPrice: 10000,    // Realistic minimum for your rooms
+    minPrice: 10000,    // Realistic minimum for your rooms
     maxPrice: 40000,    // Realistic maximum for your rooms  
     bedrooms: 0,        // 0 means no filter
     beds: 0,            // 0 means no filter
