@@ -1,20 +1,20 @@
-﻿import React, { useState, useEffect , useContext} from "react";
+﻿import React, { useState, useEffect, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./Navbar.scss";
 import { FaGlobe, FaBars, FaSearch } from "react-icons/fa";
-import { MdFilterList } from "react-icons/md";
 import FiltersModal from "../FiltersModal/FiltersModal";
-
+import { getFilterCount } from '../FiltersModal/filterUtils.js';
+ 
 // Default icons
 import HomeImg from "../../assets/Images/home.avif";
 import ExperImg from "../../assets/Images/experience.avif";
 import ServeImg from "../../assets/Images/service.avif";
-
+ 
 // Active state icons
 import NewHomeImg from "../../assets/Images/Homeopen.avif";
 import NewExperImg from "../../assets/Images/experinenceopen.avif";
 import NewServeImg from "../../assets/Images/servieceopen.avif";
-
+ 
 // Videos
 import HomeVideo from "../../assets/videos/house-selected.webm";
 import ExperVideo from "../../assets/videos/balloon-selected.webm";
@@ -23,7 +23,7 @@ import { FiltersContext } from "../Context/FiltersContext.jsx";
 
 // Constants
 const LOGO_URL = "https://upload.wikimedia.org/wikipedia/commons/6/69/Airbnb_Logo_B%C3%A9lo.svg";
-
+ 
 const NAV_ITEMS = {
   HOME: {
     key: 'home',
@@ -50,18 +50,25 @@ const NAV_ITEMS = {
     video: ServeVideo
   }
 };
-
+ 
 const Navbar = () => {
-  const { filters, setFilters } = useContext(FiltersContext);
   const navigate = useNavigate();
   const location = useLocation();
+
+  // State declarations - ALL AT THE TOP
   const [active, setActive] = useState(null);
   const [playing, setPlaying] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [showFilterButton, setShowFilterButton] = useState(false);
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [imageErrors, setImageErrors] = useState({});
+  const [showFilterButton, setShowFilterButton] = useState(false); // ✅ FIXED: Added this state
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   
+  
+  const {filters, setFilters}= useContext(FiltersContext)
+
+  // Calculate the total count of active filters
+  const filterCount = getFilterCount(filters);
+    
   // Set filter button based on current page
   useEffect(() => {
     if (location.pathname === '/') {
@@ -70,55 +77,44 @@ const Navbar = () => {
       setShowFilterButton(true);
     }
   }, [location.pathname]);
-
+ 
   const handleNavClick = (item) => {
     setActive(item.key);
     setPlaying(item.key);
     navigate(item.path);
   };
-
+ 
   const handleMenuToggle = () => {
     setIsMenuOpen(!isMenuOpen);
   };
-
-  const handleFilterClick = () => {
-    setIsFilterOpen(true);
-  };
-
+ 
   // Search functionality - navigates to rooms page
   const handleSearchClick = () => {
     navigate("/rooms");
   };
 
-  // Remove this function entirely as it's causing the issue
-  // const handleRoomSearchClick = () => {   
-  //   setShowFilterButton(false); 
-  // };
-
   const handleHostClick = () => {
     navigate("/host/onboarding");
     setIsMenuOpen(false);
   };
-
+ 
   const handleLogoClick = () => {
     navigate('/');
   };
-
+ 
   const handleLanguageClick = () => {
-    // TODO: Implement language selection functionality
     console.log('Language selector clicked');
   };
-
+ 
   const handleLogoError = () => {
-    // Fallback to text if logo fails to load
     console.warn('Logo image failed to load');
   };
-
+ 
   // Handle image loading errors
   const handleImageError = (itemKey) => {
     setImageErrors(prev => ({ ...prev, [itemKey]: true }));
   };
-
+ 
   // Helper function to render icon based on state
   const renderIcon = (item) => {
     if (playing === item.key) {
@@ -135,10 +131,10 @@ const Navbar = () => {
         </video>
       );
     }
-
+ 
     const imageSrc = active === item.key ? item.activeImg : item.defaultImg;
     const hasError = imageErrors[item.key];
-
+ 
     return (
       <img
         src={hasError ? item.defaultImg : imageSrc}
@@ -148,7 +144,7 @@ const Navbar = () => {
       />
     );
   };
-
+ 
   // Helper function to check if path is active
   const isActivePath = (path) => {
     if (path === '/') {
@@ -156,7 +152,7 @@ const Navbar = () => {
     }
     return location.pathname.startsWith(path);
   };
-
+ 
   // Handle keyboard navigation
   const handleKeyDown = (event, action) => {
     if (event.key === 'Enter' || event.key === ' ') {
@@ -164,7 +160,7 @@ const Navbar = () => {
       action();
     }
   };
-
+ 
   return (
     <div className="navbar-wrapper">
       <nav className="navbar">
@@ -182,7 +178,7 @@ const Navbar = () => {
             onKeyDown={(e) => handleKeyDown(e, handleLogoClick)}
           />
         </div>
-
+ 
         {/* Show navigation items only on home page */}
         {!showFilterButton && (
           <div className="nav-items">
@@ -202,11 +198,10 @@ const Navbar = () => {
             ))}
           </div>
         )}
-
+ 
         {/* Show search box and filters on rooms page */}
         {showFilterButton && (
           <div className="search-box-section">
-            {/* Remove the onClick from search-box as it was causing the issue */}
             <div className="search-box">
               <div className="search-item">
                 <span className="search-label">Anywhere</span>
@@ -221,21 +216,28 @@ const Navbar = () => {
                 <FaSearch />
               </button>
             </div>
-
+ 
             <div className="filter-section">
-              <button
-                className="filter-btn"
-                onClick={handleFilterClick}
-                type="button"
-                aria-label="Open filters"
+              <button 
+                className="filter-btn" 
+                onClick={() => setIsFilterModalOpen(true)}
               >
-                <MdFilterList />
+                <svg 
+                  viewBox="0 0 16 16" 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  style={{ height: '14px', width: '14px' }}
+                >
+                  <path d="M5 8c1.306 0 2.418.835 2.83 2H14v2H7.829A3.001 3.001 0 1 1 5 8zm0 2a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm6-8a3 3 0 1 1-2.829 4H2V4h6.171A3.001 3.001 0 0 1 11 2zm0 2a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"></path>
+                </svg>
                 <span>Filters</span>
+                {filterCount > 0 && (
+                  <span className="filter-badge">{filterCount}</span>
+                )}
               </button>
             </div>
           </div>
         )}
-
+ 
         {/* Right Side Actions */}
         <div className="right-actions">
           {/* Language Selector */}
@@ -249,7 +251,7 @@ const Navbar = () => {
               <FaGlobe aria-hidden="true" />
             </button>
           </div>
-
+ 
           {/* User Menu */}
           <div className="menu-wrapper">
             <button
@@ -261,7 +263,7 @@ const Navbar = () => {
             >
               <FaBars aria-hidden="true" />
             </button>
-
+ 
             {isMenuOpen && (
               <div className="dropdown" role="menu" aria-label="User menu">
                 <ul>
@@ -298,7 +300,7 @@ const Navbar = () => {
           </div>
         </div>
       </nav>
-
+ 
       {/* Search Box - Only show on home page */}
       {!showFilterButton && (
         <div className="search-box" onClick={handleSearchClick}>
@@ -323,11 +325,11 @@ const Navbar = () => {
           </button>
         </div>
       )}
-
-      {/* Filters Popup */}
+ 
+      {/* Filters Modal - Single instance */}
       <FiltersModal
-        isOpen={isFilterOpen}  
-        onClose={() => setIsFilterOpen(false)}  
+        isOpen={isFilterModalOpen}  
+        onClose={() => setIsFilterModalOpen(false)}  
         filters={filters}
         setFilters={setFilters}
       />

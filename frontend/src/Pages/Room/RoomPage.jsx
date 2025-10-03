@@ -197,6 +197,7 @@ const fetchRooms = async () => {
               attribution="&copy; OpenStreetMap contributors"
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
+            
             {rooms.map(
               (room) =>
                 room.location && (
