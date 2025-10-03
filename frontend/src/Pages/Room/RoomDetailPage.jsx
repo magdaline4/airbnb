@@ -22,11 +22,14 @@ const RoomDetailPage = () => {
   const sidebarRef = useRef(null);
   const contentRef = useRef(null);
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
+
   useEffect(() => {
     const fetchRoomDetails = async () => {
       try {
         // Fetch room by ID using the specific endpoint
-        const response = await axios.get(`http://localhost:5000/api/rooms/${id}`);
+        const response = await axios.get(`${API_URL}/api/rooms/${id}`);
         
         if (response.data.success && response.data.room) {
           setRoom(response.data.room);
