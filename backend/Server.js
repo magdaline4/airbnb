@@ -4,17 +4,20 @@ require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const connectDB = require('./config/database');
+const connectDB = require('./config/database'); // your existing DB connection
 const errorHandler = require('./middleware/errorHandler');
+
+// Routes
 const listingRoutes = require("./routes/listings.js");
 const roomsRoutes = require("./routes/rooms.js");
+const amenitiesRoutes = require('./routes/amenities');
 
 const app = express();
 
 // ✅ Enable CORS
 app.use(cors());
 
-// ✅ Allow larger request body (fix "request entity too large" error)
+// ✅ Allow larger request body
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
@@ -32,6 +35,7 @@ connectDB();
 // ✅ Use routes
 app.use("/api/listings", listingRoutes);
 app.use("/api/rooms", roomsRoutes);
+app.use('/api/amenities', amenitiesRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
