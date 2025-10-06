@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import "./RoomDetailPage.scss";
 import { FaHeart, FaShare, FaChevronLeft, FaChevronRight, FaStar, FaWifi, FaCar, FaUtensils, FaSwimmingPool, FaSnowflake, FaFire, FaTv, FaPaw, FaBed, FaBath, FaRuler } from "react-icons/fa";
@@ -18,6 +18,8 @@ const RoomDetailPage = () => {
   const [liked, setLiked] = useState(false);
   const [showAllPhotos, setShowAllPhotos] = useState(false);
   const [isSticky, setIsSticky] = useState(false);
+  const [showServiceAnimalPopup, setShowServiceAnimalPopup] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false)
   
   // Guest dropdown state
   const [isGuestDropdownOpen, setIsGuestDropdownOpen] = useState(false);
@@ -178,6 +180,27 @@ const RoomDetailPage = () => {
     // Add your reservation logic here
   };
 
+  // Calculate number of nights
+const calculateNights = () => {
+  const checkIn = selectedDates.checkIn;
+  const checkOut = selectedDates.checkOut;
+  const timeDiff = checkOut.getTime() - checkIn.getTime();
+  const nights = Math.ceil(timeDiff / (1000 * 3600 * 24));
+  return nights > 0 ? nights : 1;
+};
+
+// Calculate total price (only base price × nights)
+const calculateTotalPrice = () => {
+  const nights = calculateNights();
+  const basePrice = room?.price || 0;
+  return basePrice * nights;
+};
+
+// Format currency
+const formatCurrency = (amount) => {
+  return `₹${amount?.toLocaleString()}`;
+};
+
   // Normalize images similar to RoomCard
   const images = (() => {
     if (!room) return [];
@@ -216,7 +239,7 @@ const RoomDetailPage = () => {
         <Navbar />
         <div className="room-detail-error">
           <h2>Room not found</h2>
-          <p>{error || "The room you're looking for doesn't exist."}</p>
+          <p> {error || "The room you're looking for doesn't exist."} </p>
           <button onClick={() => navigate("/rooms")} className="back-button">
             Back to rooms
           </button>
@@ -227,7 +250,7 @@ const RoomDetailPage = () => {
 
   return (
     <>
-      <Navbar />
+     
       
       <div className="room-detail-page">
         {/* Image Gallery */}
@@ -434,19 +457,35 @@ const RoomDetailPage = () => {
             </div>
           </div>
 
-          {/* ✅ Booking Sidebar ---------- */}
+          {/* ✅ Booking Sidebar  */}
           <div
             className={`booking-sidebar ${isSticky ? "sticky" : ""}`}
             ref={sidebarRef}
           >
             <div className="booking-card">
-              {/* ✅ Price section */}
-              <div className="price-section">
-                <span className="price">₹{room.price?.toLocaleString?.()}</span>
-                <span className="price-period">per night</span>
+                {/* ✅ Price section with dynamic calculation */}
+                  <div className="price-section">
+               {selectedDates.checkIn && selectedDates.checkOut ? (
+                 // Show total price when dates are selected
+                <div className="price-display">
+                   <span className="price"> {formatCurrency(calculateTotalPrice())} </span>
+                  <span className="price-details">
+                      for {calculateNights()} night {calculateNights() !== 1 ? 's' : ''}
+                   </span>
+                   </div>
+                 ) : (
+                // Show per night price when no dates selected
+                <div className="price-display">
+                <span className="price">{formatCurrency(room?.price)}</span>
+                   <span className="price-period"> per night</span>
+                 </div>
+             )}
               </div>
+           
+            
 
               {/* ✅ Booking form */}
+
               <form className="booking-form" onSubmit={handleReserve}>
                 {/* Dates */}
                 <div className="date-inputs">
@@ -478,7 +517,9 @@ const RoomDetailPage = () => {
                           checkOut: parseInputDate(e.target.value),
                         }))
                       }
+                      
                     />
+                 
                   </div>
                 </div>
 
@@ -569,30 +610,66 @@ const RoomDetailPage = () => {
                         </div>
                       </div>
 
-                      {/* Pets */}
-                      <div className="guest-option">
-                        <div className="guest-type-info">
-                          <div className="guest-type-name">Pets</div>
-                          <div className="guest-type-description">Bringing a service animal?</div>
-                        </div>
-                        <div className="guest-counter">
-                          <button 
-                            className="counter-btn" 
-                            onClick={() => handleDecrement('pets')}
-                            disabled={guestData.pets <= 0}
-                          >
-                            −
-                          </button>
-                          <span className="counter-value">{guestData.pets}</span>
-                          <button 
-                            className="counter-btn" 
-                            onClick={() => handleIncrement('pets')}
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
+                     {/* Pets */}
+                    <div className="guest-option">
+                    <div className="guest-type-info">
+                    <div className="guest-type-name">Pets</div>
+                      <span 
+                    className="guest-type-description clickable"
+                      onClick={() => setShowServiceAnimalPopup(true)}
+                        >
+                    Bringing a service animal?
+                      </span>
+                   </div>
+                 <div className="guest-counter">
+                    <button 
+                 className="counter-btn" 
+                onClick={() => handleDecrement('pets')}
+                  disabled={guestData.pets <= 0}
+                    >
+                       −
+                </button>
+                   <span className="counter-value">{guestData.pets}</span>
+                 <button 
+                  className="counter-btn" 
+                     onClick={() => handleIncrement('pets')}
+                        >
+                      +
+                      </button>
+                     </div>
+                       </div>
+           {/* Service Animal Popup - Minimal Version */}
+           {showServiceAnimalPopup && (
+          <div className="popup-overlay" onClick={() => setShowServiceAnimalPopup(false)}>
+           <div className="popup-content" onClick={(e) => e.stopPropagation()}>
 
+           {/* Close button in top-left corner */}
+        <div className="popup-header">
+        <button 
+          className="popup-close" 
+          onClick={() => setShowServiceAnimalPopup(false)}
+        >
+          &times;
+        </button>
+      </div>
+      
+      {/* Scrollable content */}
+      <div className="popup-scrollable">
+        <div className="popup-body">
+            <img src="https://a0.muscache.com/pictures/adafb11b-41e9-49d3-908e-049dfd6934b6.jpg" alt="pet-img" />
+          <h3>Service animals</h3>
+          <p className="popup-main-text">
+           
+            Service animals aren't pets, so there's no need to add them here.
+          </p>
+          <p className="popup-secondary-text">
+            Travelling with an emotional support animal? Check out our  <Link to="/accessibility"> <span>accessibility policy. </span> </Link>
+          </p>
+               </div>
+                  </div>
+                  </div>
+               </div>
+                 )}
                       {/* Info Text */}
                       <div className="guest-dropdown-info">
                         <p>This place has a maximum of {maxGuests} guests, not including <br /> infants. If you're bringing more than 2 pets, please let <br /> your Host know..</p>
@@ -608,7 +685,6 @@ const RoomDetailPage = () => {
                          </span>
                             </div>
 
-                    
                       </div>
 
                     
@@ -616,9 +692,11 @@ const RoomDetailPage = () => {
                 </div>
 
                 {/* Reserve Button */}
-                <button type="submit" className="reserve-button">
+                 <Link to="/booking">
+                 <button type="button" className="reserve-button">
                   Reserve
-                </button>
+                 </button>
+                 </Link>
                 <p className="booking-note">You won't be charged yet</p>
               </form>
             </div>
