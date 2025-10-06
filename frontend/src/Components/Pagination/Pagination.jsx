@@ -1,4 +1,4 @@
-import "../../Pages/room/Room.scss";
+import "../../Pages/Room/Room.scss";
 import { FaHeart, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   const pages = [];

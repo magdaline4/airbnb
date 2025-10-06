@@ -39,6 +39,8 @@ const RoomDetailPage = () => {
   const sidebarRef = useRef(null);
   const contentRef = useRef(null);
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     const fetchRoomDetails = async () => {
       try {
@@ -46,6 +48,8 @@ const RoomDetailPage = () => {
         const response = await axios.get(
           `http://localhost:5000/api/rooms/${id}`
         );
+
+        // const response = await axios.get(`${API_URL}/api/rooms/${id}`);
 
         if (response.data.success && response.data.room) {
           setRoom(response.data.room);
@@ -235,34 +239,22 @@ const RoomDetailPage = () => {
             <div className="room-header">
               <div className="room-title-section">
                 <h1>{room.title || "Beautiful Room"}</h1>
-                <p>{room.guests || "2 guests"} guests<span> · </span>{room.bedrooms || "1 bed"} bedrooms<span> · </span>{room.beds || "1 bed"} beds<span> · </span>{room.bathrooms} private bathroom</p>
+                <p>
+                  {room.guests || "2 guests"} guests<span> · </span>
+                  {room.bedrooms || "1 bed"} bedrooms<span> · </span>
+                  {room.beds || "1 bed"} beds<span> · </span>
+                  {room.bathrooms} private bathroom
+                </p>
+
                 <div className="room-meta">
                   <div className="rating-section">
                     <FaStar className="star-icon" />
                     <span className="rating">{room.rating || 4.8}</span>
                     <span className="review-count">
-                       ·{room.reviewCount || 24} reviews
+                      ·{room.reviewCount || 24} reviews
                     </span>
                   </div>
-                  <div className="location-section">
-                    <MdLocationOn className="location-icon" />
-                    <span>{room.type || "Shenoy Nagar, Chennai"}</span>
-                  </div>
                 </div>
-              </div>
-
-              <div className="action-buttons">
-                <button className="share-btn">
-                  <FaShare />
-                  Share
-                </button>
-                <button
-                  className={`heart-btn ${liked ? "liked" : ""}`}
-                  onClick={() => setLiked(!liked)}
-                >
-                  <FaHeart />
-                  Save
-                </button>
               </div>
             </div>
 
@@ -285,7 +277,80 @@ const RoomDetailPage = () => {
                 </div>
               </div>
             </div>
+            <div className="host-home-section">
+              <div className="host-home-detail">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 32 32"
+                  aria-hidden="true"
+                  role="presentation"
+                  focusable="false"
+                  style={{
+                    display: "block",
+                    height: "31px",
+                    width: "40px",
+                    fill: "currentColor",
+                  }}
+                >
+                  <path d="M24.33 1.67a2 2 0 0 1 2 1.85v24.81h3v2H2.67v-2h3V3.67a2 2 0 0 1 1.85-2h.15zm-4 2H7.67v24.66h12.66zm4 0h-2v24.66h2zm-7 11a1.33 1.33 0 1 1 0 2.66 1.33 1.33 0 0 1 0-2.66z"></path>
+                </svg>
+                <div className="host-home-details-content">
+                  <p>Self check-in</p>
+                  <p>You can check in with the building staff.</p>
+                </div>
+              </div>
+              <div className="host-home-detail">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 32 32"
+                  aria-hidden="true"
+                  role="presentation"
+                  focusable="false"
+                  style={{
+                    display: "block",
+                    height: "31px",
+                    width: "40px",
+                    fill: "currentColor",
+                  }}
+                >
+                  <path d="M17 6a2 2 0 0 1 2 1.85v8.91l.24.24H24v-3h-3a1 1 0 0 1-.98-1.2l.03-.12 2-6a1 1 0 0 1 .83-.67L23 6h4a1 1 0 0 1 .9.58l.05.1 2 6a1 1 0 0 1-.83 1.31L29 14h-3v3h5a1 1 0 0 1 1 .88V30h-2v-3H20v3h-2v-3H2v3H0V19a3 3 0 0 1 1-2.24V8a2 2 0 0 1 1.85-2H3zm13 13H20v6h10zm-13-1H3a1 1 0 0 0-1 .88V25h16v-6a1 1 0 0 0-.77-.97l-.11-.02zm8 3a1 1 0 1 1 0 2 1 1 0 0 1 0-2zM17 8H3v8h2v-3a2 2 0 0 1 1.85-2H13a2 2 0 0 1 2 1.85V16h2zm-4 5H7v3h6zm13.28-5h-2.56l-1.33 4h5.22z"></path>
+                </svg>
+                <div className="host-home-details-content">
+                  <p>Room in a villa</p>
+                  <p>Your own room in a home, plus access to shared spaces.</p>
+                </div>
+              </div>
+              <div className="host-home-detail">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 32 32"
+                  aria-hidden="true"
+                  role="presentation"
+                  focusable="false"
+                  style={{
+                    display: "block",
+                    height: "31px",
+                    width: "40px",
+                    fill: "currentColor",
+                  }}
+                >
+                  <path d="M11.67 0v1.67h8.66V0h2v1.67h6a2 2 0 0 1 2 1.85v16.07a2 2 0 0 1-.46 1.28l-.12.13L21 29.75a2 2 0 0 1-1.24.58H6.67a5 5 0 0 1-5-4.78V3.67a2 2 0 0 1 1.85-2h6.15V0zm16.66 11.67H3.67v13.66a3 3 0 0 0 2.82 3h11.18v-5.66a5 5 0 0 1 4.78-5h5.88zm-.08 8h-5.58a3 3 0 0 0-3 2.82v5.76zm-18.58-16h-6v6h24.66v-6h-6v1.66h-2V3.67h-8.66v1.66h-2z"></path>
+                </svg>
 
+                <div className="host-home-details-content">
+                  <p>Free cancellation for 24 hours</p>
+                  <p>Get a full refund if you change your mind.</p>
+                </div>
+              </div>
+            </div>
+            {/* Description */}
+            <div className="room-description">
+              <h2>About this place</h2>
+              <p>
+                {room.description ||
+                  "Experience the perfect blend of comfort and style in this beautifully designed space. Located in the heart of the city, this room offers modern amenities and a cozy atmosphere. Perfect for both business and leisure travelers looking for a home away from home."}
+              </p>
+            </div>
             {/* Room Features */}
             <div className="room-features">
               <div className="feature">
@@ -316,15 +381,6 @@ const RoomDetailPage = () => {
                   <p>Private sleeping areas</p>
                 </div>
               </div>
-            </div>
-
-            {/* Description */}
-            <div className="room-description">
-              <h2>About this place</h2>
-              <p>
-                {room.description ||
-                  "Experience the perfect blend of comfort and style in this beautifully designed space. Located in the heart of the city, this room offers modern amenities and a cozy atmosphere. Perfect for both business and leisure travelers looking for a home away from home."}
-              </p>
             </div>
 
             {/* Amenities */}

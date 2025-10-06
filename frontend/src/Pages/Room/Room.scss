@@ -1,0 +1,17 @@
+.room-controls {
+  padding: 1rem 2rem;
+  border-bottom: 1px solid #e0e0e0;
+  
+  .filter-toggle-btn {
+    background: #fff;
+    border: 1px solid #ddd;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    
+    &:hover {
+      border-color: #000;
+    }
+  }
+}
