@@ -189,13 +189,13 @@ const fetchRooms = async () => {
         <div className="room-map">
           <MapContainer
             center={[13.0827, 80.2707]}
-            zoom={11}
+            zoom={8}
             scrollWheelZoom={false}
             style={{ height: "100%", width: "100%" }}
           >
             <TileLayer
-              attribution="&copy; OpenStreetMap contributors"
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             />
             
             {rooms.map(
