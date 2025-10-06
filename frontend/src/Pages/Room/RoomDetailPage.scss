@@ -246,6 +246,8 @@
       }
       .host-home-section {
         border-bottom: #eee solid 1px;
+        margin-bottom: 2rem;
+
         .host-home-detail {
           display: flex;
           gap: 32px;
@@ -261,8 +263,8 @@
         }
       }
       .room-description {
-       border-bottom: #eee solid 1px;
-       margin-bottom: 2rem;
+        border-bottom: #eee solid 1px;
+        margin-bottom: 2rem;
 
         h2 {
           font-size: 1.5rem;
@@ -545,25 +547,160 @@
             }
           }
 
-          .guests-input {
+          // Guests Input Section with Dropdown
+          .guests-input-section {
             border: 1px solid #ddd;
             border-radius: 8px;
             padding: 12px;
             margin-bottom: 16px;
+            cursor: pointer;
+            transition: border-color 0.2s;
+            background: white;
+            position: relative;
+
+            &:hover {
+              border-color: #b0b0b0;
+            }
+
+            &.dropdown-open {
+              border-color: #000;
+              border-bottom-left-radius: 0;
+              border-bottom-right-radius: 0;
+            }
 
             label {
               display: block;
-              font-size: 12px;
+              font-size: 10px;
               font-weight: 600;
+              color: #222;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
               margin-bottom: 4px;
-              color: #333;
             }
 
-            select {
+            .guests-trigger {
               width: 100%;
+              background: none;
               border: none;
-              outline: none;
+              text-align: left;
               font-size: 14px;
+              color: #222;
+              cursor: pointer;
+              padding: 0;
+              font-family: inherit;
+
+              &:focus {
+                outline: none;
+              }
+            }
+          }
+
+          // Guest Dropdown
+          .guest-dropdown {
+            position: absolute;
+            top: 100%;
+            left: -1px;
+            right: -1px;
+            background: white;
+            border: 1px solid #000;
+            border-top: none;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 100;
+            padding: 16px;
+
+            .guest-option {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              padding: 12px 0;
+
+              .guest-type-info {
+                .guest-type-name {
+                  font-weight: 600;
+                  font-size: 14px;
+                  color: #222;
+                  margin-bottom: 2px;
+                }
+
+                .guest-type-description {
+                  font-size: 12px;
+                  color: #666;
+                }
+              }
+
+              .guest-counter {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+
+                .counter-btn {
+                  width: 28px;
+                  height: 28px;
+                  border: 1px solid #b0b0b0;
+                  border-radius: 50%;
+                  background: white;
+                  font-size: 16px;
+                  font-weight: 300;
+                  cursor: pointer;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  transition: all 0.2s;
+
+                  &:hover:not(:disabled) {
+                    border-color: #222;
+                  }
+
+                  &:disabled {
+                    color: #ccc;
+                    border-color: #ebebeb;
+                    cursor: not-allowed;
+                  }
+                }
+
+                .counter-value {
+                  font-size: 14px;
+                  font-weight: 600;
+                  min-width: 20px;
+                  text-align: center;
+                }
+              }
+            }
+
+            .guest-dropdown-info {
+              margin-top: 2px;
+              padding-top: 12px;
+
+              p {
+                display: flex;
+                margin: 0px;
+
+                font-size: 11px;
+                line-height: 1.4;
+                color: #151515;
+                justify-content: center;
+                text-wrap: nowrap;
+              }
+            }
+            .guest-dropdown-footer {
+              padding: 16px;
+              display: flex;
+              justify-content: flex-end;
+
+              .close-text {
+                color: #222;
+                text-decoration: underline;
+                cursor: pointer;
+                font-size: 18px;
+                font-weight: 600;
+                transition: color 0.2s;
+
+                &:hover {
+                  color: #000;
+                }
+              }
             }
           }
 
@@ -586,29 +723,9 @@
 
           .booking-note {
             text-align: center;
-            margin: 8px 0 0 0;
-            font-size: 14px;
+            margin-top: 12px;
+            font-size: 12px;
             color: #666;
-          }
-        }
-
-        .price-breakdown {
-          border-top: 1px solid #eee;
-          padding-top: 16px;
-
-          .price-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 14px;
-
-            &.total {
-              border-top: 1px solid #eee;
-              padding-top: 8px;
-              margin-top: 8px;
-              font-weight: 600;
-              font-size: 16px;
-            }
           }
         }
       }
