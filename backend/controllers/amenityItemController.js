@@ -1,6 +1,6 @@
 // controllers/amenityItemController.js
-const AmenityItem = require('../models/amenityItem');
-const Amenity = require('../models/Amenity');
+const AmenityItem = require('../models/AmenityItem.js');
+const Amenity = require('../models/Amenity.js');
 const mongoose = require('mongoose');
 
 // @desc    Get all amenity items
