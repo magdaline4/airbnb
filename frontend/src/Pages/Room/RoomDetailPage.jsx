@@ -6,6 +6,7 @@ import { FaHeart, FaShare, FaChevronLeft, FaChevronRight, FaStar, FaWifi, FaCar,
 import { MdLocationOn, MdVerified } from "react-icons/md";
 import Navbar from "../../Components/Navbar/Navbar";
 import Footer from "../../Components/Footer/Footer";
+import Calendar from "../../Components/BookingCalendar/Calendar";
 
 const RoomDetailPage = () => {
   const { id } = useParams();
@@ -17,18 +18,89 @@ const RoomDetailPage = () => {
   const [liked, setLiked] = useState(false);
   const [showAllPhotos, setShowAllPhotos] = useState(false);
   const [isSticky, setIsSticky] = useState(false);
-  const [sidebarHeight, setSidebarHeight] = useState(0);
   
+  // Guest dropdown state
+  const [isGuestDropdownOpen, setIsGuestDropdownOpen] = useState(false);
+  const [guestData, setGuestData] = useState({
+    adults: 2,
+    children: 0,
+    infants: 1,
+    pets: 0
+  });
+
+  const [selectedDates, setSelectedDates] = useState({
+    checkIn: new Date(),
+    checkOut: new Date(Date.now() + 24 * 60 * 60 * 1000),
+  });
+
   const sidebarRef = useRef(null);
   const contentRef = useRef(null);
 
   const API_URL = import.meta.env.VITE_API_URL;
 
+  const maxGuests = room?.guests || 10;
+  const totalGuests = guestData.adults + guestData.children;
+
+  // Guest counter functions
+  const handleIncrement = (type) => {
+    setGuestData(prev => ({
+      ...prev,
+      [type]: prev[type] + 1
+    }));
+  };
+
+  const handleDecrement = (type) => {
+    setGuestData(prev => ({
+      ...prev,
+      [type]: Math.max(0, prev[type] - 1)
+    }));
+  };
+
+  const getGuestDisplayText = () => {
+    const { adults, children, infants, pets } = guestData;
+    const total = adults + children;
+    
+    let text = `${total} guest${total !== 1 ? 's' : ''}`;
+    if (infants > 0) {
+      text += `, ${infants} infant${infants !== 1 ? 's' : ''}`;
+    }
+    if (pets > 0) {
+      text += `, ${pets} pet${pets !== 1 ? 's' : ''}`;
+    }
+    
+    return text;
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isGuestDropdownOpen && !event.target.closest('.guests-input-section')) {
+        setIsGuestDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isGuestDropdownOpen]);
+
+  // Add the utility functions here
+  const formatDateForInput = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const parseInputDate = (dateString) => {
+    const [year, month, day] = dateString.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  };
 
   useEffect(() => {
     const fetchRoomDetails = async () => {
       try {
-        // Fetch room by ID using the specific endpoint
         const response = await axios.get(`${API_URL}/api/rooms/${id}`);
         
         if (response.data.success && response.data.room) {
@@ -68,10 +140,7 @@ const RoomDetailPage = () => {
       const sidebarHeight = sidebar.offsetHeight;
       const windowHeight = window.innerHeight;
 
-      // Start sticky behavior when sidebar reaches top of viewport
       const shouldBeSticky = scrollTop > contentTop - 100;
-      
-      // Stop sticky when we reach the bottom of the content
       const contentBottom = contentTop + contentHeight;
       const shouldStopSticky = scrollTop + windowHeight > contentBottom + 100;
 
@@ -81,7 +150,6 @@ const RoomDetailPage = () => {
     window.addEventListener('scroll', handleScroll);
     window.addEventListener('resize', handleScroll);
     
-    // Initial calculation
     handleScroll();
 
     return () => {
@@ -104,8 +172,10 @@ const RoomDetailPage = () => {
     setCurrentImage(index);
   };
 
-  const handleReserve = () => {
-    navigate(`/rooms/${id}/book`);
+  const handleReserve = (e) => {
+    e.preventDefault();
+    console.log("Reserved:", selectedDates, guestData);
+    // Add your reservation logic here
   };
 
   // Normalize images similar to RoomCard
@@ -117,7 +187,7 @@ const RoomDetailPage = () => {
     return [];
   })();
 
-  // Mock amenities data (in real app, this would come from the API)
+  // Mock amenities data
   const amenities = [
     { icon: <FaWifi />, name: "WiFi", category: "Essentials" },
     { icon: <FaCar />, name: "Free parking", category: "Essentials" },
@@ -317,6 +387,9 @@ const RoomDetailPage = () => {
               </div>
               <button className="show-all-amenities">Show all amenities</button>
             </div>
+           
+           {/* Booking Calendar */}
+           <Calendar onDateSelect={setSelectedDates} />
 
             {/* Reviews Section */}
             <div className="reviews-section">
@@ -361,68 +434,198 @@ const RoomDetailPage = () => {
             </div>
           </div>
 
-          {/* Booking Sidebar */}
-          <div 
-            className={`booking-sidebar ${isSticky ? 'sticky' : ''}`}
+          {/* ✅ Booking Sidebar ---------- */}
+          <div
+            className={`booking-sidebar ${isSticky ? "sticky" : ""}`}
             ref={sidebarRef}
           >
             <div className="booking-card">
+              {/* ✅ Price section */}
               <div className="price-section">
-                <span className="price">₹{room.price?.toLocaleString?.() || room.price}</span>
+                <span className="price">₹{room.price?.toLocaleString?.()}</span>
                 <span className="price-period">per night</span>
               </div>
-              
-              <div className="booking-form">
+
+              {/* ✅ Booking form */}
+              <form className="booking-form" onSubmit={handleReserve}>
+                {/* Dates */}
                 <div className="date-inputs">
                   <div className="date-input">
-                    <label>CHECK-IN</label>
-                    <input type="date" />
+                    <label htmlFor="checkin-date">CHECK-IN</label>
+                    <input
+                      id="checkin-date"
+                      type="date"
+                      value={formatDateForInput(selectedDates.checkIn)}
+                      min={formatDateForInput(new Date())}
+                      onChange={(e) =>
+                        setSelectedDates((prev) => ({
+                          ...prev,
+                          checkIn: parseInputDate(e.target.value),
+                        }))
+                      }
+                    />
                   </div>
                   <div className="date-input">
-                    <label>CHECKOUT</label>
-                    <input type="date" />
+                    <label htmlFor="checkout-date">CHECKOUT</label>
+                    <input
+                      id="checkout-date"
+                      type="date"
+                      value={formatDateForInput(selectedDates.checkOut)}
+                      min={formatDateForInput(selectedDates.checkIn)}
+                      onChange={(e) =>
+                        setSelectedDates((prev) => ({
+                          ...prev,
+                          checkOut: parseInputDate(e.target.value),
+                        }))
+                      }
+                    />
                   </div>
                 </div>
-                
-                <div className="guests-input">
-                  <label>GUESTS</label>
-                  <select>
-                    {Array.from({ length: room.guests || 4 }, (_, i) => (
-                      <option key={i + 1} value={i + 1}>
-                        {i + 1} {i === 0 ? 'guest' : 'guests'}
-                      </option>
-                    ))}
-                  </select>
+
+                {/* Guests Input Section with Dropdown */}
+                <div className={`guests-input-section ${isGuestDropdownOpen ? 'dropdown-open' : ''}`}>
+                  <label htmlFor="guests-trigger">GUESTS</label>
+                  <button 
+                    id="guests-trigger"
+                    type="button"
+                    className="guests-trigger"
+                    onClick={() => setIsGuestDropdownOpen(!isGuestDropdownOpen)}
+                  >
+                    {getGuestDisplayText()}
+                  </button>
+
+                  {/* Guest Dropdown */}
+                  {isGuestDropdownOpen && (
+                    <div className="guest-dropdown">
+                      {/* Adults */}
+                      <div className="guest-option">
+                        <div className="guest-type-info">
+                          <div className="guest-type-name">Adults</div>
+                          <div className="guest-type-description">Age 13+</div>
+                        </div>
+                        <div className="guest-counter">
+                          <button 
+                            className="counter-btn" 
+                            onClick={() => handleDecrement('adults')}
+                            disabled={guestData.adults <= 0}
+                          >
+                            −
+                          </button>
+                          <span className="counter-value">{guestData.adults}</span>
+                          <button 
+                            className="counter-btn" 
+                            onClick={() => handleIncrement('adults')}
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Children */}
+                      <div className="guest-option">
+                        <div className="guest-type-info">
+                          <div className="guest-type-name">Children</div>
+                          <div className="guest-type-description">Ages 2-12</div>
+                        </div>
+                        <div className="guest-counter">
+                          <button 
+                            className="counter-btn" 
+                            onClick={() => handleDecrement('children')}
+                            disabled={guestData.children <= 0}
+                          >
+                            −
+                          </button>
+                          <span className="counter-value">{guestData.children}</span>
+                          <button 
+                            className="counter-btn" 
+                            onClick={() => handleIncrement('children')}
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Infants */}
+                      <div className="guest-option">
+                        <div className="guest-type-info">
+                          <div className="guest-type-name">Infants</div>
+                          <div className="guest-type-description">Under 2</div>
+                        </div>
+                        <div className="guest-counter">
+                          <button 
+                            className="counter-btn" 
+                            onClick={() => handleDecrement('infants')}
+                            disabled={guestData.infants <= 0}
+                          >
+                            −
+                          </button>
+                          <span className="counter-value">{guestData.infants}</span>
+                          <button 
+                            className="counter-btn" 
+                            onClick={() => handleIncrement('infants')}
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Pets */}
+                      <div className="guest-option">
+                        <div className="guest-type-info">
+                          <div className="guest-type-name">Pets</div>
+                          <div className="guest-type-description">Bringing a service animal?</div>
+                        </div>
+                        <div className="guest-counter">
+                          <button 
+                            className="counter-btn" 
+                            onClick={() => handleDecrement('pets')}
+                            disabled={guestData.pets <= 0}
+                          >
+                            −
+                          </button>
+                          <span className="counter-value">{guestData.pets}</span>
+                          <button 
+                            className="counter-btn" 
+                            onClick={() => handleIncrement('pets')}
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Info Text */}
+                      <div className="guest-dropdown-info">
+                        <p>This place has a maximum of {maxGuests} guests, not including <br /> infants. If you're bringing more than 2 pets, please let <br /> your Host know..</p>
+                      </div>
+
+                        {/* Close Text with Underline */}
+                         <div className="guest-dropdown-footer">
+                           <span 
+                        className="close-text" 
+                        onClick={() => setIsGuestDropdownOpen(false)}
+                         >
+                           Close
+                         </span>
+                            </div>
+
+                    
+                      </div>
+
+                    
+                  )}
                 </div>
-                
-                <button className="reserve-button" onClick={handleReserve}>Reserve</button>
-                
+
+                {/* Reserve Button */}
+                <button type="submit" className="reserve-button">
+                  Reserve
+                </button>
                 <p className="booking-note">You won't be charged yet</p>
-              </div>
-              
-              <div className="price-breakdown">
-                <div className="price-item">
-                  <span>₹{room.price?.toLocaleString?.() || room.price} × {room.nights || 3} nights</span>
-                  <span>₹{((room.price || 0) * (room.nights || 3))?.toLocaleString?.()}</span>
-                </div>
-                <div className="price-item">
-                  <span>Cleaning fee</span>
-                  <span>₹500</span>
-                </div>
-                <div className="price-item">
-                  <span>Service fee</span>
-                  <span>₹800</span>
-                </div>
-                <div className="price-item total">
-                  <span>Total</span>
-                  <span>₹{(((room.price || 0) * (room.nights || 3)) + 500 + 800)?.toLocaleString?.()}</span>
-                </div>
-              </div>
+              </form>
             </div>
           </div>
         </div>
       </div>
-      
+            
       <Footer />
     </>
   );
