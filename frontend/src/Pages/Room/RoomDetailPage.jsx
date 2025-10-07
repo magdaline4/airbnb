@@ -439,7 +439,7 @@ const RoomDetailPage = () => {
               <h2>What this place offers</h2>
               <div className="amenities-grid">
                 {room.amenities && room.amenities.length > 0
-                  ? room.amenities.map((amenity, index) => (
+                  ? room.amenities.item.map((amenity, index) => (
                       <div key={index} className="amenity-item">
                         <span>{amenity}</span>
                       </div>
