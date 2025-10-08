@@ -114,11 +114,11 @@
         position: absolute;
         top: 10px;
         left: 10px;
-        right: -8px;
         display: flex;
         justify-content: space-between;
         align-items: center;
         z-index: 2;
+        gap: 28px;
       }
 
       .badge {
