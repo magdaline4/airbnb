@@ -1,8 +1,8 @@
 // RoomDetailPage.jsx
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchRoomById, clearCurrentRoom } from "../../features/roomsSlice";
+import axios from "axios";
+import "./RoomDetailPage.scss";
 import {
   FaHeart,
   FaShare,
@@ -17,13 +17,18 @@ import {
   FaFire,
   FaTv,
   FaPaw,
+  FaBed,
+  FaBath,
+  FaRuler,
 } from "react-icons/fa";
 import { MdLocationOn, MdVerified } from "react-icons/md";
 import Navbar from "../../Components/Navbar/Navbar";
 import Footer from "../../Components/Footer/Footer";
+import Amenties from "../../Components/Amenties/Amenties";
 import Calendar from "../../Components/BookingCalendar/Calendar";
+import Imgcard from "../../Components/RoomCard/Imgcard/Imgcard";
 import DatePicker from "../../Components/BookingCalendar/DatePicker";
-import "../Room/RoomDetailPage.scss";
+import "../../Components/BookingCalendar/DatePicker.scss";
 
 const RoomDetailPage = () => {
   const { id } = useParams();
@@ -37,6 +42,9 @@ const RoomDetailPage = () => {
   // UI state
   const [currentImage, setCurrentImage] = useState(0);
   const [isSticky, setIsSticky] = useState(false);
+  const [showServiceAnimalPopup, setShowServiceAnimalPopup] = useState(false);
+
+  // Guest dropdown state
   const [isGuestDropdownOpen, setIsGuestDropdownOpen] = useState(false);
   const [guestData, setGuestData] = useState({
     adults: 2,
@@ -44,27 +52,148 @@ const RoomDetailPage = () => {
     infants: 1,
     pets: 0,
   });
+
   const [selectedDates, setSelectedDates] = useState({
     checkIn: new Date(),
     checkOut: new Date(Date.now() + 24 * 60 * 60 * 1000),
   });
-  const [showServiceAnimalPopup, setShowServiceAnimalPopup] = useState(false);
 
   const sidebarRef = useRef(null);
   const contentRef = useRef(null);
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const maxGuests = room?.guests || 10;
+  const totalGuests = guestData.adults + guestData.children;
 
-  // Fetch room on mount and clear on unmount
+  // Utility functions
+  const formatDateForInput = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const parseInputDate = (dateString) => {
+    const [year, month, day] = dateString.split("-").map(Number);
+    return new Date(year, month - 1, day);
+  };
+
+  const formatCurrency = (amount) => {
+    if (typeof amount !== 'number') {
+      amount = parseFloat(amount) || 0;
+    }
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  const calculateNights = () => {
+    if (!selectedDates.checkIn || !selectedDates.checkOut) return 0;
+    
+    const checkIn = new Date(selectedDates.checkIn);
+    const checkOut = new Date(selectedDates.checkOut);
+    const timeDiff = checkOut.getTime() - checkIn.getTime();
+    const nights = Math.ceil(timeDiff / (1000 * 3600 * 24));
+    
+    return nights > 0 ? nights : 0;
+  };
+
+  const calculateTotalPrice = () => {
+    const nights = calculateNights();
+    const basePrice = room?.price || 0;
+    const cleaningFee = 50;
+    const serviceFee = 25;
+    
+    return (basePrice * nights) + cleaningFee + serviceFee;
+  };
+
+  // Guest counter functions
+  const handleIncrement = (type) => {
+    setGuestData((prev) => ({
+      ...prev,
+      [type]: prev[type] + 1,
+    }));
+  };
+
+  const handleDecrement = (type) => {
+    setGuestData((prev) => ({
+      ...prev,
+      [type]: Math.max(0, prev[type] - 1),
+    }));
+  };
+
+  const getGuestDisplayText = () => {
+    const { adults, children, infants, pets } = guestData;
+    const total = adults + children;
+
+    let text = `${total} guest${total !== 1 ? "s" : ""}`;
+    if (infants > 0) {
+      text += `, ${infants} infant${infants !== 1 ? "s" : ""}`;
+    }
+    if (pets > 0) {
+      text += `, ${pets} pet${pets !== 1 ? "s" : ""}`;
+    }
+
+    return text;
+  };
+
+  // Close dropdown when clicking outside
   useEffect(() => {
-    if (id) dispatch(fetchRoomById(id));
-    return () => dispatch(clearCurrentRoom());
-  }, [dispatch, id]);
+    const handleClickOutside = (event) => {
+      if (
+        isGuestDropdownOpen &&
+        !event.target.closest(".guests-input-section")
+      ) {
+        setIsGuestDropdownOpen(false);
+      }
+    };
 
-  // Sticky sidebar
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isGuestDropdownOpen]);
+
+  useEffect(() => {
+    const fetchRoomDetails = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/api/rooms/${id}`);
+
+        if (response.data.success && response.data.room) {
+          setRoom(response.data.room);
+        } else {
+          setError("Room not found");
+        }
+      } catch (err) {
+        console.error("Error fetching room details:", err);
+        if (err.response?.status === 404) {
+          setError("Room not found");
+        } else if (err.response?.status === 400) {
+          setError("Invalid room ID");
+        } else {
+          setError("Failed to load room details");
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchRoomDetails();
+    }
+  }, [id]);
+
+  // Sticky sidebar behavior
   useEffect(() => {
     const handleScroll = () => {
       if (!sidebarRef.current || !contentRef.current) return;
+
+      const sidebar = sidebarRef.current;
+      const content = contentRef.current;
       const scrollTop = window.pageYOffset;
       const contentTop = contentRef.current.offsetTop;
       const contentHeight = contentRef.current.offsetHeight;
@@ -76,42 +205,39 @@ const RoomDetailPage = () => {
 
       setIsSticky(shouldBeSticky && !shouldStopSticky);
     };
+
     window.addEventListener("scroll", handleScroll);
     window.addEventListener("resize", handleScroll);
+
     handleScroll();
+
     return () => {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleScroll);
     };
   }, [room]);
 
-  // Guests counter
-  const handleIncrement = (type) =>
-    setGuestData((prev) => ({ ...prev, [type]: prev[type] + 1 }));
-  const handleDecrement = (type) =>
-    setGuestData((prev) => ({ ...prev, [type]: Math.max(0, prev[type] - 1) }));
-
-  const getGuestDisplayText = () => {
-    const { adults, children, infants, pets } = guestData;
-    const total = adults + children;
-    let text = `${total} guest${total !== 1 ? "s" : ""}`;
-    if (infants) text += `, ${infants} infant${infants !== 1 ? "s" : ""}`;
-    if (pets) text += `, ${pets} pet${pets !== 1 ? "s" : ""}`;
-    return text;
+  const handlePrevImage = () => {
+    if (!images.length) return;
+    setCurrentImage((prev) => (prev === 0 ? images.length - 1 : prev - 1));
   };
 
-  // Close dropdown on outside click
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (isGuestDropdownOpen && !event.target.closest(".guests-input-section")) {
-        setIsGuestDropdownOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isGuestDropdownOpen]);
+  const handleNextImage = () => {
+    if (!images.length) return;
+    setCurrentImage((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  };
 
-  // Normalize images (safe with room possibly null)
+  const handleImageClick = (index) => {
+    setCurrentImage(index);
+  };
+
+  const handleReserve = (e) => {
+    e.preventDefault();
+    console.log("Reserved:", selectedDates, guestData);
+    // Add your reservation logic here
+  };
+
+  // Normalize images similar to RoomCard
   const images = (() => {
     if (!room) return [];
     if (Array.isArray(room.images)) return room.images;
@@ -120,133 +246,67 @@ const RoomDetailPage = () => {
     return [];
   })();
 
-  useEffect(() => {
-    // whenever room or images change, reset image index
-    setCurrentImage(0);
-  }, [room]);
+  // Mock amenities data
+  const amenities = [
+    { icon: <FaWifi />, name: "WiFi", category: "Essentials" },
+    { icon: <FaCar />, name: "Free parking", category: "Essentials" },
+    { icon: <FaUtensils />, name: "Kitchen", category: "Kitchen" },
+    { icon: <FaSwimmingPool />, name: "Pool", category: "Facilities" },
+    { icon: <FaSnowflake />, name: "Air conditioning", category: "Climate" },
+    { icon: <FaFire />, name: "Heating", category: "Climate" },
+    { icon: <FaTv />, name: "TV", category: "Entertainment" },
+    { icon: <FaPaw />, name: "Pet friendly", category: "Safety" },
+  ];
 
-  const handlePrevImage = (e) => {
-    e?.stopPropagation();
-    if (!images.length) return;
-    setCurrentImage((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-  };
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <div className="room-detail-loading">
+          <div className="loading-spinner">Loading room details...</div>
+        </div>
+      </>
+    );
+  }
 
-  const handleNextImage = (e) => {
-    e?.stopPropagation();
-    if (!images.length) return;
-    setCurrentImage((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-  };
-
-  const handleImageClick = (index) => setCurrentImage(index);
-
-  // Booking calculations
-  const calculateNights = () => {
-    try {
-      const nights = Math.ceil(
-        (selectedDates.checkOut - selectedDates.checkIn) / (1000 * 3600 * 24)
-      );
-      return nights > 0 ? nights : 1;
-    } catch {
-      return 1;
-    }
-  };
-
-  const calculateTotalPrice = () => (room?.price || 0) * calculateNights();
-
-  const formatCurrency = (amount) => `₹${amount?.toLocaleString?.() || 0}`;
-
-  // Date helpers (used by native date inputs)
-  const formatDateForInput = (date) => {
-    if (!date) return "";
-    const d = new Date(date);
-    return d.toISOString().split("T")[0];
-  };
-  const parseInputDate = (dateString) => new Date(dateString);
-
-  // Map/location display guard (avoid rendering object directly)
-  const renderLocationText = () => {
-    if (!room?.location) return "Shenoy Nagar, Chennai";
-    if (typeof room.location === "string") return room.location;
-    if (typeof room.location === "object") {
-      const { lat, lng } = room.location;
-      if (lat !== undefined && lng !== undefined) return `Lat: ${lat}, Lng: ${lng}`;
-      return JSON.stringify(room.location);
-    }
-    return String(room.location);
-  };
-
-  const handleReserve = (e) => {
-    e.preventDefault();
-    navigate("/booking");
-  };
-
-  // Loading / error guards
-  if (loading) return (
-    <>
-      <Navbar />
-      <div className="room-detail-loading">
-        <div className="loading-spinner">Loading room details...</div>
-      </div>
-    </>
-  );
-  
-  if (error || !room) return (
-    <>
-      <Navbar />
-      <div className="room-detail-error">
-        <h2>{error || "Room not found"}</h2>
-        <button onClick={() => navigate("/rooms")} className="back-button">
-          Back to rooms
-        </button>
-      </div>
-    </>
-  );
+  if (error || !room) {
+    return (
+      <>
+        <Navbar />
+        <div className="room-detail-error">
+          <h2>Room not found</h2>
+          <p>{error || "The room you're looking for doesn't exist."}</p>
+          <button onClick={() => navigate("/rooms")} className="back-button">
+            Back to rooms
+          </button>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
       <Navbar />
+
       <div className="room-detail-page">
         {/* Image Gallery */}
         <div className="image-gallery">
-          <div className="main-image-container">
-            <img
-              src={images[currentImage] || "https://via.placeholder.com/800x600"}
-              alt={`${room.title || "Room"} - Image ${currentImage + 1}`}
-              className="main-image"
-            />
-            {images.length > 1 && (
-              <>
-                <button className="image-nav prev" onClick={handlePrevImage}>
-                  <FaChevronLeft />
-                </button>
-                <button className="image-nav next" onClick={handleNextImage}>
-                  <FaChevronRight />
-                </button>
-                <div className="image-counter">
-                  {currentImage + 1}/{images.length}
-                </div>
-              </>
-            )}
+          <div className="main-image">
+            <img src={images[0]} alt="Main" />
           </div>
 
-          {images.length > 1 && (
-            <div className="thumbnail-grid">
-              {images.slice(0, 5).map((img, i) => (
-                <div
-                  key={i}
-                  className={`thumbnail ${i === currentImage ? "active" : ""}`}
-                  onClick={() => handleImageClick(i)}
-                >
-                  <img src={img} alt={`Thumb ${i + 1}`} />
-                </div>
-              ))}
-              {images.length > 5 && (
-                <div className="thumbnail show-all">
-                  <span>+{images.length - 5} more</span>
-                </div>
-              )}
-            </div>
-          )}
+          <div className="side-images">
+            {images.slice(1, 5).map((img, idx) => (
+              <div key={idx} className="side-image">
+                <img src={img} alt={`img-${idx}`} />
+                {idx === 3 && (
+                  <div className="overlay">
+                    <button className="show-button"> Show all photos</button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Main Content */}
@@ -364,27 +424,9 @@ const RoomDetailPage = () => {
             </div>
 
             {/* Amenities */}
-            <div className="amenities-section">
-              <h2>What this place offers</h2>
-              <div className="amenities-grid">
-                {(room.amenities?.length ? room.amenities : [
-                  { icon: <FaWifi />, name: "WiFi" },
-                  { icon: <FaCar />, name: "Parking" },
-                  { icon: <FaUtensils />, name: "Kitchen" },
-                  { icon: <FaSwimmingPool />, name: "Pool" },
-                  { icon: <FaSnowflake />, name: "AC" },
-                  { icon: <FaFire />, name: "Heating" },
-                  { icon: <FaTv />, name: "TV" },
-                  { icon: <FaPaw />, name: "Pets" },
-                ]).map((amenity, index) => (
-                  <div key={index} className="amenity-item">
-                    {amenity.icon} {amenity.name}
-                  </div>
-                ))}
-              </div>
-            </div>
+            <Amenties />
 
-            {/* Calendar */}
+            {/* Booking Calendar */}
             <Calendar onDateSelect={setSelectedDates} />
 
             {/* Reviews */}
@@ -441,20 +483,30 @@ const RoomDetailPage = () => {
             ref={sidebarRef}
           >
             <div className="booking-card">
+              {/* ✅ Price section with dynamic calculation */}
               <div className="price-section">
-                <div className="price-display">
-                  <span className="price">
-                    {formatCurrency(calculateTotalPrice())}
-                  </span>
-                  <span className="price-details">
-                    for {calculateNights()} night{calculateNights() > 1 ? "s" : ""}
-                  </span>
-                </div>
+                {selectedDates.checkIn && selectedDates.checkOut ? (
+                  // Show total price when dates are selected
+                  <div className="price-display">
+                    <span className="price">
+                      {formatCurrency(calculateTotalPrice())}
+                    </span>
+                    <span className="price-details">
+                      for {calculateNights()} night{calculateNights() !== 1 ? "s" : ""}
+                    </span>
+                  </div>
+                ) : (
+                  // Show per night price when no dates selected
+                  <div className="price-display">
+                    <span className="price">{formatCurrency(room?.price)}</span>
+                    <span className="price-period"> per night</span>
+                  </div>
+                )}
               </div>
 
-              {/* Booking form */}
+              {/* ✅ Booking form */}
               <form className="booking-form" onSubmit={handleReserve}>
-                {/* DatePicker */}
+                {/* DatePicker - Works with Calendar component via shared selectedDates state */}
                 <DatePicker
                   checkIn={selectedDates.checkIn}
                   checkOut={selectedDates.checkOut}
@@ -466,7 +518,7 @@ const RoomDetailPage = () => {
                   }
                 />
 
-                {/* Guests Input Section */}
+                {/* Guests Input Section with Dropdown */}
                 <div
                   className={`guests-input-section ${
                     isGuestDropdownOpen ? "dropdown-open" : ""
@@ -515,7 +567,9 @@ const RoomDetailPage = () => {
                       <div className="guest-option">
                         <div className="guest-type-info">
                           <div className="guest-type-name">Children</div>
-                          <div className="guest-type-description">Ages 2-12</div>
+                          <div className="guest-type-description">
+                            Ages 2-12
+                          </div>
                         </div>
                         <div className="guest-counter">
                           <button
@@ -594,7 +648,7 @@ const RoomDetailPage = () => {
                         </div>
                       </div>
 
-                      {/* Service Animal Popup */}
+                      {/* Service Animal Popup - Minimal Version */}
                       {showServiceAnimalPopup && (
                         <div
                           className="popup-overlay"
@@ -604,6 +658,7 @@ const RoomDetailPage = () => {
                             className="popup-content"
                             onClick={(e) => e.stopPropagation()}
                           >
+                            {/* Close button in top-left corner */}
                             <div className="popup-header">
                               <button
                                 className="popup-close"
@@ -612,6 +667,8 @@ const RoomDetailPage = () => {
                                 &times;
                               </button>
                             </div>
+
+                            {/* Scrollable content */}
                             <div className="popup-scrollable">
                               <div className="popup-body">
                                 <img
@@ -620,10 +677,12 @@ const RoomDetailPage = () => {
                                 />
                                 <h3>Service animals</h3>
                                 <p className="popup-main-text">
-                                  Service animals aren't pets, so there's no need to add them here.
+                                  Service animals aren't pets, so there's no
+                                  need to add them here.
                                 </p>
                                 <p className="popup-secondary-text">
-                                  Travelling with an emotional support animal? Check out our{" "}
+                                  Travelling with an emotional support animal?
+                                  Check out our{" "}
                                   <Link to="/accessibility">
                                     <span>accessibility policy.</span>
                                   </Link>
@@ -637,13 +696,13 @@ const RoomDetailPage = () => {
                       {/* Info Text */}
                       <div className="guest-dropdown-info">
                         <p>
-                          This place has a maximum of {maxGuests} guests, not including <br /> 
-                          infants. If you're bringing more than 2 pets, please let <br /> 
-                          your Host know.
+                          This place has a maximum of {maxGuests} guests, not
+                          including <br /> infants. If you're bringing more than
+                          2 pets, please let <br /> your Host know.
                         </p>
                       </div>
 
-                      {/* Close Text */}
+                      {/* Close Text with Underline */}
                       <div className="guest-dropdown-footer">
                         <span
                           className="close-text"
@@ -670,6 +729,7 @@ const RoomDetailPage = () => {
       </div>
 
       <Footer />
+      <Imgcard />
     </>
   );
 };
