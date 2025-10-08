@@ -1,89 +1,34 @@
 .room-detail-page {
-  padding-top: 80px; // Account for fixed navbar
+  // Account for fixed navbar
   font-size: var(--typography-body-text_16_20-font-size);
+  font-size: 1rem !important;
   .image-gallery {
-    position: relative;
-    margin-bottom: 2rem;
+    display: flex;
+    gap: 8px;
+    margin-top: 180px;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    .main-image {
+      flex: 1;
 
-    .main-image-container {
-      position: relative;
-      height: 60vh;
-      overflow: hidden;
-      border-radius: 0 0 20px 20px;
-
-      .main-image {
+      img {
         width: 100%;
         height: 100%;
         object-fit: cover;
-      }
-
-      .image-nav {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        background: rgba(255, 255, 255, 0.9);
-        border: none;
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        font-size: 16px;
-        color: #333;
-        transition: all 0.2s ease;
-
-        &:hover {
-          background: white;
-          transform: translateY(-50%) scale(1.1);
-        }
-
-        &.prev {
-          left: 20px;
-        }
-
-        &.next {
-          right: 20px;
-        }
-      }
-
-      .image-counter {
-        position: absolute;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: rgba(0, 0, 0, 0.7);
-        color: white;
-        padding: 8px 16px;
-        border-radius: 20px;
-        font-size: 14px;
+        border-radius: 12px 0 0 12px;
       }
     }
 
-    .thumbnail-grid {
-      display: flex;
+    .side-images {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
       gap: 8px;
-      padding: 20px 48px;
-      overflow-x: auto;
 
-      .thumbnail {
-        flex-shrink: 0;
-        width: 80px;
-        height: 80px;
-        border-radius: 8px;
-        overflow: hidden;
-        cursor: pointer;
-        border: 2px solid transparent;
-        transition: all 0.2s ease;
-
-        &.active {
-          border-color: #333;
-        }
-
-        &:hover {
-          border-color: #666;
-        }
+      .side-image {
+        position: relative;
 
         img {
           width: 100%;
@@ -91,14 +36,24 @@
           object-fit: cover;
         }
 
-        &.show-all {
-          background: rgba(0, 0, 0, 0.7);
-          color: white;
+        .overlay {
+          position: absolute;
+          inset: 0;
+          top: 160px;
+          left: 130;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 12px;
-          font-weight: 600;
+          border-radius: 0 0 12px 0;
+
+          .show-button {
+            background: white;
+            padding: 10px 18px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+          }
         }
       }
     }
@@ -508,7 +463,6 @@
           .price {
             font-size: 1.5rem;
             font-weight: 600;
-            text-decoration: underline;
           }
 
           .price-period {
@@ -533,10 +487,10 @@
 
               label {
                 display: block;
-                font-size: 13px;
+                font-size: 12px;
                 font-weight: 600;
                 margin-bottom: 4px;
-                color: black;
+                color: #333;
               }
 
               input {
@@ -616,27 +570,18 @@
               justify-content: space-between;
               align-items: center;
               padding: 12px 0;
-              
 
               .guest-type-info {
                 .guest-type-name {
                   font-weight: 600;
-                  font-size: 15px;
-                  color: black;
+                  font-size: 14px;
+                  color: #222;
                   margin-bottom: 2px;
                 }
 
                 .guest-type-description {
-                  font-size: 14px;
-                  color: black;
-                  
-                  &.clickable {
-                    
-                    cursor: pointer;
-                    text-decoration: underline;
-                    
-                    
-                  }
+                  font-size: 12px;
+                  color: #666;
                 }
               }
 
@@ -682,8 +627,6 @@
             .guest-dropdown-info {
               margin-top: 2px;
               padding-top: 12px;
-              
-             
 
               p {
                 display: flex;
@@ -691,27 +634,20 @@
 
                 font-size: 11px;
                 line-height: 1.4;
-                font-weight: 500;
                 color: #151515;
                 justify-content: center;
                 text-wrap: nowrap;
               }
-            
             }
             .guest-dropdown-footer {
               padding: 16px;
               display: flex;
               justify-content: flex-end;
-              
 
               .close-text {
                 color: #222;
                 text-decoration: underline;
                 cursor: pointer;
-                font-size: 16px;
-                font-weight: 600;
-                transition: color 0.2s;
-                
                 font-size: 18px;
                 font-weight: 600;
                 transition: color 0.2s;
@@ -750,22 +686,23 @@
       }
     }
   }
-  
 }
 
-// ========== POPUP STYLES (MOVED TO ROOT LEVEL) ==========
 
+ 
+// ========== POPUP STYLES (MOVED TO ROOT LEVEL) ==========
+ 
 // Clickable text style
 .guest-type-description.clickable {
   color: #0066cc;
   cursor: pointer;
   text-decoration: underline;
-  
+ 
   &:hover {
     color: #004499;
   }
 }
-
+ 
 // Popup Styles for Minimal Version
 .popup-overlay {
   position: fixed;
@@ -780,7 +717,7 @@
   z-index: 10000;
   padding: 20px;
 }
-
+ 
 .popup-content {
   background: white;
   border-radius: 25px;
@@ -793,7 +730,7 @@
   display: flex;
   flex-direction: column;
 }
-
+ 
 @keyframes popupSlideIn {
   from {
     opacity: 0;
@@ -804,12 +741,12 @@
     transform: translateY(0);
   }
 }
-
+ 
 .popup-header {
   padding: 6px 9px;
   display: flex;
   align-items: center;
-  
+ 
   .popup-close {
     background: none;
     border: none;
@@ -824,23 +761,23 @@
     justify-content: center;
     transition: all 0.2s ease;
     padding: 0;
-    
+   
     &:hover {
       background-color: #f7f7f7;
       color: #333;
     }
   }
 }
-
+ 
 .popup-scrollable {
   flex: 1;
   overflow-y: auto;
-  
+ 
 }
-
+ 
 .popup-body {
   padding: 2px 24px;
-  
+ 
   h3 {
     margin: 0 0 16px 0;
     font-size: 22px;
@@ -855,7 +792,7 @@
       margin-bottom: 20px;
    
     }
-  
+ 
   .popup-main-text {
     margin: 0 0 16px 0;
     font-size: 15px;
@@ -864,7 +801,7 @@
     font-weight: 400;
    
   }
-  
+ 
   .popup-secondary-text {
     margin: 0;
     font-size: 15px;
@@ -880,25 +817,27 @@
    
   }
 }
-
+ 
 // Scrollbar styling (in case content grows)
 .popup-scrollable::-webkit-scrollbar {
   width: 6px;
 }
-
+ 
 .popup-scrollable::-webkit-scrollbar-track {
   background: #f1f1f1;
   border-radius: 3px;
 }
-
+ 
 .popup-scrollable::-webkit-scrollbar-thumb {
   background: #c1c1c1;
   border-radius: 3px;
 }
-
+ 
 .popup-scrollable::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
 }
+ 
+ 
 
 // Loading and Error States
 .room-detail-loading,
@@ -994,33 +933,6 @@
         }
       }
     }
-  }
-  
-  // Responsive for popup
-  .popup-overlay {
-    padding: 10px;
-  }
-  
-  .popup-content {
-    max-width: 100%;
-    max-height: 90vh;
-  }
-  
-  .popup-body {
-    padding: 20px;
-    
-    h3 {
-      font-size: 20px;
-    }
-    
-    .popup-main-text,
-    .popup-secondary-text {
-      font-size: 15px;
-    }
-  }
-  
-  .popup-scrollable {
-    max-height: calc(90vh - 73px);
   }
 }
 
