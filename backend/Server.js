@@ -11,6 +11,7 @@ const errorHandler = require('./middleware/errorHandler');
 const listingRoutes = require("./routes/listings.js");
 const roomsRoutes = require("./routes/rooms.js");
 const amenitiesRoutes = require('./routes/amenities');
+const amenitiesitemRoutes = require('./routes/amenitiesItem.js');
 
 const app = express();
 
@@ -36,6 +37,7 @@ connectDB();
 app.use("/api/listings", listingRoutes);
 app.use("/api/rooms", roomsRoutes);
 app.use('/api/amenities', amenitiesRoutes);
+app.use('/api/amenitiesitem', amenitiesitemRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
