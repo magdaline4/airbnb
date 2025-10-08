@@ -1,6 +1,7 @@
 // RoomDetailPage.jsx
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
 import "./RoomDetailPage.scss";
 import {
@@ -26,16 +27,16 @@ import Navbar from "../../Components/Navbar/Navbar";
 import Footer from "../../Components/Footer/Footer";
 import Amenties from "../../Components/Amenties/Amenties";
 import Calendar from "../../Components/BookingCalendar/Calendar";
-import Imgcard from "../../Components/RoomCard/Imgcard/Imgcard";
 import DatePicker from "../../Components/BookingCalendar/DatePicker";
 import "../../Components/BookingCalendar/DatePicker.scss";
+import { fetchRoomById, clearCurrentRoom } from "../../features/roomsSlice";
 
 const RoomDetailPage = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // safe selector guard — if state.rooms is undefined fallback to defaults
+  // Redux state
   const roomsState = useSelector((state) => state.rooms) || {};
   const { room = null, loading = false, error = null } = roomsState;
 
@@ -111,6 +112,13 @@ const RoomDetailPage = () => {
     return (basePrice * nights) + cleaningFee + serviceFee;
   };
 
+  const renderLocationText = () => {
+    if (!room?.location) return "Location information not available";
+    return typeof room.location === 'string' 
+      ? room.location 
+      : `${room.location.city || ''}, ${room.location.state || ''}, ${room.location.country || ''}`;
+  };
+
   // Guest counter functions
   const handleIncrement = (type) => {
     setGuestData((prev) => ({
@@ -158,34 +166,17 @@ const RoomDetailPage = () => {
     };
   }, [isGuestDropdownOpen]);
 
+  // Fetch room details using Redux
   useEffect(() => {
-    const fetchRoomDetails = async () => {
-      try {
-        const response = await axios.get(`${API_URL}/api/rooms/${id}`);
-
-        if (response.data.success && response.data.room) {
-          setRoom(response.data.room);
-        } else {
-          setError("Room not found");
-        }
-      } catch (err) {
-        console.error("Error fetching room details:", err);
-        if (err.response?.status === 404) {
-          setError("Room not found");
-        } else if (err.response?.status === 400) {
-          setError("Invalid room ID");
-        } else {
-          setError("Failed to load room details");
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
     if (id) {
-      fetchRoomDetails();
+      dispatch(fetchRoomById(id));
     }
-  }, [id]);
+    
+    // Cleanup when component unmounts
+    return () => {
+      dispatch(clearCurrentRoom());
+    };
+  }, [id, dispatch]);
 
   // Sticky sidebar behavior
   useEffect(() => {
@@ -729,7 +720,6 @@ const RoomDetailPage = () => {
       </div>
 
       <Footer />
-      <Imgcard />
     </>
   );
 };
