@@ -22,8 +22,9 @@ import { MdLocationOn, MdVerified } from "react-icons/md";
 import Navbar from "../../Components/Navbar/Navbar";
 import Footer from "../../Components/Footer/Footer";
 import Calendar from "../../Components/BookingCalendar/Calendar";
-import "./RoomDetailPage.scss";
-
+import DatePicker from "../../Components/BookingCalendar/DatePicker";
+import "../../Components/BookingCalendar/DatePicker.scss"
+ 
 const RoomDetailPage = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
@@ -280,48 +281,201 @@ const RoomDetailPage = () => {
             </div>
           </div>
 
-          {/* Booking Sidebar */}
-          <div className={`booking-sidebar ${isSticky ? "sticky" : ""}`} ref={sidebarRef}>
+          {/* ✅ Booking Sidebar  */}
+
+          <div
+            className={`booking-sidebar ${isSticky ? "sticky" : ""}`}
+            ref={sidebarRef}
+          >
             <div className="booking-card">
               <div className="price-section">
                 <span>{formatCurrency(calculateTotalPrice())} for {calculateNights()} night{calculateNights() > 1 ? "s" : ""}</span>
               </div>
 
-              <form className="booking-form" onSubmit={(e) => e.preventDefault()}>
-                <div className="date-inputs">
-                  <input
-                    type="date"
-                    value={formatDateForInput(selectedDates.checkIn)}
-                    onChange={(e) => setSelectedDates({ ...selectedDates, checkIn: parseInputDate(e.target.value) })}
-                  />
-                  <input
-                    type="date"
-                    value={formatDateForInput(selectedDates.checkOut)}
-                    onChange={(e) => setSelectedDates({ ...selectedDates, checkOut: parseInputDate(e.target.value) })}
-                  />
-                </div>
+    {/* ✅ Booking form */}
+   <form className="booking-form" onSubmit={handleReserve}>
+  
+  {/* DatePicker - Works with Calendar component via shared selectedDates state */}
+  <DatePicker
+    checkIn={selectedDates.checkIn}
+    checkOut={selectedDates.checkOut}
+    onCheckInChange={(date) => setSelectedDates(prev => ({ ...prev, checkIn: date }))}
+    onCheckOutChange={(date) => setSelectedDates(prev => ({ ...prev, checkOut: date }))}
+  />
 
-                {/* Guests */}
-                <div className="guests-input-section">
-                  <button type="button" onClick={() => setIsGuestDropdownOpen(!isGuestDropdownOpen)}>{getGuestDisplayText()}</button>
-                  {isGuestDropdownOpen && (
-                    <div className="guest-dropdown">
-                      {["adults", "children", "infants", "pets"].map((type) => (
-                        <div key={type} className="guest-option">
-                          <span>{type.charAt(0).toUpperCase() + type.slice(1)}</span>
-                          <button onClick={() => handleDecrement(type)} disabled={guestData[type] <= 0}>−</button>
-                          <span>{guestData[type]}</span>
-                          <button onClick={() => handleIncrement(type)}>+</button>
-                        </div>
-                      ))}
-                      <span onClick={() => setIsGuestDropdownOpen(false)}>Close</span>
-                    </div>
-                  )}
-                </div>
+  {/* Guests Input Section with Dropdown */}
+  <div className={`guests-input-section ${isGuestDropdownOpen ? 'dropdown-open' : ''}`}>
+    <label htmlFor="guests-trigger">GUESTS</label>
+    <button 
+      id="guests-trigger"
+      type="button"
+      className="guests-trigger"
+      onClick={() => setIsGuestDropdownOpen(!isGuestDropdownOpen)}
+    >
+      {getGuestDisplayText()}
+    </button>
 
-                <Link to="/booking"><button type="button">Reserve</button></Link>
-                <p>You won't be charged yet</p>
-              </form>
+    {/* Guest Dropdown */}
+    {isGuestDropdownOpen && (
+      <div className="guest-dropdown">
+        {/* Adults */}
+        <div className="guest-option">
+          <div className="guest-type-info">
+            <div className="guest-type-name">Adults</div>
+            <div className="guest-type-description">Age 13+</div>
+          </div>
+          <div className="guest-counter">
+            <button 
+              className="counter-btn" 
+              onClick={() => handleDecrement('adults')}
+              disabled={guestData.adults <= 0}
+            >
+              −
+            </button>
+            <span className="counter-value">{guestData.adults}</span>
+            <button 
+              className="counter-btn" 
+              onClick={() => handleIncrement('adults')}
+            >
+              +
+            </button>
+          </div>
+        </div>
+
+        {/* Children */}
+        <div className="guest-option">
+          <div className="guest-type-info">
+            <div className="guest-type-name">Children</div>
+            <div className="guest-type-description">Ages 2-12</div>
+          </div>
+          <div className="guest-counter">
+            <button 
+              className="counter-btn" 
+              onClick={() => handleDecrement('children')}
+              disabled={guestData.children <= 0}
+            >
+              −
+            </button>
+            <span className="counter-value">{guestData.children}</span>
+            <button 
+              className="counter-btn" 
+              onClick={() => handleIncrement('children')}
+            >
+              +
+            </button>
+          </div>
+        </div>
+
+        {/* Infants */}
+        <div className="guest-option">
+          <div className="guest-type-info">
+            <div className="guest-type-name">Infants</div>
+            <div className="guest-type-description">Under 2</div>
+          </div>
+          <div className="guest-counter">
+            <button 
+              className="counter-btn" 
+              onClick={() => handleDecrement('infants')}
+              disabled={guestData.infants <= 0}
+            >
+              −
+            </button>
+            <span className="counter-value">{guestData.infants}</span>
+            <button 
+              className="counter-btn" 
+              onClick={() => handleIncrement('infants')}
+            >
+              +
+            </button>
+          </div>
+        </div>
+
+        {/* Pets */}
+        <div className="guest-option">
+          <div className="guest-type-info">
+            <div className="guest-type-name">Pets</div>
+            <span 
+              className="guest-type-description clickable"
+              onClick={() => setShowServiceAnimalPopup(true)}
+            >
+              Bringing a service animal?
+            </span>
+          </div>
+          <div className="guest-counter">
+            <button 
+              className="counter-btn" 
+              onClick={() => handleDecrement('pets')}
+              disabled={guestData.pets <= 0}
+            >
+              −
+            </button>
+            <span className="counter-value">{guestData.pets}</span>
+            <button 
+              className="counter-btn" 
+              onClick={() => handleIncrement('pets')}
+            >
+              +
+            </button>
+          </div>
+        </div>
+
+        {/* Service Animal Popup - Minimal Version */}
+        {showServiceAnimalPopup && (
+          <div className="popup-overlay" onClick={() => setShowServiceAnimalPopup(false)}>
+            <div className="popup-content" onClick={(e) => e.stopPropagation()}>
+              {/* Close button in top-left corner */}
+              <div className="popup-header">
+                <button 
+                  className="popup-close" 
+                  onClick={() => setShowServiceAnimalPopup(false)}
+                >
+                  &times;
+                </button>
+              </div>
+              
+              {/* Scrollable content */}
+              <div className="popup-scrollable">
+                <div className="popup-body">
+                  <img src="https://a0.muscache.com/pictures/adafb11b-41e9-49d3-908e-049dfd6934b6.jpg" alt="pet-img" />
+                  <h3>Service animals</h3>
+                  <p className="popup-main-text">
+                    Service animals aren't pets, so there's no need to add them here.
+                  </p>
+                  <p className="popup-secondary-text">
+                    Travelling with an emotional support animal? Check out our <Link to="/accessibility"><span>accessibility policy.</span></Link>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Info Text */}
+        <div className="guest-dropdown-info">
+          <p>This place has a maximum of {maxGuests} guests, not including <br /> infants. If you're bringing more than 2 pets, please let <br /> your Host know.</p>
+        </div>
+
+        {/* Close Text with Underline */}
+        <div className="guest-dropdown-footer">
+          <span 
+            className="close-text" 
+            onClick={() => setIsGuestDropdownOpen(false)}
+          >
+            Close
+          </span>
+        </div>
+      </div>
+    )}
+  </div>
+
+  {/* Reserve Button */}
+    <Link to="/booking">
+    <button type="button" className="reserve-button">
+      Reserve
+    </button>
+    </Link>
+    <p className="booking-note">You won't be charged yet</p>
+    </form>
             </div>
           </div>
         </div>
