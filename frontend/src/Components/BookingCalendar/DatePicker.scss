@@ -1,27 +1,9 @@
+// DatePicker.scss
 
 .date-picker-container {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
   max-width: 650px;
-  padding: 20px;
 
-  .booking-header {
-    margin-bottom: 16px;
-
-    .nights-display {
-      font-size: 24px;
-      font-weight: 400;
-      margin-bottom: 4px;
-
-      .nights-number {
-        font-weight: 600;
-      }
-    }
-
-    .date-display {
-      font-size: 14px;
-      color: #666;
-    }
-  }
 
   .date-inputs-wrapper {
     position: relative;
@@ -29,7 +11,7 @@
 
   .date-inputs-row {
     display: flex;
-    gap: 12px;
+    
   }
 
   .date-input-box {
@@ -86,7 +68,8 @@
   .calendar-dropdown {
     position: absolute;
     top: calc(100% + 8px);
-    left: 0;
+    right: 0;
+    left: auto;
     background: white;
     border: 1px solid #ddd;
     border-radius: 12px;
@@ -94,6 +77,29 @@
     padding: 24px;
     z-index: 1000;
     min-width: 600px;
+
+    // Header info inside calendar
+    .calendar-header-info {
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #eee;
+
+      .nights-display {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 4px;
+        color: #222;
+
+        .nights-number {
+          font-weight: 700;
+        }
+      }
+
+      .date-display {
+        font-size: 14px;
+        color: #717171;
+      }
+    }
 
     .calendar-navigation {
       display: flex;
@@ -104,7 +110,7 @@
       .nav-btn {
         background: white;
         border: 1px solid #ddd;
-        border-radius: 50%;
+        border-radius: 100%;
         width: 32px;
         height: 32px;
         display: flex;
@@ -161,7 +167,7 @@
           background: white;
           cursor: pointer;
           font-size: 14px;
-          border-radius: 50%;
+          border-radius: 100%;
           transition: all 0.2s ease;
           position: relative;
 
@@ -188,11 +194,11 @@
           }
 
           &.check-in {
-            border-radius: 50% 0 0 50%;
+            border-radius: 100%;
           }
 
           &.check-out {
-            border-radius: 0 50% 50% 0;
+            border-radius: 100%;
           }
 
           &.in-range {
@@ -250,6 +256,7 @@
       min-width: 100%;
       left: 0;
       right: 0;
+      max-width: calc(100vw - 40px);
 
       .calendars-container {
         flex-direction: column;

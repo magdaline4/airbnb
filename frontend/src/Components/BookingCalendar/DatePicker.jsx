@@ -1,17 +1,12 @@
-// DatePicker.jsx
+// DatePicker.jsx - REPLACE YOUR CURRENT ONE WITH THIS
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import './DatePicker.scss';
 
-const DatePicker = () => {
+const DatePicker = ({ checkIn, checkOut, onCheckInChange, onCheckOutChange }) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  
-  const [checkIn, setCheckIn] = useState(today);
-  const [checkOut, setCheckOut] = useState(tomorrow);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
   const [selectingCheckIn, setSelectingCheckIn] = useState(true);
@@ -29,6 +24,7 @@ const DatePicker = () => {
   }, []);
 
   const formatDate = (date) => {
+    if (!date) return '';
     return date.toLocaleDateString('en-GB', { 
       day: '2-digit', 
       month: '2-digit', 
@@ -37,6 +33,7 @@ const DatePicker = () => {
   };
 
   const getNights = () => {
+    if (!checkIn || !checkOut) return 1;
     const diff = checkOut - checkIn;
     return Math.ceil(diff / (1000 * 60 * 60 * 24));
   };
@@ -80,58 +77,70 @@ const DatePicker = () => {
     if (!date || date < today) return;
     
     if (selectingCheckIn) {
-      setCheckIn(date);
-      const newCheckOut = new Date(date);
-      newCheckOut.setDate(newCheckOut.getDate() + 1);
-      setCheckOut(newCheckOut);
+      onCheckInChange(date);
+      // Auto set checkout to next day if it's before or same as new checkin
+      if (!checkOut || date >= checkOut) {
+        const nextDay = new Date(date);
+        nextDay.setDate(nextDay.getDate() + 1);
+        onCheckOutChange(nextDay);
+      }
       setSelectingCheckIn(false);
     } else {
       if (date > checkIn) {
-        setCheckOut(date);
+        onCheckOutChange(date);
         setIsCalendarOpen(false);
         setSelectingCheckIn(true);
       } else {
-        setCheckIn(date);
-        const newCheckOut = new Date(date);
-        newCheckOut.setDate(newCheckOut.getDate() + 1);
-        setCheckOut(newCheckOut);
+        onCheckInChange(date);
+        const nextDay = new Date(date);
+        nextDay.setDate(nextDay.getDate() + 1);
+        onCheckOutChange(nextDay);
       }
     }
   };
 
   const isInRange = (date) => {
-    return date && date > checkIn && date < checkOut;
+    if (!date || !checkIn || !checkOut) return false;
+    return date > checkIn && date < checkOut;
   };
 
   const isSelected = (date) => {
-    if (!date) return false;
+    if (!date || !checkIn || !checkOut) return false;
     return date.getTime() === checkIn.getTime() || date.getTime() === checkOut.getTime();
   };
 
   const isCheckIn = (date) => {
-    return date && date.getTime() === checkIn.getTime();
+    if (!date || !checkIn) return false;
+    return date.getTime() === checkIn.getTime();
   };
 
   const isCheckOut = (date) => {
-    return date && date.getTime() === checkOut.getTime();
+    if (!date || !checkOut) return false;
+    return date.getTime() === checkOut.getTime();
   };
 
   const clearCheckIn = (e) => {
     e.stopPropagation();
-    setCheckIn(today);
-    setCheckOut(tomorrow);
+    onCheckInChange(today);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    onCheckOutChange(tomorrow);
   };
 
   const clearCheckOut = (e) => {
     e.stopPropagation();
-    const newCheckOut = new Date(checkIn);
-    newCheckOut.setDate(newCheckOut.getDate() + 1);
-    setCheckOut(newCheckOut);
+    if (checkIn) {
+      const nextDay = new Date(checkIn);
+      nextDay.setDate(nextDay.getDate() + 1);
+      onCheckOutChange(nextDay);
+    }
   };
 
   const clearDates = () => {
-    setCheckIn(today);
-    setCheckOut(tomorrow);
+    onCheckInChange(today);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    onCheckOutChange(tomorrow);
   };
 
   const closeCalendar = () => {
@@ -178,6 +187,7 @@ const DatePicker = () => {
             return (
               <button
                 key={i}
+                type="button"
                 className={`
                   calendar-day 
                   ${!date ? 'empty' : ''} 
@@ -203,15 +213,6 @@ const DatePicker = () => {
 
   return (
     <div className="date-picker-container">
-      <div className="booking-header">
-        <div className="nights-display">
-          <span className="nights-number">{getNights()}</span> night{getNights() !== 1 ? 's' : ''}
-        </div>
-        <div className="date-display">
-          {checkIn.getDate()} {monthNames[checkIn.getMonth()].slice(0, 3)} {checkIn.getFullYear()} - {checkOut.getDate()} {monthNames[checkOut.getMonth()].slice(0, 3)} {checkOut.getFullYear()}
-        </div>
-      </div>
-
       <div className="date-inputs-wrapper" ref={calendarRef}>
         <div className="date-inputs-row">
           <div 
@@ -221,7 +222,7 @@ const DatePicker = () => {
             <label>CHECK-IN</label>
             <div className="date-value">
               {formatDate(checkIn)}
-              <button className="clear-btn" onClick={clearCheckIn}>
+              <button type="button" className="clear-btn" onClick={clearCheckIn}>
                 <X size={16} />
               </button>
             </div>
@@ -234,7 +235,7 @@ const DatePicker = () => {
             <label>CHECKOUT</label>
             <div className="date-value">
               {formatDate(checkOut)}
-              <button className="clear-btn" onClick={clearCheckOut}>
+              <button type="button" className="clear-btn" onClick={clearCheckOut}>
                 <X size={16} />
               </button>
             </div>
@@ -243,8 +244,19 @@ const DatePicker = () => {
 
         {isCalendarOpen && (
           <div className="calendar-dropdown">
+            {/* Nights and Date Display inside calendar */}
+            <div className="calendar-header-info">
+              <div className="nights-display">
+                <span className="nights-number">{getNights()}</span> night{getNights() !== 1 ? 's' : ''}
+              </div>
+              <div className="date-display">
+                {checkIn?.getDate()} {monthNames[checkIn?.getMonth()].slice(0, 3)} {checkIn?.getFullYear()} - {checkOut?.getDate()} {monthNames[checkOut?.getMonth()].slice(0, 3)} {checkOut?.getFullYear()}
+              </div>
+            </div>
+
             <div className="calendar-navigation">
               <button 
+                type="button"
                 onClick={prevMonth} 
                 disabled={isPrevDisabled}
                 className="nav-btn"
@@ -252,6 +264,7 @@ const DatePicker = () => {
                 <ChevronLeft size={20} />
               </button>
               <button 
+                type="button"
                 onClick={nextMonth}
                 className="nav-btn"
               >
@@ -265,10 +278,10 @@ const DatePicker = () => {
             </div>
 
             <div className="calendar-footer">
-              <button className="clear-dates-btn" onClick={clearDates}>
+              <button type="button" className="clear-dates-btn" onClick={clearDates}>
                 Clear dates
               </button>
-              <button className="close-btn" onClick={closeCalendar}>
+              <button type="button" className="close-btn" onClick={closeCalendar}>
                 Close
               </button>
             </div>
