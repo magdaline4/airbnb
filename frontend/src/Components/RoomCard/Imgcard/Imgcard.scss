@@ -1,0 +1,124 @@
+$image-nav-bg: rgba(0, 0, 0, 0.4);
+$primary-color: #007bff;
+$thumb-bg: #eee;
+$gallery-bg: white;
+
+.image-gallery {
+  width: 100%;
+  margin: auto;
+
+  .main-image-container {
+    position: relative;
+
+    .main-image {
+      width: 100%;
+      height: auto;
+      border-radius: 10px;
+      object-fit: cover;
+    }
+
+    .image-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: $image-nav-bg;
+      color: white;
+      border: none;
+      padding: 10px;
+      cursor: pointer;
+      z-index: 2;
+
+      &.prev {
+        left: 10px;
+      }
+
+      &.next {
+        right: 10px;
+      }
+    }
+
+    .image-counter {
+      position: absolute;
+      bottom: 10px;
+      right: 20px;
+      color: white;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+  }
+
+  .thumbnail-grid {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    overflow-x: auto;
+
+    .thumbnail {
+      width: 80px;
+      height: 60px;
+      cursor: pointer;
+      overflow: hidden;
+      border-radius: 6px;
+      border: 2px solid transparent;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      &.active {
+        border-color: $primary-color;
+      }
+
+      &.show-all {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: $thumb-bg;
+        color: $primary-color;
+        font-weight: bold;
+        padding: 10px;
+        cursor: pointer;
+        border-radius: 6px;
+        min-width: 100px;
+      }
+    }
+  }
+
+  .full-gallery {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow-y: auto;
+    background: $gallery-bg;
+    padding: 20px;
+    z-index: 9999;
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 20px;
+      float: right;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+
+    .grid-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+
+      img {
+        width: 100%;
+        height: auto;
+        border-radius: 8px;
+        object-fit: cover;
+      }
+    }
+  }
+}

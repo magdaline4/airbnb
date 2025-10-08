@@ -7,7 +7,7 @@ const {
   createAmenityItem,
   createBulkAmenityItems,
   searchAmenityItems
-} = require('../controllers/amenityItemController'); // Import from amenityItemController
+} = require('../controllers/amenityItemController.js');
 
 // GET routes
 router.get('/items', getAmenityItems);

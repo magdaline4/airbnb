@@ -2,14 +2,31 @@ import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./RoomDetailPage.scss";
-import { FaHeart, FaShare, FaChevronLeft, FaChevronRight, FaStar, FaWifi, FaCar, FaUtensils, FaSwimmingPool, FaSnowflake, FaFire, FaTv, FaPaw, FaBed, FaBath, FaRuler } from "react-icons/fa";
+import {
+  FaHeart,
+  FaShare,
+  FaChevronLeft,
+  FaChevronRight,
+  FaStar,
+  FaWifi,
+  FaCar,
+  FaUtensils,
+  FaSwimmingPool,
+  FaSnowflake,
+  FaFire,
+  FaTv,
+  FaPaw,
+  FaBed,
+  FaBath,
+  FaRuler,
+} from "react-icons/fa";
 import { MdLocationOn, MdVerified } from "react-icons/md";
 import Navbar from "../../Components/Navbar/Navbar";
 import Footer from "../../Components/Footer/Footer";
+import Amenties from "../../Components/Amenties/Amenties";
 import Calendar from "../../Components/BookingCalendar/Calendar";
- 
+import Imgcard from "../../Components/RoomCard/Imgcard/Imgcard";
 const RoomDetailPage = () => {
-  
   const { id } = useParams();
   const navigate = useNavigate();
   const [room, setRoom] = useState(null);
@@ -19,91 +36,94 @@ const RoomDetailPage = () => {
   const [liked, setLiked] = useState(false);
   const [showAllPhotos, setShowAllPhotos] = useState(false);
   const [isSticky, setIsSticky] = useState(false);
- 
+
   // Guest dropdown state
   const [isGuestDropdownOpen, setIsGuestDropdownOpen] = useState(false);
   const [guestData, setGuestData] = useState({
     adults: 2,
     children: 0,
     infants: 1,
-    pets: 0
+    pets: 0,
   });
- 
+
   const [selectedDates, setSelectedDates] = useState({
     checkIn: new Date(),
     checkOut: new Date(Date.now() + 24 * 60 * 60 * 1000),
   });
- 
+
   const sidebarRef = useRef(null);
   const contentRef = useRef(null);
- 
+
   const API_URL = import.meta.env.VITE_API_URL;
- 
+
   const maxGuests = room?.guests || 10;
   const totalGuests = guestData.adults + guestData.children;
- 
+
   // Guest counter functions
   const handleIncrement = (type) => {
-    setGuestData(prev => ({
+    setGuestData((prev) => ({
       ...prev,
-      [type]: prev[type] + 1
+      [type]: prev[type] + 1,
     }));
   };
- 
+
   const handleDecrement = (type) => {
-    setGuestData(prev => ({
+    setGuestData((prev) => ({
       ...prev,
-      [type]: Math.max(0, prev[type] - 1)
+      [type]: Math.max(0, prev[type] - 1),
     }));
   };
- 
+
   const getGuestDisplayText = () => {
     const { adults, children, infants, pets } = guestData;
     const total = adults + children;
-   
-    let text = `${total} guest${total !== 1 ? 's' : ''}`;
+
+    let text = `${total} guest${total !== 1 ? "s" : ""}`;
     if (infants > 0) {
-      text += `, ${infants} infant${infants !== 1 ? 's' : ''}`;
+      text += `, ${infants} infant${infants !== 1 ? "s" : ""}`;
     }
     if (pets > 0) {
-      text += `, ${pets} pet${pets !== 1 ? 's' : ''}`;
+      text += `, ${pets} pet${pets !== 1 ? "s" : ""}`;
     }
-   
+
     return text;
   };
- 
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (isGuestDropdownOpen && !event.target.closest('.guests-input-section')) {
+      if (
+        isGuestDropdownOpen &&
+        !event.target.closest(".guests-input-section")
+      ) {
         setIsGuestDropdownOpen(false);
       }
     };
- 
-    document.addEventListener('mousedown', handleClickOutside);
+
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isGuestDropdownOpen]);
- 
+
   // Add the utility functions here
   const formatDateForInput = (date) => {
     const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   };
- 
+
   const parseInputDate = (dateString) => {
-    const [year, month, day] = dateString.split('-').map(Number);
+    const [year, month, day] = dateString.split("-").map(Number);
     return new Date(year, month - 1, day);
   };
- 
+
   useEffect(() => {
     const fetchRoomDetails = async () => {
       try {
         const response = await axios.get(`${API_URL}/api/rooms/${id}`);
-       
+
         if (response.data.success && response.data.room) {
           setRoom(response.data.room);
         } else {
@@ -122,17 +142,17 @@ const RoomDetailPage = () => {
         setLoading(false);
       }
     };
- 
+
     if (id) {
       fetchRoomDetails();
     }
   }, [id]);
- 
+
   // Sticky sidebar behavior
   useEffect(() => {
     const handleScroll = () => {
       if (!sidebarRef.current || !contentRef.current) return;
- 
+
       const sidebar = sidebarRef.current;
       const content = contentRef.current;
       const scrollTop = window.pageYOffset;
@@ -140,45 +160,45 @@ const RoomDetailPage = () => {
       const contentHeight = content.offsetHeight;
       const sidebarHeight = sidebar.offsetHeight;
       const windowHeight = window.innerHeight;
- 
+
       const shouldBeSticky = scrollTop > contentTop - 100;
       const contentBottom = contentTop + contentHeight;
       const shouldStopSticky = scrollTop + windowHeight > contentBottom + 100;
- 
+
       setIsSticky(shouldBeSticky && !shouldStopSticky);
     };
- 
-    window.addEventListener('scroll', handleScroll);
-    window.addEventListener('resize', handleScroll);
-   
+
+    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("resize", handleScroll);
+
     handleScroll();
- 
+
     return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', handleScroll);
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
     };
   }, [room]);
- 
+
   const handlePrevImage = () => {
     if (!images.length) return;
     setCurrentImage((prev) => (prev === 0 ? images.length - 1 : prev - 1));
   };
- 
+
   const handleNextImage = () => {
     if (!images.length) return;
     setCurrentImage((prev) => (prev === images.length - 1 ? 0 : prev + 1));
   };
- 
+
   const handleImageClick = (index) => {
     setCurrentImage(index);
   };
- 
+
   const handleReserve = (e) => {
     e.preventDefault();
     console.log("Reserved:", selectedDates, guestData);
     // Add your reservation logic here
   };
- 
+
   // Normalize images similar to RoomCard
   const images = (() => {
     if (!room) return [];
@@ -187,7 +207,7 @@ const RoomDetailPage = () => {
     if (typeof room.image === "string") return [room.image];
     return [];
   })();
- 
+
   // Mock amenities data
   const amenities = [
     { icon: <FaWifi />, name: "WiFi", category: "Essentials" },
@@ -197,9 +217,9 @@ const RoomDetailPage = () => {
     { icon: <FaSnowflake />, name: "Air conditioning", category: "Climate" },
     { icon: <FaFire />, name: "Heating", category: "Climate" },
     { icon: <FaTv />, name: "TV", category: "Entertainment" },
-    { icon: <FaPaw />, name: "Pet friendly", category: "Safety" }
+    { icon: <FaPaw />, name: "Pet friendly", category: "Safety" },
   ];
- 
+
   if (loading) {
     return (
       <>
@@ -210,7 +230,7 @@ const RoomDetailPage = () => {
       </>
     );
   }
- 
+
   if (error || !room) {
     return (
       <>
@@ -232,57 +252,24 @@ const RoomDetailPage = () => {
 
       <div className="room-detail-page">
         {/* Image Gallery */}
-        <div className="image-gallery">
-          <div className="main-image-container">
-            <img
-              src={
-                images[currentImage] ||
-                "https://via.placeholder.com/800x600?text=No+Image"
-              }
-              alt={`${room.title} - Image ${currentImage + 1}`}
-              className="main-image"
-            />
+ <div className="image-gallery">
+      <div className="main-image">
+        <img src={images[0]} alt="Main" />
+      </div>
 
-            {images.length > 1 && (
-              <>
-                <button className="image-nav prev" onClick={handlePrevImage}>
-                  <FaChevronLeft />
-                </button>
-                <button className="image-nav next" onClick={handleNextImage}>
-                  <FaChevronRight />
-                </button>
-
-                <div className="image-counter">
-                  {currentImage + 1} / {images.length}
-                </div>
-              </>
+      <div className="side-images">
+        {images.slice(1, 5).map((img, idx) => (
+          <div key={idx} className="side-image">
+            <img src={img} alt={`img-${idx}`} />
+            {idx === 3 && (
+              <div className="overlay">
+                <button className="show-button">Show all photos</button>
+              </div>
             )}
           </div>
-
-          {images.length > 1 && (
-            <div className="thumbnail-grid">
-              {images.slice(0, 5).map((img, index) => (
-                <div
-                  key={index}
-                  className={`thumbnail ${
-                    index === currentImage ? "active" : ""
-                  }`}
-                  onClick={() => handleImageClick(index)}
-                >
-                  <img src={img} alt={`Thumbnail ${index + 1}`} />
-                </div>
-              ))}
-              {images.length > 5 && (
-                <div
-                  className="thumbnail show-all"
-                  onClick={() => setShowAllPhotos(true)}
-                >
-                  <span>+{images.length - 5} more</span>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+        ))}
+      </div>
+    </div>
 
         <div className="room-detail-content" ref={contentRef}>
           <div className="main-content">
@@ -402,60 +389,12 @@ const RoomDetailPage = () => {
                   "Experience the perfect blend of comfort and style in this beautifully designed space. Located in the heart of the city, this room offers modern amenities and a cozy atmosphere. Perfect for both business and leisure travelers looking for a home away from home."}
               </p>
             </div>
-            {/* Room Features */}
-            {/* <div className="room-features">
-              <div className="feature">
-                <FaBed className="feature-icon" />
-                <div>
-                  <strong>{room.beds || 2} beds</strong>
-                  <p>Comfortable sleeping arrangements</p>
-                </div>
-              </div>
-              <div className="feature">
-                <FaBath className="feature-icon" />
-                <div>
-                  <strong>{room.bathrooms || 1} bathrooms</strong>
-                  <p>Clean and well-maintained</p>
-                </div>
-              </div>
-              <div className="feature">
-                <FaRuler className="feature-icon" />
-                <div>
-                  <strong>{room.guests || 1} guests</strong>
-                  <p>Maximum occupancy</p>
-                </div>
-              </div>
-              <div className="feature">
-                <FaBed className="feature-icon" />
-                <div>
-                  <strong>{room.bedrooms || 1} bedrooms</strong>
-                  <p>Private sleeping areas</p>
-                </div>
-              </div>
-            </div> */}
 
             {/* Amenities */}
-            <div className="amenities-section">
-              <h2>What this place offers</h2>
-              <div className="amenities-grid">
-                {room.amenities && room.amenities.length > 0
-                  ? room.amenities.item.map((amenity, index) => (
-                      <div key={index} className="amenity-item">
-                        <span>{amenity}</span>
-                      </div>
-                    ))
-                  : amenities.map((amenity, index) => (
-                      <div key={index} className="amenity-item">
-                        {amenity.icon}
-                        <span>{amenity.name}</span>
-                      </div>
-                    ))}
-              </div>
-              <button className="show-all-amenities">Show all amenities</button>
-            </div>
-           
-           {/* Booking Calendar */}
-           <Calendar onDateSelect={setSelectedDates} />
+            <Amenties />
+
+            {/* Booking Calendar */}
+            <Calendar onDateSelect={setSelectedDates} />
 
             {/* Reviews Section */}
             <div className="reviews-section">
@@ -514,10 +453,10 @@ const RoomDetailPage = () => {
           >
             <div className="booking-card">
               {/* ✅ Price section */}
-              <div className="price-section">
+              {/* <div className="price-section">
                 <span className="price">₹{room.price?.toLocaleString?.()}</span>
                 <span className="price-period">per night</span>
-              </div>
+              </div> */}
 
               {/* ✅ Booking form */}
               <form className="booking-form" onSubmit={handleReserve}>
@@ -556,9 +495,13 @@ const RoomDetailPage = () => {
                 </div>
 
                 {/* Guests Input Section with Dropdown */}
-                <div className={`guests-input-section ${isGuestDropdownOpen ? 'dropdown-open' : ''}`}>
+                <div
+                  className={`guests-input-section ${
+                    isGuestDropdownOpen ? "dropdown-open" : ""
+                  }`}
+                >
                   <label htmlFor="guests-trigger">GUESTS</label>
-                  <button 
+                  <button
                     id="guests-trigger"
                     type="button"
                     className="guests-trigger"
@@ -577,17 +520,19 @@ const RoomDetailPage = () => {
                           <div className="guest-type-description">Age 13+</div>
                         </div>
                         <div className="guest-counter">
-                          <button 
-                            className="counter-btn" 
-                            onClick={() => handleDecrement('adults')}
+                          <button
+                            className="counter-btn"
+                            onClick={() => handleDecrement("adults")}
                             disabled={guestData.adults <= 0}
                           >
                             −
                           </button>
-                          <span className="counter-value">{guestData.adults}</span>
-                          <button 
-                            className="counter-btn" 
-                            onClick={() => handleIncrement('adults')}
+                          <span className="counter-value">
+                            {guestData.adults}
+                          </span>
+                          <button
+                            className="counter-btn"
+                            onClick={() => handleIncrement("adults")}
                           >
                             +
                           </button>
@@ -598,20 +543,24 @@ const RoomDetailPage = () => {
                       <div className="guest-option">
                         <div className="guest-type-info">
                           <div className="guest-type-name">Children</div>
-                          <div className="guest-type-description">Ages 2-12</div>
+                          <div className="guest-type-description">
+                            Ages 2-12
+                          </div>
                         </div>
                         <div className="guest-counter">
-                          <button 
-                            className="counter-btn" 
-                            onClick={() => handleDecrement('children')}
+                          <button
+                            className="counter-btn"
+                            onClick={() => handleDecrement("children")}
                             disabled={guestData.children <= 0}
                           >
                             −
                           </button>
-                          <span className="counter-value">{guestData.children}</span>
-                          <button 
-                            className="counter-btn" 
-                            onClick={() => handleIncrement('children')}
+                          <span className="counter-value">
+                            {guestData.children}
+                          </span>
+                          <button
+                            className="counter-btn"
+                            onClick={() => handleIncrement("children")}
                           >
                             +
                           </button>
@@ -625,17 +574,19 @@ const RoomDetailPage = () => {
                           <div className="guest-type-description">Under 2</div>
                         </div>
                         <div className="guest-counter">
-                          <button 
-                            className="counter-btn" 
-                            onClick={() => handleDecrement('infants')}
+                          <button
+                            className="counter-btn"
+                            onClick={() => handleDecrement("infants")}
                             disabled={guestData.infants <= 0}
                           >
                             −
                           </button>
-                          <span className="counter-value">{guestData.infants}</span>
-                          <button 
-                            className="counter-btn" 
-                            onClick={() => handleIncrement('infants')}
+                          <span className="counter-value">
+                            {guestData.infants}
+                          </span>
+                          <button
+                            className="counter-btn"
+                            onClick={() => handleIncrement("infants")}
                           >
                             +
                           </button>
@@ -646,20 +597,24 @@ const RoomDetailPage = () => {
                       <div className="guest-option">
                         <div className="guest-type-info">
                           <div className="guest-type-name">Pets</div>
-                          <div className="guest-type-description">Bringing a service animal?</div>
+                          <div className="guest-type-description">
+                            Bringing a service animal?
+                          </div>
                         </div>
                         <div className="guest-counter">
-                          <button 
-                            className="counter-btn" 
-                            onClick={() => handleDecrement('pets')}
+                          <button
+                            className="counter-btn"
+                            onClick={() => handleDecrement("pets")}
                             disabled={guestData.pets <= 0}
                           >
                             −
                           </button>
-                          <span className="counter-value">{guestData.pets}</span>
-                          <button 
-                            className="counter-btn" 
-                            onClick={() => handleIncrement('pets')}
+                          <span className="counter-value">
+                            {guestData.pets}
+                          </span>
+                          <button
+                            className="counter-btn"
+                            onClick={() => handleIncrement("pets")}
                           >
                             +
                           </button>
@@ -668,23 +623,23 @@ const RoomDetailPage = () => {
 
                       {/* Info Text */}
                       <div className="guest-dropdown-info">
-                        <p>This place has a maximum of {maxGuests} guests, not including <br /> infants. If you're bringing more than 2 pets, please let <br /> your Host know..</p>
+                        <p>
+                          This place has a maximum of {maxGuests} guests, not
+                          including <br /> infants. If you're bringing more than
+                          2 pets, please let <br /> your Host know..
+                        </p>
                       </div>
 
-                        {/* Close Text with Underline */}
-                         <div className="guest-dropdown-footer">
-                           <span 
-                        className="close-text" 
-                        onClick={() => setIsGuestDropdownOpen(false)}
-                         >
-                           Close
-                         </span>
-                            </div>
-
-                    
+                      {/* Close Text with Underline */}
+                      <div className="guest-dropdown-footer">
+                        <span
+                          className="close-text"
+                          onClick={() => setIsGuestDropdownOpen(false)}
+                        >
+                          Close
+                        </span>
                       </div>
-
-                    
+                    </div>
                   )}
                 </div>
 
@@ -698,8 +653,9 @@ const RoomDetailPage = () => {
           </div>
         </div>
       </div>
-            
+
       <Footer />
+      <Imgcard />
     </>
   );
 };
