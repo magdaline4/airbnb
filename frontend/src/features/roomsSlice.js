@@ -3,7 +3,7 @@ import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-// Fetch rooms with filters + pagination
+// Fetch rooms (list)
 export const fetchRooms = createAsyncThunk(
   "rooms/fetchRooms",
   async ({ filters, currentPage, roomsPerPage }, { rejectWithValue }) => {
@@ -30,10 +30,24 @@ export const fetchRooms = createAsyncThunk(
   }
 );
 
+// ✅ Fetch a single room by ID
+export const fetchRoomById = createAsyncThunk(
+  "rooms/fetchRoomById",
+  async (roomId, { rejectWithValue }) => {
+    try {
+      const res = await axios.get(`${API_URL}/api/rooms/${roomId}`);
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || "Error fetching room details");
+    }
+  }
+);
+
 const roomsSlice = createSlice({
   name: "rooms",
   initialState: {
     rooms: [],
+    room: null,          // ✅ for single room details
     totalPages: 1,
     totalRooms: 0,
     currentPage: 1,
@@ -53,9 +67,15 @@ const roomsSlice = createSlice({
         state.likedRooms.push(roomId);
       }
     },
+    // ✅ Clear the currently loaded room
+    clearCurrentRoom: (state) => {
+      state.room = null;
+      state.error = null;
+    },
   },
   extraReducers: (builder) => {
     builder
+      // ✅ Rooms list
       .addCase(fetchRooms.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -69,9 +89,23 @@ const roomsSlice = createSlice({
       .addCase(fetchRooms.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+
+      // ✅ Single room
+      .addCase(fetchRoomById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchRoomById.fulfilled, (state, action) => {
+        state.loading = false;
+        state.room = action.payload.room || action.payload;
+      })
+      .addCase(fetchRoomById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });
 
-export const { setPage, toggleLike } = roomsSlice.actions;
+export const { setPage, toggleLike, clearCurrentRoom } = roomsSlice.actions;
 export default roomsSlice.reducer;

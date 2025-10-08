@@ -2,12 +2,15 @@ import React, { useEffect, useState } from "react";
 import "./roomcard.scss";
 import { FaHeart, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { useSelector, useDispatch } from "react-redux";
-import { toggleLike } from "../../features/roomsSlice";
+import { toggleLike, fetchRoomById } from "../../features/roomsSlice";
+import { useNavigate } from "react-router-dom";
 
 const RoomCard = ({ room = {} }) => {
   const [currentImage, setCurrentImage] = useState(0);
   const dispatch = useDispatch();
-const likedRooms = useSelector((state) => state.rooms.likedRooms);
+  const navigate = useNavigate();
+
+  const likedRooms = useSelector((state) => state.rooms.likedRooms);
   const liked = likedRooms.includes(room.id);
 
   const images = (() => {
@@ -16,7 +19,6 @@ const likedRooms = useSelector((state) => state.rooms.likedRooms);
     if (typeof room.image === "string") return [room.image];
     return [];
   })();
-  
 
   useEffect(() => {
     setCurrentImage(0);
@@ -39,9 +41,18 @@ const likedRooms = useSelector((state) => state.rooms.likedRooms);
     setCurrentImage(idx);
   };
 
+  // ✅ Navigate to room details when the card or title is clicked
+  const handleCardClick = () => {
+    if (!room?._id && !room?.id) return;
+    const roomId = room._id || room.id;
+
+    dispatch(fetchRoomById(roomId)); // Optional: preload details
+    navigate(`/rooms/${roomId}`);   // Navigate to details page
+  };
+
   if (!images.length) {
     return (
-      <div className="room-card">
+      <div className="room-card" onClick={handleCardClick}>
         <div className="room-image placeholder">
           <img
             src="https://via.placeholder.com/600x400?text=No+Image"
@@ -57,13 +68,19 @@ const likedRooms = useSelector((state) => state.rooms.likedRooms);
   }
 
   return (
-    <div className="room-card">
-      <div className="room-image" role="presentation" aria-label={room.title || "Room image"}>
+    // ✅ Entire card is clickable
+    <div className="room-card" onClick={handleCardClick}>
+      <div
+        className="room-image"
+        role="presentation"
+        aria-label={room.title || "Room image"}
+      >
         <img
           src={images[currentImage]}
           alt={`${room.title || "Room"} — photo ${currentImage + 1}`}
           onError={(e) => {
-            e.currentTarget.src = "https://via.placeholder.com/600x400?text=Image+not+found";
+            e.currentTarget.src =
+              "https://via.placeholder.com/600x400?text=Image+not+found";
           }}
         />
 
@@ -72,7 +89,7 @@ const likedRooms = useSelector((state) => state.rooms.likedRooms);
         <button
           className={`heart-btn ${liked ? "liked" : ""}`}
           onClick={(e) => {
-            e.stopPropagation();
+            e.stopPropagation(); // ✅ prevents navigating when clicking the heart
             dispatch(toggleLike(room.id));
           }}
           aria-label="Toggle favourite"
@@ -85,10 +102,18 @@ const likedRooms = useSelector((state) => state.rooms.likedRooms);
             <div className="hover-zone left-zone" onClick={handlePrev} />
             <div className="hover-zone right-zone" onClick={handleNext} />
 
-            <button className="arrow left" onClick={handlePrev} aria-label="Previous image">
+            <button
+              className="arrow left"
+              onClick={handlePrev}
+              aria-label="Previous image"
+            >
               <FaChevronLeft />
             </button>
-            <button className="arrow right" onClick={handleNext} aria-label="Next image">
+            <button
+              className="arrow right"
+              onClick={handleNext}
+              aria-label="Next image"
+            >
               <FaChevronRight />
             </button>
 
@@ -109,11 +134,17 @@ const likedRooms = useSelector((state) => state.rooms.likedRooms);
       <div className="room-info">
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <h3>{room.type}</h3>
-          <h2>★ {room.rating} ({room.reviewCount})</h2>
+          <h2>
+            ★ {room.rating} ({room.reviewCount})
+          </h2>
         </div>
-        <p>Stay with {room.title}</p>
+        <p onClick={handleCardClick} className="room-title">
+          Stay with {room.title}
+        </p>
         <p>{room.beds} beds</p>
-        <p>{room.checkIn} - {room.checkOut}</p>
+        <p>
+          {room.checkIn} - {room.checkOut}
+        </p>
         <p className="price">
           ₹{room.price?.toLocaleString?.() || room.price}{" "}
           <span>for {room.nights || 1} nights</span>
