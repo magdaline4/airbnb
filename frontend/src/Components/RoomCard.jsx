@@ -1,18 +1,12 @@
 import React, { useEffect, useState } from "react";
-import "./roomcard.scss";
+import "../Pages/Room/Room.scss";
 import { FaHeart, FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import { useSelector, useDispatch } from "react-redux";
-import { toggleLike, fetchRoomById } from "../../features/roomsSlice";
-import { useNavigate } from "react-router-dom";
 
 const RoomCard = ({ room = {} }) => {
   const [currentImage, setCurrentImage] = useState(0);
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const [liked, setLiked] = useState(false);
 
-  const likedRooms = useSelector((state) => state.rooms.likedRooms);
-  const liked = likedRooms.includes(room.id);
-
+  // Normalize images: support room.images (array), room.image (string or array)
   const images = (() => {
     if (Array.isArray(room.images)) return room.images;
     if (Array.isArray(room.image)) return room.image;
@@ -20,9 +14,15 @@ const RoomCard = ({ room = {} }) => {
     return [];
   })();
 
+  // Reset index when room changes
   useEffect(() => {
     setCurrentImage(0);
   }, [room]);
+
+  // Debugging helper — check console to confirm images are seen by the component
+  useEffect(() => {
+    console.log("RoomCard — images:", images);
+  }, [images]);
 
   const handlePrev = (e) => {
     e?.stopPropagation();
@@ -41,18 +41,10 @@ const RoomCard = ({ room = {} }) => {
     setCurrentImage(idx);
   };
 
-  // ✅ Navigate to room details when the card or title is clicked
-  const handleCardClick = () => {
-    if (!room?._id && !room?.id) return;
-    const roomId = room._id || room.id;
-
-    dispatch(fetchRoomById(roomId)); // Optional: preload details
-    navigate(`/rooms/${roomId}`);   // Navigate to details page
-  };
-
+  // graceful fallback
   if (!images.length) {
     return (
-      <div className="room-card" onClick={handleCardClick}>
+      <div className="room-card">
         <div className="room-image placeholder">
           <img
             src="https://via.placeholder.com/600x400?text=No+Image"
@@ -68,19 +60,14 @@ const RoomCard = ({ room = {} }) => {
   }
 
   return (
-    // ✅ Entire card is clickable
-    <div className="room-card" onClick={handleCardClick}>
-      <div
-        className="room-image"
-        role="presentation"
-        aria-label={room.title || "Room image"}
-      >
+    <div className="room-card">
+      <div className="room-image" role="presentation" aria-label={room.title || "Room image"}>
         <img
           src={images[currentImage]}
           alt={`${room.title || "Room"} — photo ${currentImage + 1}`}
           onError={(e) => {
-            e.currentTarget.src =
-              "https://via.placeholder.com/600x400?text=Image+not+found";
+            // show placeholder if image fails
+            e.currentTarget.src = "https://via.placeholder.com/600x400?text=Image+not+found";
           }}
         />
 
@@ -89,8 +76,8 @@ const RoomCard = ({ room = {} }) => {
         <button
           className={`heart-btn ${liked ? "liked" : ""}`}
           onClick={(e) => {
-            e.stopPropagation(); // ✅ prevents navigating when clicking the heart
-            dispatch(toggleLike(room.id));
+            e.stopPropagation();
+            setLiked((s) => !s);
           }}
           aria-label="Toggle favourite"
         >
@@ -99,24 +86,19 @@ const RoomCard = ({ room = {} }) => {
 
         {images.length > 1 && (
           <>
+            {/* big clickable left/right zones */}
             <div className="hover-zone left-zone" onClick={handlePrev} />
             <div className="hover-zone right-zone" onClick={handleNext} />
 
-            <button
-              className="arrow left"
-              onClick={handlePrev}
-              aria-label="Previous image"
-            >
+            {/* visible arrow buttons (higher z-index than hover zones) */}
+            <button className="arrow left" onClick={handlePrev} aria-label="Previous image">
               <FaChevronLeft />
             </button>
-            <button
-              className="arrow right"
-              onClick={handleNext}
-              aria-label="Next image"
-            >
+            <button className="arrow right" onClick={handleNext} aria-label="Next image">
               <FaChevronRight />
             </button>
 
+            {/* dots */}
             <div className="dots" aria-hidden="true">
               {images.map((_, i) => (
                 <button
@@ -134,20 +116,13 @@ const RoomCard = ({ room = {} }) => {
       <div className="room-info">
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <h3>{room.type}</h3>
-          <h2>
-            ★ {room.rating} ({room.reviewCount})
-          </h2>
+          <h2>★ {room.rating} ({room.reviewCount})</h2>
         </div>
-        <p onClick={handleCardClick} className="room-title">
-          Stay with {room.title}
-        </p>
+        <p>Stay with {room.title}</p>
         <p>{room.beds} beds</p>
-        <p>
-          {room.checkIn} - {room.checkOut}
-        </p>
+        <p>{room.checkIn} - {room.checkOut} </p>
         <p className="price">
-          ₹{room.price?.toLocaleString?.() || room.price}{" "}
-          <span>for {room.nights || 1} nights</span>
+          ₹{room.price?.toLocaleString?.() || room.price} <span>for {room.nights || 1} nights</span>
         </p>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
-import './Calendar.scss';
+import '../BookingCalendar/Calendar.scss';
 
 const Calendar = ({ onDateSelect }) => {
   const [checkIn, setCheckIn] = useState(new Date(2025, 9, 8));

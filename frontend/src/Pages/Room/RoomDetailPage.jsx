@@ -1,5 +1,7 @@
-import React, { useState, useEffect, useRef } from "react";
+// RoomDetailPage.jsx
+import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
 import "./RoomDetailPage.scss";
 import {
@@ -25,19 +27,21 @@ import Navbar from "../../Components/Navbar/Navbar";
 import Footer from "../../Components/Footer/Footer";
 import Amenties from "../../Components/Amenties/Amenties";
 import Calendar from "../../Components/BookingCalendar/Calendar";
-import Imgcard from "../../Components/RoomCard/Imgcard/Imgcard";
 import DatePicker from "../../Components/BookingCalendar/DatePicker";
 import "../../Components/BookingCalendar/DatePicker.scss";
+import { fetchRoomById, clearCurrentRoom } from "../../features/roomsSlice";
 
 const RoomDetailPage = () => {
   const { id } = useParams();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [room, setRoom] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+
+  // Redux state
+  const roomsState = useSelector((state) => state.rooms) || {};
+  const { room = null, loading = false, error = null } = roomsState;
+
+  // UI state
   const [currentImage, setCurrentImage] = useState(0);
-  const [liked, setLiked] = useState(false);
-  const [showAllPhotos, setShowAllPhotos] = useState(false);
   const [isSticky, setIsSticky] = useState(false);
   const [showServiceAnimalPopup, setShowServiceAnimalPopup] = useState(false);
    
@@ -110,6 +114,13 @@ const RoomDetailPage = () => {
     return (basePrice * nights) + cleaningFee + serviceFee;
   };
 
+  const renderLocationText = () => {
+    if (!room?.location) return "Location information not available";
+    return typeof room.location === 'string' 
+      ? room.location 
+      : `${room.location.city || ''}, ${room.location.state || ''}, ${room.location.country || ''}`;
+  };
+
   // Guest counter functions
   const handleIncrement = (type) => {
     setGuestData((prev) => ({
@@ -161,34 +172,17 @@ const RoomDetailPage = () => {
   
  
 
+  // Fetch room details using Redux
   useEffect(() => {
-    const fetchRoomDetails = async () => {
-      try {
-        const response = await axios.get(`${API_URL}/api/rooms/${id}`);
-
-        if (response.data.success && response.data.room) {
-          setRoom(response.data.room);
-        } else {
-          setError("Room not found");
-        }
-      } catch (err) {
-        console.error("Error fetching room details:", err);
-        if (err.response?.status === 404) {
-          setError("Room not found");
-        } else if (err.response?.status === 400) {
-          setError("Invalid room ID");
-        } else {
-          setError("Failed to load room details");
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
     if (id) {
-      fetchRoomDetails();
+      dispatch(fetchRoomById(id));
     }
-  }, [id]);
+    
+    // Cleanup when component unmounts
+    return () => {
+      dispatch(clearCurrentRoom());
+    };
+  }, [id, dispatch]);
 
   // Sticky sidebar behavior
   useEffect(() => {
@@ -198,9 +192,8 @@ const RoomDetailPage = () => {
       const sidebar = sidebarRef.current;
       const content = contentRef.current;
       const scrollTop = window.pageYOffset;
-      const contentTop = content.offsetTop;
-      const contentHeight = content.offsetHeight;
-      const sidebarHeight = sidebar.offsetHeight;
+      const contentTop = contentRef.current.offsetTop;
+      const contentHeight = contentRef.current.offsetHeight;
       const windowHeight = window.innerHeight;
 
       const shouldBeSticky = scrollTop > contentTop - 100;
@@ -313,43 +306,37 @@ const RoomDetailPage = () => {
           </div>
         </div>
 
+        {/* Main Content */}
         <div className="room-detail-content" ref={contentRef}>
           <div className="main-content">
             {/* Header */}
             <div className="room-header">
               <div className="room-title-section">
-                <h1>{room.title || "Beautiful Room"}</h1>
-                <p>
-                  {room.guests || "2 guests"} guests<span> · </span>
-                  {room.bedrooms || "1 bed"} bedrooms<span> · </span>
-                  {room.beds || "1 bed"} beds<span> · </span>
-                  {room.bathrooms} private bathroom
-                </p>
-
+                <h1>{room.title}</h1>
                 <div className="room-meta">
+                  <p>
+                    {room.guests} guests · {room.bedrooms} bedrooms · {room.beds} beds · {room.bathrooms} bath
+                  </p>
                   <div className="rating-section">
                     <FaStar className="star-icon" />
-                    <span className="rating">{room.rating || 4.8}</span>
-                    <span className="review-count">
-                      ·{room.reviewCount || 24} reviews
-                    </span>
+                    <span className="rating">{room.rating}</span>
+                    <span className="review-count">· {room.reviewCount} reviews</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Host Info */}
+            {/* Host */}
             <div className="host-section">
               <div className="host-info">
                 <div className="host-avatar">
                   <img
-                    src="https://a0.muscache.com/im/pictures/user/User/original/ad72d705-4af6-4760-bd27-c7a3f2c5cb5f.jpeg?im_w=240"
+                    src={room.hostAvatar || "https://a0.muscache.com/im/pictures/user/User/original/ad72d705-4af6-4760-bd27-c7a3f2c5cb5f.jpeg?im_w=240"}
                     alt="Host"
                   />
                 </div>
                 <div className="host-details">
-                  <h3>Hosted by {room.host || "GoEarthy"}</h3>
-                  <p>Joined in March 2020</p>
+                  <h3>Hosted by {room.host}</h3>
                   <div className="host-verification">
                     <MdVerified className="verified-icon" />
                     <span>Identity verified</span>
@@ -357,6 +344,8 @@ const RoomDetailPage = () => {
                 </div>
               </div>
             </div>
+
+            {/* Host Home Features */}
             <div className="host-home-section">
               <div className="host-home-detail">
                 <svg
@@ -379,6 +368,7 @@ const RoomDetailPage = () => {
                   <p>You can check in with the building staff.</p>
                 </div>
               </div>
+              
               <div className="host-home-detail">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -400,6 +390,7 @@ const RoomDetailPage = () => {
                   <p>Your own room in a home, plus access to shared spaces.</p>
                 </div>
               </div>
+              
               <div className="host-home-detail">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -416,20 +407,17 @@ const RoomDetailPage = () => {
                 >
                   <path d="M11.67 0v1.67h8.66V0h2v1.67h6a2 2 0 0 1 2 1.85v16.07a2 2 0 0 1-.46 1.28l-.12.13L21 29.75a2 2 0 0 1-1.24.58H6.67a5 5 0 0 1-5-4.78V3.67a2 2 0 0 1 1.85-2h6.15V0zm16.66 11.67H3.67v13.66a3 3 0 0 0 2.82 3h11.18v-5.66a5 5 0 0 1 4.78-5h5.88zm-.08 8h-5.58a3 3 0 0 0-3 2.82v5.76zm-18.58-16h-6v6h24.66v-6h-6v1.66h-2V3.67h-8.66v1.66h-2z"></path>
                 </svg>
-
                 <div className="host-home-details-content">
                   <p>Free cancellation for 24 hours</p>
                   <p>Get a full refund if you change your mind.</p>
                 </div>
               </div>
             </div>
+
             {/* Description */}
             <div className="room-description">
               <h2>About this place</h2>
-              <p>
-                {room.description ||
-                  "Experience the perfect blend of comfort and style in this beautifully designed space. Located in the heart of the city, this room offers modern amenities and a cozy atmosphere. Perfect for both business and leisure travelers looking for a home away from home."}
-              </p>
+              <p>{room.description}</p>
             </div>
 
             {/* Amenities */}
@@ -438,15 +426,13 @@ const RoomDetailPage = () => {
             {/* Booking Calendar */}
             <Calendar onDateSelect={setSelectedDates} />
 
-            {/* Reviews Section */}
+            {/* Reviews */}
             <div className="reviews-section">
               <div className="reviews-header">
                 <div className="reviews-summary">
                   <FaStar className="star-icon" />
-                  <span className="overall-rating">{room.rating || 4.8}</span>
-                  <span className="review-count">
-                    · {room.reviewCount || 24} reviews
-                  </span>
+                  <span className="overall-rating">{room.rating}</span>
+                  <span className="review-count">· {room.reviewCount} reviews</span>
                 </div>
               </div>
 
@@ -482,14 +468,13 @@ const RoomDetailPage = () => {
                 <div className="map-placeholder">
                   <MdLocationOn className="map-icon" />
                   <p>Map view</p>
-                  <span>Shenoy Nagar, Chennai, Tamil Nadu</span>
+                  <span>{renderLocationText()}</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* ✅ Booking Sidebar  */}
-
+          {/* Booking Sidebar */}
           <div
             className={`booking-sidebar ${isSticky ? "sticky" : ""}`}
             ref={sidebarRef}
@@ -741,7 +726,6 @@ const RoomDetailPage = () => {
       </div>
 
       <Footer />
-      <Imgcard />
     </>
   );
 };

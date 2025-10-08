@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { setFilters } from "../../features/filtersSlice";
 import "./FiltersModal.scss";
 import {
   FaHotel,
@@ -38,68 +40,70 @@ import {
   GiTimeTrap,
   GiWashingMachine,
 } from "react-icons/gi";
-
-const FiltersModal = ({ isOpen, onClose, filters, setFilters }) => {
+const FiltersModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
-  // Use the filters from props instead of local state
-  const [minPrice, setMinPrice] = useState(filters.minPrice || 30000);
-  const [maxPrice, setMaxPrice] = useState(filters.maxPrice || 50000);
+  const dispatch = useDispatch();
+  const filters = useSelector((state) => state.filters);
 
-  const [bedrooms, setBedrooms] = useState(filters.bedrooms || 1);
-  const [beds, setBeds] = useState(filters.beds || 1);
-  const [bathrooms, setBathrooms] = useState(filters.bathrooms || 1);
-  const [selectedFilters, setSelectedFilters] = useState(
-    filters.amenities || []
-  );
-
-  // Accordion
+  const [minPrice, setMinPrice] = useState(filters.minPrice);
+  const [maxPrice, setMaxPrice] = useState(filters.maxPrice);
+  const [bedrooms, setBedrooms] = useState(filters.bedrooms);
+  const [beds, setBeds] = useState(filters.beds);
+  const [bathrooms, setBathrooms] = useState(filters.bathrooms);
+  const [selectedFilters, setSelectedFilters] = useState(filters.amenities || []);
   const [expanded, setExpanded] = useState(null);
 
-  // Update local state when filters prop changes
   useEffect(() => {
-    if (filters) {
-      setMinPrice(filters.minPrice || 500);
-      setMaxPrice(filters.maxPrice || 2000);
-      setBedrooms(filters.bedrooms || 1);
-      setBeds(filters.beds || 1);
-      setBathrooms(filters.bathrooms || 1);
-      setSelectedFilters(filters.amenities || []);
-    }
+    setMinPrice(filters.minPrice);
+    setMaxPrice(filters.maxPrice);
+    setBedrooms(filters.bedrooms);
+    setBeds(filters.beds);
+    setBathrooms(filters.bathrooms);
+    setSelectedFilters(filters.amenities || []);
   }, [filters]);
-
   const toggleSection = (section) =>
     setExpanded(expanded === section ? null : section);
 
-  //ToggleFilter
-  const toggleFilter = (filterName) => {
+  const toggleFilter = (name) => {
     setSelectedFilters((prev) =>
-      prev.includes(filterName)
-        ? prev.filter((f) => f !== filterName)
-        : [...prev, filterName]
+      prev.includes(name) ? prev.filter((f) => f !== name) : [...prev, name]
     );
   };
 
   //  Clear all filters
 
   const handleClearAll = () => {
-    setSelectedFilters([]);
     setMinPrice(500);
-    setMaxPrice(2000);
+    setMaxPrice(50000);
     setBedrooms(1);
     setBeds(1);
     setBathrooms(1);
+    setSelectedFilters([]);
+    dispatch(
+      setFilters({
+        minPrice: 500,
+        maxPrice: 50000,
+        bedrooms: 1,
+        beds: 1,
+        bathrooms: 1,
+        amenities: [],
+      })
+    );
   };
 
+
   const handleShowResults = () => {
-    setFilters({
-      minPrice,
-      maxPrice,
-      bedrooms,
-      beds,
-      bathrooms,
-      amenities: selectedFilters,
-    });
+    dispatch(
+      setFilters({
+        minPrice,
+        maxPrice,
+        bedrooms,
+        beds,
+        bathrooms,
+        amenities: selectedFilters,
+      })
+    );
     onClose();
   };
 
