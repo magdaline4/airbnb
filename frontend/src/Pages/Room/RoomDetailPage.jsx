@@ -22,8 +22,7 @@ const RoomDetailPage = () => {
   const [showAllPhotos, setShowAllPhotos] = useState(false);
   const [isSticky, setIsSticky] = useState(false);
   const [showServiceAnimalPopup, setShowServiceAnimalPopup] = useState(false);
- 
-  
+   
  
   // Guest dropdown state
   const [isGuestDropdownOpen, setIsGuestDropdownOpen] = useState(false);
@@ -92,17 +91,7 @@ const RoomDetailPage = () => {
   }, [isGuestDropdownOpen]);
  
   // Add the utility functions here
-  const formatDateForInput = (date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
- 
-  const parseInputDate = (dateString) => {
-    const [year, month, day] = dateString.split('-').map(Number);
-    return new Date(year, month - 1, day);
-  };
+  
  
   useEffect(() => {
     const fetchRoomDetails = async () => {
@@ -255,7 +244,7 @@ const formatCurrency = (amount) => {
 
   return (
     <>
-     
+      <Navbar />
       <div className="room-detail-page">
         {/* Image Gallery */}
         <div className="image-gallery">
