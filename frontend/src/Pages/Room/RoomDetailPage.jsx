@@ -30,6 +30,8 @@ import Calendar from "../../Components/BookingCalendar/Calendar";
 import DatePicker from "../../Components/BookingCalendar/DatePicker";
 import "../../Components/BookingCalendar/DatePicker.scss";
 import { fetchRoomById, clearCurrentRoom } from "../../features/roomsSlice";
+import { PhotoGalleryModal } from '../../Components/ImgGallary/ImgGalleryModal';
+import "../../Components/ImgGallary/ImgGalleryModal.scss"
 
 const RoomDetailPage = () => {
   const { id } = useParams();
@@ -44,6 +46,8 @@ const RoomDetailPage = () => {
   const [currentImage, setCurrentImage] = useState(0);
   const [isSticky, setIsSticky] = useState(false);
   const [showServiceAnimalPopup, setShowServiceAnimalPopup] = useState(false);
+
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
    
  
 
@@ -298,13 +302,27 @@ const RoomDetailPage = () => {
                 <img src={img} alt={`img-${idx}`} />
                 {idx === 3 && (
                   <div className="overlay">
-                    <button className="show-button"> Show all photos</button>
+                    <button className="show-button" onClick={() => setIsGalleryOpen(true)}>Show all photos</button>
                   </div>
                 )}
               </div>
             ))}
           </div>
+          
         </div>
+
+        {/* Photo Gallery Modal */}
+      {isGalleryOpen && (
+        <PhotoGalleryModal 
+          isOpen={isGalleryOpen}
+          onClose={() => setIsGalleryOpen(false)}
+          images={images}
+          currentImageIndex={currentImage}
+          onImageChange={setCurrentImage}
+        />
+      )}
+
+       
 
         {/* Main Content */}
         <div className="room-detail-content" ref={contentRef}>
