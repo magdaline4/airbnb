@@ -2,9 +2,29 @@ const Room = require("../models/Room");
 const asyncHandler = require("../utils/asyncHandler");
 const AppError = require("../utils/AppError");
 
-// Create one or multiple rooms
-exports.createRoom = asyncHandler(async (req, res) => {
+// Create one or multiple rooms - UPDATED with address validation
+exports.createRoom = asyncHandler(async (req, res, next) => {
   const payload = req.body;
+
+  // Validate address for single room creation
+  if (!Array.isArray(payload) && payload.address) {
+    const { street, city, state, country, postalCode } = payload.address;
+    if (!street || !city || !state || !country || !postalCode) {
+      return next(new AppError("All address fields (street, city, state, country, postalCode) are required", 400));
+    }
+  }
+
+  // Validate address for multiple rooms creation
+  if (Array.isArray(payload)) {
+    for (const roomData of payload) {
+      if (roomData.address) {
+        const { street, city, state, country, postalCode } = roomData.address;
+        if (!street || !city || !state || !country || !postalCode) {
+          return next(new AppError("All address fields (street, city, state, country, postalCode) are required for each room", 400));
+        }
+      }
+    }
+  }
 
   if (Array.isArray(payload)) {
     const rooms = await Room.insertMany(payload, { ordered: false });
@@ -25,7 +45,7 @@ exports.createRoom = asyncHandler(async (req, res) => {
   }
 });
 
-// Get all rooms with pagination and filtering - COMPLETELY FIXED
+// Get all rooms with pagination and filtering - UPDATED to include address
 exports.getAllRooms = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
@@ -36,7 +56,7 @@ exports.getAllRooms = asyncHandler(async (req, res) => {
   console.log("🔍 === BACKEND FILTER DEBUG ===");
   console.log("📥 Incoming query params:", req.query);
 
-  // Price filter - FIXED
+  // Price filter
   if (req.query.minPrice) {
     const minPriceVal = parseInt(req.query.minPrice);
     if (!isNaN(minPriceVal) && minPriceVal > 0) {
@@ -53,7 +73,7 @@ exports.getAllRooms = asyncHandler(async (req, res) => {
     }
   }
 
-  // Room counts - FIXED
+  // Room counts
   if (req.query.bedrooms) {
     const bedroomsVal = parseInt(req.query.bedrooms);
     if (!isNaN(bedroomsVal) && bedroomsVal > 0) {
@@ -78,7 +98,13 @@ exports.getAllRooms = asyncHandler(async (req, res) => {
     }
   }
 
-  // AMENITIES FILTER - COMPLETELY FIXED
+  // Location filter by city - NEW
+  if (req.query.city) {
+    filter["address.city"] = { $regex: req.query.city, $options: "i" };
+    console.log("🏙️ City filter:", req.query.city);
+  }
+
+  // AMENITIES FILTER
   if (req.query.amenities) {
     try {
       let amenitiesArray;
@@ -89,13 +115,11 @@ exports.getAllRooms = asyncHandler(async (req, res) => {
         amenitiesArray = req.query.amenities.split(",");
       }
       
-      // Clean the amenities array
       const cleanAmenities = amenitiesArray
         .map(a => a.toString().trim())
         .filter(a => a.length > 0);
       
       if (cleanAmenities.length > 0) {
-        // Use $all for strict matching (must have ALL selected amenities)
         filter.amenities = { $all: cleanAmenities };
         console.log("🏠 Amenities filter STRICTLY APPLIED:", cleanAmenities);
         console.log("🏠 Filter query:", JSON.stringify({ amenities: { $all: cleanAmenities } }));
@@ -111,8 +135,6 @@ exports.getAllRooms = asyncHandler(async (req, res) => {
 
   console.log("📝 Final filter object:", JSON.stringify(filter, null, 2));
 
-  // Test the query directly first
-  console.log("🧪 Testing direct MongoDB query with filter...");
   const testQuery = await Room.find(filter);
   console.log("🧪 Direct query result count:", testQuery.length);
 
@@ -126,10 +148,10 @@ exports.getAllRooms = asyncHandler(async (req, res) => {
   console.log(`📈 Total matching: ${total}`);
   
   if (rooms.length > 0) {
-    console.log("📋 First 3 rooms with amenities:");
+    console.log("📋 First 3 rooms with address and amenities:");
     rooms.slice(0, 3).forEach((room, index) => {
       console.log(`   ${index + 1}. ${room.title}`);
-      console.log(`      Price: ₹${room.price}, Amenities: ${room.amenities?.join(', ')}`);
+      console.log(`      Price: ₹${room.price}, City: ${room.address?.city}, Amenities: ${room.amenities?.join(', ')}`);
     });
   } else {
     console.log("📋 No rooms found with current filters");
@@ -149,7 +171,7 @@ exports.getAllRooms = asyncHandler(async (req, res) => {
   });
 });
 
-// Get room by ID
+// Get room by ID - UPDATED to include address
 exports.getRoomById = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
   if (!id) return next(new AppError("Room ID is required", 400));
@@ -164,11 +186,19 @@ exports.getRoomById = asyncHandler(async (req, res, next) => {
   });
 });
 
-// Update room by ID
+// Update room by ID - UPDATED with address validation
 exports.updateRoom = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
   const updateData = { ...req.body };
   if (!id) return next(new AppError("Room ID is required", 400));
+
+  // Validate address if provided
+  if (updateData.address) {
+    const { street, city, state, country, postalCode } = updateData.address;
+    if (!street || !city || !state || !country || !postalCode) {
+      return next(new AppError("All address fields (street, city, state, country, postalCode) are required", 400));
+    }
+  }
 
   delete updateData._id;
   delete updateData.createdAt;
@@ -199,10 +229,11 @@ exports.deleteRoom = asyncHandler(async (req, res, next) => {
   });
 });
 
-// Search rooms with advanced filtering
+// Search rooms with advanced filtering - UPDATED with address search
 exports.searchRooms = asyncHandler(async (req, res) => {
   const {
     location,
+    city,
     minPrice,
     maxPrice,
     propertyType,
@@ -220,13 +251,18 @@ exports.searchRooms = asyncHandler(async (req, res) => {
   const filter = { published: true };
   const skip = (parseInt(page) - 1) * parseInt(limit);
 
-  // Location filter
+  // Location filter by coordinates
   if (location) {
     const [lat, lng] = location.split(',').map(Number);
     if (!isNaN(lat) && !isNaN(lng)) {
       filter['location.lat'] = { $gte: lat - 0.1, $lte: lat + 0.1 };
       filter['location.lng'] = { $gte: lng - 0.1, $lte: lng + 0.1 };
     }
+  }
+
+  // City filter by address - NEW
+  if (city) {
+    filter["address.city"] = { $regex: city, $options: "i" };
   }
 
   // Price filter
@@ -249,7 +285,7 @@ exports.searchRooms = asyncHandler(async (req, res) => {
   if (bedrooms) filter.bedrooms = { $gte: parseInt(bedrooms) };
   if (bathrooms) filter.bathrooms = { $gte: parseInt(bathrooms) };
 
-  // Amenities - FIXED
+  // Amenities
   if (amenities) {
     const amenitiesArray = Array.isArray(amenities) ? amenities : amenities.split(',');
     const cleanAmenities = amenitiesArray.map(a => a.trim()).filter(a => a.length > 0);
@@ -277,7 +313,52 @@ exports.searchRooms = asyncHandler(async (req, res) => {
   });
 });
 
-// Test endpoint for debugging
+// Add address to existing rooms - NEW migration method
+exports.addAddressToExistingRooms = asyncHandler(async (req, res, next) => {
+  const { defaultCity = "Unknown City", defaultState = "Unknown State", defaultCountry = "Unknown Country" } = req.body;
+
+  console.log("🔄 Starting address migration for existing rooms...");
+
+  try {
+    // Update rooms that don't have address field
+    const result = await Room.updateMany(
+      { 
+        $or: [
+          { address: { $exists: false } },
+          { address: null }
+        ]
+      },
+      {
+        $set: {
+          address: {
+            street: "Address not specified",
+            city: defaultCity,
+            state: defaultState,
+            country: defaultCountry,
+            postalCode: "000000"
+          }
+        }
+      }
+    );
+
+    console.log(`✅ Address migration completed: ${result.modifiedCount} rooms updated`);
+
+    res.status(200).json({
+      success: true,
+      message: "Address migration completed successfully",
+      result: {
+        matched: result.matchedCount,
+        modified: result.modifiedCount
+      }
+    });
+
+  } catch (error) {
+    console.error("❌ Address migration error:", error);
+    return next(new AppError(`Address migration failed: ${error.message}`, 500));
+  }
+});
+
+// Test endpoint for debugging - UPDATED with address
 exports.testFilters = asyncHandler(async (req, res) => {
   const filter = { published: true };
   
@@ -304,6 +385,7 @@ exports.testFilters = asyncHandler(async (req, res) => {
       id: r._id, 
       title: r.title, 
       price: r.price, 
+      city: r.address?.city,
       amenities: r.amenities 
     }))
   });
