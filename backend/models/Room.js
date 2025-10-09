@@ -6,6 +6,14 @@ const PROPERTY_TYPES = [
   "Flat",
   "Guest house",
   "Hotel",
+  "Apartment",
+  "Hostel",
+  "villa",
+  "cabin",
+  "condo",
+  "Townhouse",
+  "Loft",
+  "Others"
 ];
 
 // ✅ Allowed room types based on your list
@@ -13,6 +21,9 @@ const ROOM_TYPES = [
   "Any type Room",
   "Entire home",
   "Room",
+  "Entire Place",
+  "Private Room",
+  "Shared Room"
 ];
 
 // ✅ Allowed amenities based on your list
@@ -58,6 +69,7 @@ const locationSchema = new mongoose.Schema(
 
 const addressSchema = new mongoose.Schema(
   {
+    street: { type: String, required: true },
     city: { type: String, required: true },
     state: { type: String, required: true },
     country: { type: String, required: true },
@@ -93,7 +105,7 @@ const roomSchema = new mongoose.Schema(
     minNights: { type: Number, default: 1 },
     maxNights: { type: Number, default: 30 },
 
-    rating: { type: Number, default: 0 },
+    rating: { type: Number, default: 0 }, 
     reviewCount: { type: Number, default: 0 },
     isGuestFavorite: { type: Boolean, default: false },
 

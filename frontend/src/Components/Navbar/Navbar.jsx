@@ -1,20 +1,21 @@
 ﻿import React, { useState, useEffect, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./Navbar.scss";
-import { FaGlobe, FaBars, FaSearch } from "react-icons/fa";
+import { FaBars, FaSearch } from "react-icons/fa";
 import FiltersModal from "../FiltersModal/FiltersModal";
-import { getFilterCount } from '../FiltersModal/filterUtils.js';
- 
+import { getFilterCount } from "../FiltersModal/filterUtils.js";
+import LanguageCurrencyModal from "../LanguageCurrencyModal/LanguageCurrencyModal.jsx";
+
 // Default icons
 import HomeImg from "../../assets/Images/home.avif";
 import ExperImg from "../../assets/Images/experience.avif";
 import ServeImg from "../../assets/Images/service.avif";
- 
+
 // Active state icons
 import NewHomeImg from "../../assets/Images/Homeopen.avif";
 import NewExperImg from "../../assets/Images/experinenceopen.avif";
 import NewServeImg from "../../assets/Images/servieceopen.avif";
- 
+
 // Videos
 import HomeVideo from "../../assets/videos/house-selected.webm";
 import ExperVideo from "../../assets/videos/balloon-selected.webm";
@@ -22,35 +23,36 @@ import ServeVideo from "../../assets/videos/consierge-selected.webm";
 import { FiltersContext } from "../Context/FiltersContext.jsx";
 
 // Constants
-const LOGO_URL = "https://upload.wikimedia.org/wikipedia/commons/6/69/Airbnb_Logo_B%C3%A9lo.svg";
- 
+const LOGO_URL =
+  "https://upload.wikimedia.org/wikipedia/commons/6/69/Airbnb_Logo_B%C3%A9lo.svg";
+
 const NAV_ITEMS = {
   HOME: {
-    key: 'home',
-    label: 'Homes',
-    path: '/',
+    key: "home",
+    label: "Homes",
+    path: "/",
     defaultImg: HomeImg,
     activeImg: NewHomeImg,
-    video: HomeVideo
+    video: HomeVideo,
   },
   EXPERIENCES: {
-    key: 'experiences',
-    label: 'Experiences',
-    path: '/experiences',
+    key: "experiences",
+    label: "Experiences",
+    path: "/experiences",
     defaultImg: ExperImg,
     activeImg: NewExperImg,
-    video: ExperVideo
+    video: ExperVideo,
   },
   SERVICES: {
-    key: 'services',
-    label: 'Services',
-    path: '/services',
+    key: "services",
+    label: "Services",
+    path: "/services",
     defaultImg: ServeImg,
     activeImg: NewServeImg,
-    video: ServeVideo
-  }
+    video: ServeVideo,
+  },
 };
- 
+
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -62,32 +64,32 @@ const Navbar = () => {
   const [imageErrors, setImageErrors] = useState({});
   const [showFilterButton, setShowFilterButton] = useState(false); // ✅ FIXED: Added this state
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
-  
-  
-  const {filters, setFilters}= useContext(FiltersContext)
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const { filters, setFilters } = useContext(FiltersContext);
 
   // Calculate the total count of active filters
   const filterCount = getFilterCount(filters);
-    
+
   // Set filter button based on current page
   useEffect(() => {
-    if (location.pathname === '/') {
+    if (location.pathname === "/") {
       setShowFilterButton(false);
     } else {
       setShowFilterButton(true);
     }
   }, [location.pathname]);
- 
+
   const handleNavClick = (item) => {
     setActive(item.key);
     setPlaying(item.key);
     navigate(item.path);
   };
- 
+
   const handleMenuToggle = () => {
     setIsMenuOpen(!isMenuOpen);
   };
- 
+
   // Search functionality - navigates to rooms page
   const handleSearchClick = () => {
     navigate("/rooms");
@@ -97,24 +99,24 @@ const Navbar = () => {
     navigate("/host/onboarding");
     setIsMenuOpen(false);
   };
- 
+
   const handleLogoClick = () => {
-    navigate('/');
+    navigate("/");
   };
- 
+
   const handleLanguageClick = () => {
-    console.log('Language selector clicked');
+    console.log("Language selector clicked");
   };
- 
+
   const handleLogoError = () => {
-    console.warn('Logo image failed to load');
+    console.warn("Logo image failed to load");
   };
- 
+
   // Handle image loading errors
   const handleImageError = (itemKey) => {
-    setImageErrors(prev => ({ ...prev, [itemKey]: true }));
+    setImageErrors((prev) => ({ ...prev, [itemKey]: true }));
   };
- 
+
   // Helper function to render icon based on state
   const renderIcon = (item) => {
     if (playing === item.key) {
@@ -124,43 +126,43 @@ const Navbar = () => {
           muted
           loop
           onEnded={() => setPlaying(null)}
-          style={{ width: '24px', height: '24px' }}
+          style={{ width: "24px", height: "24px" }}
           onError={() => setPlaying(null)}
         >
           <source src={item.video} type="video/webm" />
         </video>
       );
     }
- 
+
     const imageSrc = active === item.key ? item.activeImg : item.defaultImg;
     const hasError = imageErrors[item.key];
- 
+
     return (
       <img
         src={hasError ? item.defaultImg : imageSrc}
         alt={`${item.label} icon`}
-        style={{ width: '24px', height: '24px' }}
+        style={{ width: "24px", height: "24px" }}
         onError={() => handleImageError(item.key)}
       />
     );
   };
- 
+
   // Helper function to check if path is active
   const isActivePath = (path) => {
-    if (path === '/') {
-      return location.pathname === '/';
+    if (path === "/") {
+      return location.pathname === "/";
     }
     return location.pathname.startsWith(path);
   };
- 
+
   // Handle keyboard navigation
   const handleKeyDown = (event, action) => {
-    if (event.key === 'Enter' || event.key === ' ') {
+    if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       action();
     }
   };
- 
+
   return (
     <div className="navbar-wrapper">
       <nav className="navbar">
@@ -172,20 +174,22 @@ const Navbar = () => {
             className="logo"
             onClick={handleLogoClick}
             onError={handleLogoError}
-            style={{ cursor: 'pointer' }}
+            style={{ cursor: "pointer" }}
             role="button"
             tabIndex={0}
             onKeyDown={(e) => handleKeyDown(e, handleLogoClick)}
           />
         </div>
- 
+
         {/* Show navigation items only on home page */}
         {!showFilterButton && (
           <div className="nav-items">
             {Object.values(NAV_ITEMS).map((item) => (
               <button
                 key={item.key}
-                className={`nav-item ${isActivePath(item.path) ? 'active' : ''}`}
+                className={`nav-item ${
+                  isActivePath(item.path) ? "active" : ""
+                }`}
                 onClick={() => handleNavClick(item)}
                 onMouseEnter={() => setActive(item.key)}
                 onMouseLeave={() => setActive(null)}
@@ -198,7 +202,7 @@ const Navbar = () => {
             ))}
           </div>
         )}
- 
+
         {/* Show search box and filters on rooms page */}
         {showFilterButton && (
           <div className="search-box-section">
@@ -216,16 +220,16 @@ const Navbar = () => {
                 <FaSearch />
               </button>
             </div>
- 
+
             <div className="filter-section">
-              <button 
-                className="filter-btn" 
+              <button
+                className="filter-btn"
                 onClick={() => setIsFilterModalOpen(true)}
               >
-                <svg 
-                  viewBox="0 0 16 16" 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  style={{ height: '14px', width: '14px' }}
+                <svg
+                  viewBox="0 0 16 16"
+                  xmlns="http://www.w3.org/2000/svg"
+                  style={{ height: "14px", width: "14px" }}
                 >
                   <path d="M5 8c1.306 0 2.418.835 2.83 2H14v2H7.829A3.001 3.001 0 1 1 5 8zm0 2a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm6-8a3 3 0 1 1-2.829 4H2V4h6.171A3.001 3.001 0 0 1 11 2zm0 2a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"></path>
                 </svg>
@@ -237,21 +241,19 @@ const Navbar = () => {
             </div>
           </div>
         )}
- 
+
         {/* Right Side Actions */}
         <div className="right-actions">
           {/* Language Selector */}
           <div className="language-wrapper">
             <button
-              className="language-btn"
-              type="button"
-              onClick={handleLanguageClick}
-              aria-label="Select language"
+              className="globe-button"
+              onClick={() => setIsModalOpen(true)}
             >
-              <FaGlobe aria-hidden="true" />
+              <span>🌐</span>
             </button>
           </div>
- 
+
           {/* User Menu */}
           <div className="menu-wrapper">
             <button
@@ -263,7 +265,7 @@ const Navbar = () => {
             >
               <FaBars aria-hidden="true" />
             </button>
- 
+
             {isMenuOpen && (
               <div className="dropdown" role="menu" aria-label="User menu">
                 <ul>
@@ -282,7 +284,11 @@ const Navbar = () => {
                     </div>
                   </li>
                   <hr />
-                  <li role="menuitem" onClick={handleHostClick} style={{ cursor: 'pointer' }}>
+                  <li
+                    role="menuitem"
+                    onClick={handleHostClick}
+                    style={{ cursor: "pointer" }}
+                  >
                     <span className="icon">🏠</span>
                     <div className="bold">Host your home</div>
                   </li>
@@ -300,7 +306,12 @@ const Navbar = () => {
           </div>
         </div>
       </nav>
- 
+
+      <LanguageCurrencyModal
+        isVisible={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
+
       {/* Search Box - Only show on home page */}
       {!showFilterButton && (
         <div className="search-box" onClick={handleSearchClick}>
@@ -325,11 +336,11 @@ const Navbar = () => {
           </button>
         </div>
       )}
- 
+
       {/* Filters Modal - Single instance */}
       <FiltersModal
-        isOpen={isFilterModalOpen}  
-        onClose={() => setIsFilterModalOpen(false)}  
+        isOpen={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
         filters={filters}
         setFilters={setFilters}
       />
