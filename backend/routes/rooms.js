@@ -4,7 +4,7 @@ const roomController = require("../controllers/roomController");
 const asyncHandler = require("../utils/asyncHandler");
 const Room = require("../models/Room");
 
-// Bulk delete (delete all rooms) — optional, use with extreme caution
+// Bulk delete (delete all rooms)
 router.delete(
   "/",
   asyncHandler(async (req, res, next) => {
@@ -17,28 +17,24 @@ router.delete(
   })
 );
 
-// POST — create room(s)
+// Create room(s)
 router.post("/", roomController.createRoom);
 
-// GET — list all rooms
+// Static / specific routes — IMPORTANT: keep these before the '/:id' param route
+router.get("/filterapi", roomController.getAllRooms);
+router.get("/test-filters", roomController.testFilters);
+
+// Migration route — add address to existing rooms
+// Use POST when you want to send options in body (defaultCity, defaultState, etc.)
+router.post("/migrate/address", roomController.addAddressToExistingRooms);
+
+// Search & filters
+router.get("/search", roomController.searchRooms);
 router.get("/", roomController.getAllRooms);
 
-router.get("/filterapi", roomController.getAllRooms);
-
-
-// GET — search
-router.get("/search", roomController.searchRooms);
-
-// GET by ID
+// Parameterized routes (leave these last)
 router.get("/:id", roomController.getRoomById);
-
-// PUT by ID
 router.put("/:id", roomController.updateRoom);
-
-// DELETE by ID
 router.delete("/:id", roomController.deleteRoom);
-
-// In your routes file
-router.get("/test-filters", roomController.testFilters);
 
 module.exports = router;
