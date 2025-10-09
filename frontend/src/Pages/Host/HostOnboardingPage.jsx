@@ -385,35 +385,71 @@ const HostOnboardingPage = () => {
               )}
 
               {/* Step 6: Photos */}
-              {currentStep === 6 && (
-                <div className="step-content">
-                  <h1>Add some photos of your place</h1>
-                  <p>You'll need 5 photos to get started. You can add more or make changes later.</p>
-                  
-                  <div className="photo-upload-area">
-                    <div className="upload-zone">
-                      <MdPhotoCamera className="upload-icon" />
-                      <h3>Drag your photos here</h3>
-                      <p>Choose at least 5 photos</p>
-                      <button className="upload-button">Upload from your device</button>
-                    </div>
-                    
-                    {hostData.photos.length > 0 && (
-                      <div className="uploaded-photos">
-                        <h3>Uploaded photos ({hostData.photos.length})</h3>
-                        <div className="photo-grid">
-                          {hostData.photos.map((photo, index) => (
-                            <div key={index} className="photo-preview">
-                              <img src={photo} alt={`Upload ${index + 1}`} />
-                              <button className="remove-photo">×</button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
+             {/* Step 6: Photos */}
+{currentStep === 6 && (
+  <div className="step-content">
+    <h1>Add some photos of your place</h1>
+    <p>You'll need 5 photos to get started. You can add more or make changes later.</p>
+    
+    <div className="photo-upload-area">
+      <div className="upload-zone">
+        <MdPhotoCamera className="upload-icon" />
+        <h3>Drag your photos here</h3>
+        <p>Choose at least 5 photos</p>
+
+        {/* Hidden file input */}
+        <input
+          type="file"
+          accept="image/*"
+          multiple
+          id="photoInput"
+          style={{ display: "none" }}
+          onChange={(e) => {
+            const files = Array.from(e.target.files);
+            const fileURLs = files.map(file => URL.createObjectURL(file));
+            setHostData(prev => ({
+              ...prev,
+              photos: [...prev.photos, ...fileURLs]
+            }));
+          }}
+        />
+
+        <button
+          className="upload-button"
+          onClick={() => document.getElementById("photoInput").click()}
+        >
+          Upload from your device
+        </button>
+      </div>
+
+      {/* Photo Preview Section */}
+      {hostData.photos.length > 0 && (
+        <div className="uploaded-photos">
+          <h3>Uploaded photos ({hostData.photos.length})</h3>
+          <div className="photo-grid">
+            {hostData.photos.map((photo, index) => (
+              <div key={index} className="photo-preview">
+                <img src={photo} alt={`Upload ${index + 1}`} />
+                <button
+                  className="remove-photo"
+                  onClick={() =>
+                    setHostData(prev => ({
+                      ...prev,
+                      photos: prev.photos.filter((_, i) => i !== index)
+                    }))
+                  }
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  </div>
+)}
+
 
               {/* Step 7: Title & Description */}
               {currentStep === 7 && (

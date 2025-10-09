@@ -1,7 +1,7 @@
 // DatePicker.jsx - REPLACE YOUR CURRENT ONE WITH THIS
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
-import './DatePicker.scss';
+import '../BookingCalendar/DatePicker.scss';
 
 const DatePicker = ({ checkIn, checkOut, onCheckInChange, onCheckOutChange }) => {
   const today = new Date();

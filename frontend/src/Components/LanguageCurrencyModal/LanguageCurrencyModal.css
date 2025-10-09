@@ -1,0 +1,210 @@
+/* Styling for the Modal Overlay and Container */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4); /* Semi-transparent background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 680px; /* Approximate width from the screenshot */
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 24px;
+  position: relative;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.close-button {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #222;
+  padding: 5px;
+}
+
+/* Tab Styling */
+.modal-tabs {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+.modal-tabs button {
+  background: none;
+  border: none;
+  font-size: 16px;
+  padding: 8px 0;
+  cursor: pointer;
+  color: #717171;
+  font-weight: 400;
+}
+
+.modal-tabs button.active {
+  color: #222;
+  font-weight: 600;
+  border-bottom: 2px solid #222; /* Active tab underline */
+}
+
+.tab-separator {
+  border: 0;
+  border-top: 1px solid #ddd;
+  margin: 10px 0 20px 0;
+}
+
+/* General Section Styling */
+.modal-section {
+  margin-bottom: 30px;
+}
+
+.modal-section h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #222;
+}
+
+/* Grid for Language/Region/Currency Selection */
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.grid-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: white;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.grid-item:hover {
+  border-color: #222;
+}
+
+.grid-item.selected {
+  border: 2px solid #222; /* Highlight selected item */
+}
+
+.grid-item .lang {
+  font-weight: 600;
+  color: #222;
+  font-size: 14px;
+}
+
+.grid-item .region {
+  color: #717171;
+  font-size: 12px;
+}
+
+.grid-item.currency-item {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 18px 12px;
+  font-weight: 400;
+  font-size: 14px;
+}
+
+/* Translation Toggle Styling (Switch) */
+.translation-toggle-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+}
+
+.translation-info {
+  max-width: 80%;
+}
+
+.translation-title {
+  font-weight: 600;
+  margin: 0 0 4px 0;
+}
+
+.translation-desc {
+  font-size: 14px;
+  color: #717171;
+  margin: 0;
+}
+
+/* The actual switch component styling */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 28px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+
+input:checked + .slider {
+  background-color: #222222; /* Airbnb dark color when ON */
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #222222;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(20px);
+  -ms-transform: translateX(20px);
+  transform: translateX(20px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
