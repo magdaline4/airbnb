@@ -29,6 +29,19 @@ import Imgcard from "../../Components/RoomCard/Imgcard/Imgcard";
 import DatePicker from "../../Components/BookingCalendar/DatePicker";
 import "../../Components/BookingCalendar/DatePicker.scss";
 
+// Leaflet imports
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
+// Fix for default markers in react-leaflet
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
+
 const RoomDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -57,6 +70,7 @@ const RoomDetailPage = () => {
 
   const sidebarRef = useRef(null);
   const contentRef = useRef(null);
+  const mapRef = useRef(null);
 
   const API_URL = import.meta.env.VITE_API_URL;
 
@@ -106,6 +120,49 @@ const RoomDetailPage = () => {
     const serviceFee = 25;
     
     return (basePrice * nights) + cleaningFee + serviceFee;
+  };
+
+  // Address formatting function
+  const formatAddress = (address) => {
+    if (!address) return "Shenoy Nagar, Chennai, Tamil Nadu";
+    
+    if (typeof address === 'string') {
+      return address;
+    }
+    
+    if (typeof address === 'object') {
+      const parts = [];
+      if (address.street) parts.push(address.street);
+      if (address.city) parts.push(address.city);
+      if (address.state) parts.push(address.state);
+      if (address.postalCode) parts.push(address.postalCode);
+      if (address.country) parts.push(address.country);
+      
+      return parts.length > 0 ? parts.join(', ') : "Shenoy Nagar, Chennai, Tamil Nadu";
+    }
+    
+    return "Shenoy Nagar, Chennai, Tamil Nadu";
+  };
+
+  // Get coordinates from room data or use defaults
+  const getCoordinates = () => {
+    // Check for nested coordinates object
+    if (room?.location?.coordinates && Array.isArray(room.location.coordinates)) {
+      return room.location.coordinates;
+    }
+    
+    // Check for separate latitude and longitude fields
+    if (room?.latitude && room?.longitude) {
+      return [parseFloat(room.latitude), parseFloat(room.longitude)];
+    }
+    
+    // Check for coordinates in location object
+    if (room?.location?.latitude && room?.location?.longitude) {
+      return [parseFloat(room.location.latitude), parseFloat(room.location.longitude)];
+    }
+    
+    // Default coordinates (Chennai, India)
+    return [13.0827, 80.2707];
   };
 
   // Guest counter functions
@@ -281,6 +338,9 @@ const RoomDetailPage = () => {
       </>
     );
   }
+
+  const coordinates = getCoordinates();
+  const formattedAddress = formatAddress(room.address);
 
   return (
     <>
@@ -473,14 +533,73 @@ const RoomDetailPage = () => {
             <div className="location-section">
               <h2>Where you'll be</h2>
               <div className="location-map">
-                <div className="map-placeholder">
-                  <MdLocationOn className="map-icon" />
-                  <p>Map view</p>
-                  <span>Shenoy Nagar, Chennai, Tamil Nadu</span>
+                <div className="map-container">
+                  <MapContainer
+                    center={coordinates}
+                    zoom={15}
+                    // style={{ height: '400px', width: '100%' }}
+                    ref={mapRef}
+                  >
+                    <TileLayer
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    />
+                    <Marker position={coordinates}>
+                      <Popup>
+                        <div className="map-popup">
+                          <h4>{room.title || "Beautiful Room"}</h4>
+                          <p>{formattedAddress}</p>
+                          <div className="popup-coordinates">
+                            <small>Lat: {coordinates[0].toFixed(6)}</small>
+                            <br />
+                            <small>Lng: {coordinates[1].toFixed(6)}</small>
+                          </div>
+                        </div>
+                      </Popup>
+                    </Marker>
+                  </MapContainer>
                 </div>
               </div>
+              
+              {/* Location Details */}
+              {/* <div className="location-details">
+                <div className="location-info">
+                  <h3>
+                    <MdLocationOn className="location-icon" />
+                    {formattedAddress}
+                  </h3>
+                  <p className="location-description">
+                    {room.locationDescription || 
+                      "Conveniently situated in the heart of the city with easy access to transportation, dining, and attractions."}
+                  </p> */}
+                  
+                  {/* <div className="location-features">
+                    <div className="location-feature">
+                      <FaCar className="feature-icon" />
+                      <span>Free parking on premises</span>
+                    </div>
+                    <div className="location-feature">
+                      <FaUtensils className="feature-icon" />
+                      <span>Walking distance to restaurants</span>
+                    </div>
+                    <div className="location-feature">
+                      <FaWifi className="feature-icon" />
+                      <span>Public transport nearby</span>
+                    </div>
+                  </div> */}
+                  
+                  {/* Coordinates Display */}
+                  {/* <div className="coordinates-display">
+                    <h4>Location Coordinates:</h4>
+                    <div className="coordinate-values">
+                      <span>Latitude: {coordinates[0].toFixed(6)}</span>
+                      <span>Longitude: {coordinates[1].toFixed(6)}</span>
+                    </div>
+                  </div>
+                </div>
+              </div> */}
             </div>
-          </div>
+          </div> 
 
           {/* ✅ Booking Sidebar  */}
 
