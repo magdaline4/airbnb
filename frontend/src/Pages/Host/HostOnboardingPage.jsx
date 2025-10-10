@@ -29,11 +29,10 @@ const PROPERTY_TYPE_MAPPING = {
 
 // CORRECT Room Type Mapping - Based on actual backend acceptance
 const ROOM_TYPE_MAPPING = {
-  "entire": "Entire home",    // ✅ For entire places
-  "private": "Private Room",  // ✅ For private rooms
-  "shared": "Shared Room"     // ✅ For shared rooms
+  "entire": "Entire home",    // ✅ Works
+  "private": "Room",          // ✅ Works
+  "shared": "Room"            // ✅ Works
 };
-
 
 // Complete Amenities Mapping
 const AMENITIES_MAPPING = {
