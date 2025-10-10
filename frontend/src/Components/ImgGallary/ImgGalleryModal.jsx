@@ -1,43 +1,87 @@
-import React, { useState } from "react";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { X, ChevronLeft, ChevronRight, Share, Heart } from "lucide-react";
+import axios from "axios";
+import { useParams } from "react-router-dom";
 import "./ImgGalleryModal.scss";
 
 export const PhotoGalleryModal = ({ isOpen, onClose }) => {
-  const [selectedCategory, setSelectedCategory] = useState("Living room");
+  const [selectedCategory, setSelectedCategory] = useState("Room Photos");
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
+  const [photos, setPhotos] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const photos = {
-    "Living room": [
-      { id: 1, url: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=1200" },
-      { id: 2, url: "https://images.unsplash.com/photo-1567016432779-094069958ea5?w=1200" },
-      { id: 3, url: "https://images.unsplash.com/photo-1600585154154-5c3c1c9c90f1?w=1200" },
-      { id: 4, url: "https://images.unsplash.com/photo-1628744445777-57d20593d353?w=1200" },
-    ],
-    "Full kitchen": [
-      { id: 5, url: "https://images.unsplash.com/photo-1556912173-46c336c7fd55?w=1200" },
-      { id: 6, url: "https://images.unsplash.com/photo-1556911220-bff31c812dba?w=1200" },
-      { id: 7, url: "https://images.unsplash.com/photo-1628744446075-6fce6b1c4cc8?w=1200" },
-    ],
-    "Bedroom 1": [
-      { id: 8, url: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=1200" },
-      { id: 9, url: "https://images.unsplash.com/photo-1540518614846-7eded433c457?w=1200" },
-    ],
-    "Bedroom 2": [
-      { id: 10, url: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200" },
-      { id: 11, url: "https://images.unsplash.com/photo-1615529328331-f8917597711f?w=1200" },
-    ],
-    "Full bathroom 1": [
-      { id: 12, url: "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=1200" },
-      { id: 13, url: "https://images.unsplash.com/photo-1564540583246-934409427776?w=1200" },
-    ],
-    "Full bathroom 2": [
-      { id: 14, url: "https://images.unsplash.com/photo-1603899122328-8a06a7e98e33?w=1200" },
-      { id: 15, url: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200" },
-    ],
-    "Additional photos": [
-      { id: 16, url: "https://images.unsplash.com/photo-1600607687644-c7171b42498b?w=1200" },
-      { id: 17, url: "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?w=1200" },
-    ],
+  const { id } = useParams();
+  const roomId = id;
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  useEffect(() => {
+    if (isOpen && roomId) {
+      fetchRoomImages();
+    } else if (isOpen && !roomId) {
+      setError("Room ID is missing. Cannot load images.");
+    }
+  }, [isOpen, roomId]);
+
+  const fetchRoomImages = async () => {
+    if (!roomId) {
+      setError("Room ID is required");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await axios.get(`${API_URL}/api/rooms?limit=100`);
+      const transformedPhotos = transformApiResponse(res.data);
+      setPhotos(transformedPhotos);
+
+      const categories = Object.keys(transformedPhotos);
+      if (categories.length > 0) {
+        setSelectedCategory(categories[0]);
+      }
+    } catch (err) {
+      setError(`Failed to load room images: ${err.message}`);
+      setPhotos({});
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const transformApiResponse = (apiData) => {
+    if (apiData.rooms && Array.isArray(apiData.rooms)) {
+      const targetRoom = apiData.rooms.find((room) => room._id === roomId);
+      if (targetRoom) {
+        const roomImages = extractImagesFromRoom(targetRoom);
+        if (roomImages.length > 0) {
+          const roomName = targetRoom.title || "Room Photos";
+          return {
+            [roomName]: roomImages,
+          };
+        } else {
+          setError("This room has no images available");
+        }
+      } else {
+        setError(`Room with ID "${roomId}" not found.`);
+      }
+    }
+    return {};
+  };
+
+  const extractImagesFromRoom = (room) => {
+    const images = [];
+    if (room.images && Array.isArray(room.images)) {
+      room.images.forEach((imageUrl, imgIndex) => {
+        if (typeof imageUrl === "string" && imageUrl) {
+          images.push({
+            id: `${room._id}-img-${imgIndex}`,
+            url: imageUrl,
+            alt: room.title || `Room image ${imgIndex + 1}`,
+          });
+        }
+      });
+    }
+    return images;
   };
 
   const categories = Object.keys(photos);
@@ -51,11 +95,13 @@ export const PhotoGalleryModal = ({ isOpen, onClose }) => {
 
   const navigateImage = (direction) => {
     const currentPhotos = photos[selectedCategory];
-    if (selectedImageIndex === null) return;
+    if (selectedImageIndex === null || !currentPhotos) return;
+
     const newIndex =
       direction === "next"
         ? (selectedImageIndex + 1) % currentPhotos.length
-        : (selectedImageIndex - 1 + currentPhotos.length) % currentPhotos.length;
+        : (selectedImageIndex - 1 + currentPhotos.length) %
+          currentPhotos.length;
     setSelectedImageIndex(newIndex);
   };
 
@@ -63,52 +109,60 @@ export const PhotoGalleryModal = ({ isOpen, onClose }) => {
 
   return (
     <div className="gallery-modal">
-      {/* Header */}
-      <div className="gallery-header">
-        <h2>Photo tour</h2>
-        <button className="close-btn" onClick={onClose}>
-          <X size={24} />
-        </button>
-      </div>
-
-      {/* Thumbnails */}
-      <div className="thumbnail-nav">
-        {categories.map((cat) => (
-          <div
-            key={cat}
-            className={`thumb-item ${
-              selectedCategory === cat ? "active" : ""
-            }`}
-            onClick={() => setSelectedCategory(cat)}
-          >
-            <img src={photos[cat][0].url} alt={cat} />
-            <p>{cat}</p>
+      {/* ===== Top Nav  ===== */}
+      <div className="gallery-top-nav">
+        <div className="nav-left">
+          <ChevronLeft size={20} className="back-icon" onClick={onClose} />
+        </div>
+        <div className="nav-right">
+          <div className="nav-item">
+            <Share size={18} />
+            <span>Share</span>
           </div>
-        ))}
+          <div className="nav-item">
+            <Heart size={18} />
+            <span>Save</span>
+          </div>
+        </div>
       </div>
 
-      {/* Sections */}
-      <div className="photo-sections">
-        {categories.map((cat) => (
-          <div key={cat} id={cat} className="photo-section">
-            <h3>{cat}</h3>
-            <div className="photo-grid">
-              {photos[cat].map((photo, i) => (
-                <div
-                  key={photo.id}
-                  className="photo-item"
-                  onClick={() => openLightbox(i, cat)}
-                >
-                  <img src={photo.url} alt={cat} />
-                </div>
-              ))}
+      {/* ===== Main Content ===== */}
+      {!loading && !error && categories.length > 0 && (
+        <div className="photo-sections">
+           <h2>Photo tour</h2>
+          {categories.map((cat) => (
+            <div key={cat} id={cat} className="photo-section">
+              <h3>{cat}</h3>
+              <div className="photo-grid">
+                {photos[cat]?.map((photo, i) => (
+                  <div
+                    key={photo.id}
+                    className="photo-item"
+                    onClick={() => openLightbox(i, cat)}
+                  >
+                    <img
+                      src={photo.url}
+                      alt={photo.alt || cat}
+                      onError={(e) => {
+                        e.target.style.display = "none";
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
-      {/* Lightbox */}
-      {selectedImageIndex !== null && (
+      {!loading && !error && categories.length === 0 && (
+        <div className="no-photos">
+          <p>No photos available for room ID: {roomId}</p>
+          <button onClick={fetchRoomImages}>Retry Load</button>
+        </div>
+      )}
+
+      {selectedImageIndex !== null && photos[selectedCategory] && (
         <div className="lightbox" onClick={closeLightbox}>
           <button className="lightbox-close" onClick={closeLightbox}>
             <X size={32} />
@@ -125,7 +179,10 @@ export const PhotoGalleryModal = ({ isOpen, onClose }) => {
           <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
             <img
               src={photos[selectedCategory][selectedImageIndex].url}
-              alt={selectedCategory}
+              alt={
+                photos[selectedCategory][selectedImageIndex].alt ||
+                selectedCategory
+              }
             />
             <p className="caption">
               {selectedCategory} — {selectedImageIndex + 1} /{" "}
