@@ -2,17 +2,74 @@
   position: fixed;
   inset: 0;
   background: #fff;
-  overflow-y: auto;
+  overflow: hidden;
   z-index: 1000;
-  padding: 2rem 3rem;
-  font-family: "Inter", sans-serif;
+  padding: 2rem 2rem 1rem 2rem; /* reduced bottom padding */
+  font-family: "Manrope", sans-serif;
   color: #222;
+
+   // ===== Top Navigation Bar =====
+  .gallery-top-nav {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.2rem 2rem;
+    background: #fff;
+   
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+
+      .back-icon {
+        cursor: pointer;
+        color: #222;
+        transition: opacity 0.2s ease;
+        &:hover {
+          opacity: 0.7;
+        }
+      }
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 1.8rem;
+
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        cursor: pointer;
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: #222;
+        text-decoration: underline;
+        transition: opacity 0.2s ease;
+        padding: 6px 6px;
+        border-radius: 10px;
+
+        svg {
+          width: 18px;
+          height: 18px;
+        }
+
+        &:hover {
+         background-color: rgba(229, 229, 229, 0.293);
+       
+        }
+      }
+    }
+  }
 
   .gallery-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1.5rem;
+    margin-bottom: 10px;
 
     h2 {
       font-size: 1.8rem;
@@ -31,7 +88,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
-    margin-bottom: 2.5rem;
+    margin-bottom: 1.5rem;
 
     .thumb-item {
       width: 160px;
@@ -65,15 +122,28 @@
     }
   }
 
-  /* Section styling - Left h3 and right images grid */
+  /* Main photo sections */
   .photo-sections {
     display: flex;
     flex-direction: column;
     gap: 3rem;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    padding-left: 70px;
+    padding-bottom: 8rem; /* 👈 ensures bottom images are fully visible */
+    scroll-behavior: smooth;
+
+    /* Hide scrollbar but keep functionality */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+
 
     .photo-section {
       display: grid;
-      grid-template-columns: 1fr 2fr; /* 1/3 for h3, 2/3 for images */
+      grid-template-columns: 1fr 2fr;
       gap: 2rem;
       align-items: start;
 
@@ -84,31 +154,39 @@
         padding-top: 0.5rem;
         text-align: left;
         position: sticky;
-        top: 1rem;
+        top: 0;
+        background: white;
+        padding-bottom: 0.5rem;
+        z-index: 1;
       }
 
       .photo-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
         gap: 1rem;
+        align-items: start;
 
         .photo-item {
-          cursor: pointer;
-          border-radius: 8px;
+          border-radius: 12px;
           overflow: hidden;
+          cursor: pointer;
           transition: all 0.3s ease;
-          aspect-ratio: 4/3;
-
-          &:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-          }
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          background: #f9f9f9;
 
           img {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 8px;
+            height: auto; /* keeps original image ratio */
+            object-fit: contain; /* prevents cropping */
+            border-radius: 12px;
+            transition: transform 0.3s ease;
+            display: block;
+          }
+
+          &:hover img {
+            transform: scale(1.03);
           }
         }
       }
@@ -116,75 +194,25 @@
   }
 }
 
-/* Lightbox */
-.lightbox {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.9);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
-  color: #fff;
-
-  .lightbox-content {
-    max-width: 90%;
-    max-height: 80%;
-    text-align: center;
-
-    img {
-      max-width: 100%;
-      max-height: 70vh;
-      border-radius: 10px;
-    }
-
-    .caption {
-      margin-top: 1rem;
-      font-size: 0.95rem;
-      opacity: 0.8;
-    }
-  }
-
-  .lightbox-close,
-  .lightbox-nav {
-    position: absolute;
-    background: none;
-    border: none;
-    color: #fff;
-    cursor: pointer;
-    padding: 0.5rem;
-    border-radius: 4px;
-    transition: background-color 0.2s ease;
-
-    &:hover {
-      background-color: rgba(255, 255, 255, 0.1);
-    }
-  }
-
-  .lightbox-close {
-    top: 2rem;
-    right: 2rem;
-  }
-
-  .lightbox-nav.prev {
-    left: 2rem;
-  }
-
-  .lightbox-nav.next {
-    right: 2rem;
-  }
-}
-
 /* Responsive */
 @media (max-width: 1024px) {
   .gallery-modal .photo-sections .photo-section {
-    grid-template-columns: 1fr 1.5fr; /* Adjust ratio for tablet */
+    grid-template-columns: 1fr 1.5fr;
+
+    .photo-grid {
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
   }
 }
 
 @media (max-width: 768px) {
   .gallery-modal {
     padding: 1rem;
+
+    .photo-sections {
+      height: calc(100vh - 150px);
+      padding-bottom: 1.5rem;
+    }
 
     .thumbnail-nav {
       justify-content: center;
@@ -194,46 +222,62 @@
       }
     }
 
-    /* Stack vertically on mobile */
     .photo-sections .photo-section {
       grid-template-columns: 1fr;
-      gap: 1rem;
+      gap: 1.5rem;
 
       h3 {
         position: static;
         text-align: center;
         padding-bottom: 0.5rem;
         border-bottom: 2px solid #f0f0f0;
+        font-size: 1.4rem;
       }
 
       .photo-grid {
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 1rem;
       }
     }
-  }
-
-  .lightbox .lightbox-content img {
-    max-height: 60vh;
   }
 }
 
 @media (max-width: 480px) {
   .gallery-modal {
+    .photo-sections {
+      height: calc(100vh - 120px);
+      padding-bottom: 1rem;
+    }
+
     .photo-sections .photo-section .photo-grid {
       grid-template-columns: repeat(2, 1fr);
-      gap: 0.5rem;
+      gap: 0.75rem;
+
+      .photo-item {
+        aspect-ratio: auto;
+      }
     }
 
     .thumbnail-nav .thumb-item {
-      width: 100px;
-      
+      width: 120px;
+
       img {
-        height: 80px;
+        height: 90px;
       }
-      
+
       p {
-        font-size: 0.8rem;
+        font-size: 0.85rem;
       }
+    }
+  }
+}
+
+/* Extra large screens */
+@media (min-width: 1440px) {
+  .gallery-modal {
+    .photo-sections .photo-section .photo-grid {
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
     }
   }
 }
