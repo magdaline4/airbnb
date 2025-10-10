@@ -52,10 +52,7 @@
         display: block;
       }
 
-      &:first-child {
-        border-top-right-radius: 12px;
-      }
-
+      
       &:last-child {
         border-bottom-right-radius: 12px;
       }
@@ -63,8 +60,8 @@
        .overlay {
           position: absolute;
           inset: 0;
-          top: 160px;
-          left: 10px; // Fixed: added 'px' unit
+          top: 180px;
+          left: 50px; // Fixed: added 'px' unit
           display: flex;
           align-items: center;
           justify-content: center;

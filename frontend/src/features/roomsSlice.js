@@ -43,16 +43,33 @@ export const fetchRoomById = createAsyncThunk(
   }
 );
 
+// ✅ NEW: Fetch amenities
+export const fetchAmenities = createAsyncThunk(
+  "rooms/fetchAmenities",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await axios.get(`${API_URL}/api/amenitiesitem/items`);
+      const payload = res?.data?.data ?? res?.data ?? [];
+      return Array.isArray(payload) ? payload : [];
+    } catch (err) {
+      return rejectWithValue(err.response?.data || "Error fetching amenities");
+    }
+  }
+);
+
 const roomsSlice = createSlice({
   name: "rooms",
   initialState: {
     rooms: [],
     room: null,          // ✅ for single room details
+    amenities: [],       // ✅ NEW: for amenities
     totalPages: 1,
     totalRooms: 0,
     currentPage: 1,
     loading: false,
     error: null,
+    amenitiesLoading: false, // ✅ NEW: separate loading for amenities
+    amenitiesError: null,    // ✅ NEW: separate error for amenities
     likedRooms: [],
   },
   reducers: {
@@ -103,6 +120,20 @@ const roomsSlice = createSlice({
       .addCase(fetchRoomById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+
+      // ✅ NEW: Amenities
+      .addCase(fetchAmenities.pending, (state) => {
+        state.amenitiesLoading = true;
+        state.amenitiesError = null;
+      })
+      .addCase(fetchAmenities.fulfilled, (state, action) => {
+        state.amenitiesLoading = false;
+        state.amenities = action.payload;
+      })
+      .addCase(fetchAmenities.rejected, (state, action) => {
+        state.amenitiesLoading = false;
+        state.amenitiesError = action.payload;
       });
   },
 });

@@ -5,6 +5,11 @@ import Footer from "../../Components/Footer/Footer";
 import "./HostOnboardingPage.scss";
 import { FaHome, FaBed, FaBath, FaWifi, FaCar, FaUtensils, FaSwimmingPool, FaCamera, FaMapMarkerAlt, FaDollarSign, FaCalendarAlt, FaCheck } from "react-icons/fa";
 import { MdKeyboardArrowRight, MdKeyboardArrowLeft, MdPhotoCamera, MdLocationOn } from "react-icons/md";
+import { DateRange } from "react-date-range";
+import "react-date-range/dist/styles.css";
+import "react-date-range/dist/theme/default.css";
+
+
 
 const HostOnboardingPage = () => {
   const navigate = useNavigate();
@@ -46,7 +51,10 @@ const HostOnboardingPage = () => {
     currency: "USD",
     
     // Step 9: Availability
-    availability: {},
+    availability: { startDate: null, endDate: null },
+    minStay: "1",
+    maxStay: "No limit",
+    showCalendar: false,
     
     // Step 10: Review
     isReady: false
@@ -519,44 +527,111 @@ const HostOnboardingPage = () => {
 
               {/* Step 9: Availability */}
               {currentStep === 9 && (
-                <div className="step-content">
-                  <h1>Set your availability</h1>
-                  <p>Choose when your place is available for guests.</p>
-                  
-                  <div className="availability-form">
-                    <div className="calendar-placeholder">
-                      <FaCalendarAlt className="calendar-icon" />
-                      <h3>Calendar</h3>
-                      <p>Select your available dates</p>
-                      <button className="calendar-button">Open calendar</button>
-                    </div>
-                    
-                    <div className="availability-settings">
-                      <h3>Availability settings</h3>
-                      <div className="setting-item">
-                        <label>Minimum stay</label>
-                        <select>
-                          <option>1 night</option>
-                          <option>2 nights</option>
-                          <option>3 nights</option>
-                          <option>1 week</option>
-                        </select>
-                      </div>
-                      
-                      <div className="setting-item">
-                        <label>Maximum stay</label>
-                        <select>
-                          <option>No limit</option>
-                          <option>7 nights</option>
-                          <option>14 nights</option>
-                          <option>28 nights</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
+  <div className="step-content">
+    <h1>Set your availability</h1>
+    <p>Choose when your place is available for guests.</p>
 
+    <div className="availability-form">
+      {/* 🗓️ Date Picker Trigger */}
+      <div className="date-picker-trigger">
+        <label htmlFor="availability">Select dates</label>
+
+        <div
+          className="date-input"
+          onClick={() =>
+            setHostData((prev) => ({
+              ...prev,
+              showCalendar: !prev.showCalendar,
+            }))
+          }
+        >
+          <FaCalendarAlt className="calendar-icon" />
+          <span>
+            {hostData.availability?.startDate && hostData.availability?.endDate
+              ? `${new Date(
+                  hostData.availability.startDate
+                ).toLocaleDateString()} - ${new Date(
+                  hostData.availability.endDate
+                ).toLocaleDateString()}`
+              : "Select your available dates"}
+          </span>
+        </div>
+
+        {/* 📅 Popup Calendar */}
+        {hostData.showCalendar && (
+          <div className="calendar-popup">
+            <DateRange
+              editableDateInputs={true}
+              onChange={(item) => {
+                const { startDate, endDate } = item.selection;
+                setHostData((prev) => ({
+                  ...prev,
+                  availability: { startDate, endDate },
+                }));
+              }}
+              moveRangeOnFirstSelection={false}
+              ranges={[
+                {
+                  startDate:
+                    hostData.availability?.startDate || new Date(),
+                  endDate: hostData.availability?.endDate || new Date(),
+                  key: "selection",
+                },
+              ]}
+              minDate={new Date()}
+            />
+            <button
+              className="close-calendar"
+              onClick={() =>
+                setHostData((prev) => ({
+                  ...prev,
+                  showCalendar: false,
+                }))
+              }
+            >
+              Done
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* ⚙️ Availability Settings */}
+      <div className="availability-settings">
+        <h3>Stay duration</h3>
+
+        <div className="setting-item">
+          <label>Minimum stay</label>
+          <select
+            value={hostData.minStay || "1"}
+            onChange={(e) =>
+              handleInputChange("minStay", e.target.value)
+            }
+          >
+            <option value="1">1 night</option>
+            <option value="2">2 nights</option>
+            <option value="3">3 nights</option>
+            <option value="7">1 week</option>
+          </select>
+        </div>
+
+        <div className="setting-item">
+          <label>Maximum stay</label>
+          <select
+            value={hostData.maxStay || "No limit"}
+            onChange={(e) =>
+              handleInputChange("maxStay", e.target.value)
+            }
+          >
+            <option value="No limit">No limit</option>
+            <option value="7">7 nights</option>
+            <option value="14">14 nights</option>
+            <option value="28">28 nights</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
               {/* Step 10: Review */}
               {currentStep === 10 && (
                 <div className="step-content">
