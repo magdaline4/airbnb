@@ -8,12 +8,61 @@ import { MdKeyboardArrowRight, MdKeyboardArrowLeft, MdPhotoCamera, MdLocationOn 
 import { DateRange } from "react-date-range";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
+import { roomService } from "../../services/roomService";
 
+// Map frontend amenities to backend amenities
+const AMENITIES_MAPPING = {
+  wifi: "Wifi",
+  kitchen: "Kitchen",
+  parking: "Free parking",
+  pool: "Pool",
+  ac: "Air conditioning",
+  heating: "Heating",
+  tv: "TV",
+  washer: "Washing machine",
+  dryer: "Dryer",
+  hot_tub: "Hot tub",
+  gym: "Gym",
+  workspace: "Workspace"
+};
 
+// COMPLETE Property Type Mapping - Matches your backend schema EXACTLY
+const PROPERTY_TYPE_MAPPING = {
+  "House": "House",
+  "Apartment": "Apartment", 
+  "Guesthouse": "Guest house",
+  "Hotel": "Hotel",
+  "Hostel": "Hostel",
+  "Villa": "villa",           // lowercase
+  "Cabin": "cabin",           // lowercase
+  "Condo": "condo",           // lowercase - ADDED THIS
+  "Townhouse": "Townhouse",
+  "Loft": "Loft",
+  "Other": "Others"           // Plural - ADDED THIS
+};
+
+// CORRECT Room Type Mapping - Matches your backend schema exactly
+const ROOM_TYPE_MAPPING = {
+  "entire": "Entire home",
+  "private": "Room", 
+  "shared": "Shared Room"
+};
+
+// Helper function to convert file to Base64
+const convertToBase64 = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+  });
+};
 
 const HostOnboardingPage = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploadingPhotos, setIsUploadingPhotos] = useState(false);
   const [hostData, setHostData] = useState({
     // Step 1: Welcome
     hostType: "",
@@ -28,7 +77,7 @@ const HostOnboardingPage = () => {
     state: "",
     zipCode: "",
     country: "",
-    coordinates: null,
+    coordinates: { lat: null, lng: null },
     
     // Step 4: Basics
     bedrooms: 0,
@@ -63,6 +112,16 @@ const HostOnboardingPage = () => {
   const totalSteps = 10;
   const progress = (currentStep / totalSteps) * 100;
 
+  // Verify mapping on component mount
+  useEffect(() => {
+    console.log('=== VERIFYING MAPPING ===');
+    console.log('Backend expects these property types:', [
+      "House", "Flat", "Guest house", "Hotel", "Apartment", 
+      "Hostel", "villa", "cabin", "condo", "Townhouse", "Loft", "Others"
+    ]);
+    console.log('Our mapping covers:', Object.values(PROPERTY_TYPE_MAPPING));
+  }, []);
+
   const handleInputChange = (field, value) => {
     setHostData(prev => ({
       ...prev,
@@ -91,14 +150,129 @@ const HostOnboardingPage = () => {
     }
   };
 
-  const handleSubmitListing = async () => {
+  // Handle photo upload and conversion to Base64
+  const handlePhotoUpload = async (files) => {
+    setIsUploadingPhotos(true);
     try {
-      console.log("Submitting listing:", hostData);
+      const base64Images = await Promise.all(
+        files.map(file => convertToBase64(file))
+      );
+      setHostData(prev => ({
+        ...prev,
+        photos: [...prev.photos, ...base64Images]
+      }));
+    } catch (error) {
+      console.error("Photo conversion failed:", error);
+      alert("Failed to process images. Please try again.");
+    } finally {
+      setIsUploadingPhotos(false);
+    }
+  };
+
+  // Transform data for backend
+  const transformDataForBackend = () => {
+    // Debug the incoming data
+    console.log('=== TRANSFORM DEBUG ===');
+    console.log('Property Category from form:', hostData.propertyCategory);
+    console.log('Property Type from form:', hostData.propertyType);
+
+    // Map property type - Use the mapping
+    const backendPropertyType = PROPERTY_TYPE_MAPPING[hostData.propertyCategory];
+    
+    // Map room type - Use the mapping
+    const backendRoomType = ROOM_TYPE_MAPPING[hostData.propertyType];
+
+    console.log('Mapped Property Type:', backendPropertyType);
+    console.log('Mapped Room Type:', backendRoomType);
+
+    // Map amenities to backend format
+    const backendAmenities = hostData.amenities
+      .map(amenity => AMENITIES_MAPPING[amenity])
+      .filter(amenity => amenity);
+
+    // Handle maxStay conversion
+    let maxNights = 30;
+    if (hostData.maxStay !== "No limit") {
+      maxNights = parseInt(hostData.maxStay);
+    }
+
+    return {
+      title: hostData.title,
+      description: hostData.description,
+      propertyType: backendPropertyType,
+      roomType: backendRoomType,
+      type: hostData.propertyType,
+      
+      // Location data
+      location: {
+        lat: hostData.coordinates.lat || 40.7128,
+        lng: hostData.coordinates.lng || -74.0060
+      },
+      address: {
+        street: hostData.address,
+        city: hostData.city,
+        state: hostData.state,
+        country: hostData.country,
+        postalCode: hostData.zipCode
+      },
+      
+      // Capacity
+      guests: hostData.guests,
+      beds: hostData.beds || 1,
+      bedrooms: hostData.bedrooms,
+      bathrooms: hostData.bathrooms,
+      
+      // Amenities
+      amenities: backendAmenities,
+      
+      // Pricing
+      price: hostData.basePrice,
+      
+      // Availability rules
+      minNights: parseInt(hostData.minStay),
+      maxNights: maxNights,
+      
+      // Images as Base64 strings
+      images: hostData.photos,
+      
+      // Default values for required fields
+      rating: 0,
+      reviewCount: 0,
+      isGuestFavorite: false,
+      cancellationPolicy: "moderate",
+      checkIn: "14:00",
+      checkOut: "11:00",
+      verified: false,
+      published: true
+    };
+  };
+
+  const handleSubmitListing = async () => {
+    if (!isStepValid()) {
+      alert("Please complete all required fields before submitting.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const roomData = transformDataForBackend();
+      console.log("Submitting room data:", roomData);
+      console.log("Number of images:", roomData.images.length);
+      console.log("Property Type being sent:", roomData.propertyType);
+      console.log("Room Type being sent:", roomData.roomType);
+      
+      const response = await roomService.createRoom(roomData);
+      
+      console.log("Listing submitted successfully:", response);
       alert("Congratulations! Your listing has been published!");
       navigate("/host/dashboard");
     } catch (err) {
       console.error("Listing submission failed:", err);
-      alert("Failed to publish listing. Please try again.");
+      console.error("Error details:", err.response?.data);
+      const errorMessage = err.response?.data?.message || "Failed to publish listing. Please try again.";
+      alert(errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -109,14 +283,39 @@ const HostOnboardingPage = () => {
       case 3: return hostData.address && hostData.city && hostData.country;
       case 4: return hostData.bedrooms > 0 && hostData.bathrooms > 0 && hostData.guests > 0;
       case 5: return hostData.amenities.length > 0;
-      case 6: return hostData.photos.length > 0;
+      case 6: return hostData.photos.length >= 5;
       case 7: return hostData.title && hostData.description;
       case 8: return hostData.basePrice > 0;
-      case 9: return Object.keys(hostData.availability).length > 0;
+      case 9: return hostData.availability.startDate && hostData.availability.endDate;
       case 10: return hostData.isReady;
       default: return false;
     }
   };
+
+  // Add geocoding function for address
+  const handleGeocodeAddress = async () => {
+    if (hostData.address && hostData.city && hostData.country) {
+      try {
+        const mockCoordinates = {
+          lat: 40.7128 + (Math.random() - 0.5) * 0.1,
+          lng: -74.0060 + (Math.random() - 0.5) * 0.1
+        };
+        setHostData(prev => ({
+          ...prev,
+          coordinates: mockCoordinates
+        }));
+      } catch (error) {
+        console.error("Geocoding failed:", error);
+      }
+    }
+  };
+
+  // Auto-geocode when location data changes
+  useEffect(() => {
+    if (hostData.address && hostData.city && hostData.country) {
+      handleGeocodeAddress();
+    }
+  }, [hostData.address, hostData.city, hostData.country]);
 
   return (
     <>
@@ -232,7 +431,7 @@ const HostOnboardingPage = () => {
                   <div className="property-categories">
                     <h3>What type of property is this?</h3>
                     <div className="category-grid">
-                      {["House", "Apartment", "Guesthouse", "Hotel", "Hostel", "Villa", "Cabin", "Condo", "Townhouse", "Loft", "Other"].map(category => (
+                      {Object.keys(PROPERTY_TYPE_MAPPING).map(category => (
                         <button
                           key={category}
                           className={`category-btn ${hostData.propertyCategory === category ? "selected" : ""}`}
@@ -393,71 +592,66 @@ const HostOnboardingPage = () => {
               )}
 
               {/* Step 6: Photos */}
-             {/* Step 6: Photos */}
-{currentStep === 6 && (
-  <div className="step-content">
-    <h1>Add some photos of your place</h1>
-    <p>You'll need 5 photos to get started. You can add more or make changes later.</p>
-    
-    <div className="photo-upload-area">
-      <div className="upload-zone">
-        <MdPhotoCamera className="upload-icon" />
-        <h3>Drag your photos here</h3>
-        <p>Choose at least 5 photos</p>
+              {currentStep === 6 && (
+                <div className="step-content">
+                  <h1>Add some photos of your place</h1>
+                  <p>You'll need 5 photos to get started. You can add more or make changes later.</p>
+                  
+                  <div className="photo-upload-area">
+                    <div className="upload-zone">
+                      <MdPhotoCamera className="upload-icon" />
+                      <h3>Drag your photos here</h3>
+                      <p>Choose at least 5 photos</p>
 
-        {/* Hidden file input */}
-        <input
-          type="file"
-          accept="image/*"
-          multiple
-          id="photoInput"
-          style={{ display: "none" }}
-          onChange={(e) => {
-            const files = Array.from(e.target.files);
-            const fileURLs = files.map(file => URL.createObjectURL(file));
-            setHostData(prev => ({
-              ...prev,
-              photos: [...prev.photos, ...fileURLs]
-            }));
-          }}
-        />
+                      {/* Hidden file input */}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        id="photoInput"
+                        style={{ display: "none" }}
+                        onChange={async (e) => {
+                          const files = Array.from(e.target.files);
+                          await handlePhotoUpload(files);
+                        }}
+                      />
 
-        <button
-          className="upload-button"
-          onClick={() => document.getElementById("photoInput").click()}
-        >
-          Upload from your device
-        </button>
-      </div>
+                      <button
+                        className="upload-button"
+                        onClick={() => document.getElementById("photoInput").click()}
+                        disabled={isUploadingPhotos}
+                      >
+                        {isUploadingPhotos ? "Processing..." : "Upload from your device"}
+                      </button>
+                    </div>
 
-      {/* Photo Preview Section */}
-      {hostData.photos.length > 0 && (
-        <div className="uploaded-photos">
-          <h3>Uploaded photos ({hostData.photos.length})</h3>
-          <div className="photo-grid">
-            {hostData.photos.map((photo, index) => (
-              <div key={index} className="photo-preview">
-                <img src={photo} alt={`Upload ${index + 1}`} />
-                <button
-                  className="remove-photo"
-                  onClick={() =>
-                    setHostData(prev => ({
-                      ...prev,
-                      photos: prev.photos.filter((_, i) => i !== index)
-                    }))
-                  }
-                >
-                  ×
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  </div>
-)}
-
+                    {/* Photo Preview Section */}
+                    {hostData.photos.length > 0 && (
+                      <div className="uploaded-photos">
+                        <h3>Uploaded photos ({hostData.photos.length})</h3>
+                        <div className="photo-grid">
+                          {hostData.photos.map((photo, index) => (
+                            <div key={index} className="photo-preview">
+                              <img src={photo} alt={`Upload ${index + 1}`} />
+                              <button
+                                className="remove-photo"
+                                onClick={() =>
+                                  setHostData(prev => ({
+                                    ...prev,
+                                    photos: prev.photos.filter((_, i) => i !== index)
+                                  }))
+                                }
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Step 7: Title & Description */}
               {currentStep === 7 && (
@@ -527,111 +721,109 @@ const HostOnboardingPage = () => {
 
               {/* Step 9: Availability */}
               {currentStep === 9 && (
-  <div className="step-content">
-    <h1>Set your availability</h1>
-    <p>Choose when your place is available for guests.</p>
+                <div className="step-content">
+                  <h1>Set your availability</h1>
+                  <p>Choose when your place is available for guests.</p>
 
-    <div className="availability-form">
-      {/* 🗓️ Date Picker Trigger */}
-      <div className="date-picker-trigger">
-        <label htmlFor="availability">Select dates</label>
+                  <div className="availability-form">
+                    <div className="date-picker-trigger">
+                      <label htmlFor="availability">Select dates</label>
 
-        <div
-          className="date-input"
-          onClick={() =>
-            setHostData((prev) => ({
-              ...prev,
-              showCalendar: !prev.showCalendar,
-            }))
-          }
-        >
-          <FaCalendarAlt className="calendar-icon" />
-          <span>
-            {hostData.availability?.startDate && hostData.availability?.endDate
-              ? `${new Date(
-                  hostData.availability.startDate
-                ).toLocaleDateString()} - ${new Date(
-                  hostData.availability.endDate
-                ).toLocaleDateString()}`
-              : "Select your available dates"}
-          </span>
-        </div>
+                      <div
+                        className="date-input"
+                        onClick={() =>
+                          setHostData((prev) => ({
+                            ...prev,
+                            showCalendar: !prev.showCalendar,
+                          }))
+                        }
+                      >
+                        <FaCalendarAlt className="calendar-icon" />
+                        <span>
+                          {hostData.availability?.startDate && hostData.availability?.endDate
+                            ? `${new Date(
+                                hostData.availability.startDate
+                              ).toLocaleDateString()} - ${new Date(
+                                hostData.availability.endDate
+                              ).toLocaleDateString()}`
+                            : "Select your available dates"}
+                        </span>
+                      </div>
 
-        {/* 📅 Popup Calendar */}
-        {hostData.showCalendar && (
-          <div className="calendar-popup">
-            <DateRange
-              editableDateInputs={true}
-              onChange={(item) => {
-                const { startDate, endDate } = item.selection;
-                setHostData((prev) => ({
-                  ...prev,
-                  availability: { startDate, endDate },
-                }));
-              }}
-              moveRangeOnFirstSelection={false}
-              ranges={[
-                {
-                  startDate:
-                    hostData.availability?.startDate || new Date(),
-                  endDate: hostData.availability?.endDate || new Date(),
-                  key: "selection",
-                },
-              ]}
-              minDate={new Date()}
-            />
-            <button
-              className="close-calendar"
-              onClick={() =>
-                setHostData((prev) => ({
-                  ...prev,
-                  showCalendar: false,
-                }))
-              }
-            >
-              Done
-            </button>
-          </div>
-        )}
-      </div>
+                      {hostData.showCalendar && (
+                        <div className="calendar-popup">
+                          <DateRange
+                            editableDateInputs={true}
+                            onChange={(item) => {
+                              const { startDate, endDate } = item.selection;
+                              setHostData((prev) => ({
+                                ...prev,
+                                availability: { startDate, endDate },
+                              }));
+                            }}
+                            moveRangeOnFirstSelection={false}
+                            ranges={[
+                              {
+                                startDate:
+                                  hostData.availability?.startDate || new Date(),
+                                endDate: hostData.availability?.endDate || new Date(),
+                                key: "selection",
+                              },
+                            ]}
+                            minDate={new Date()}
+                          />
+                          <button
+                            className="close-calendar"
+                            onClick={() =>
+                              setHostData((prev) => ({
+                                ...prev,
+                                showCalendar: false,
+                              }))
+                            }
+                          >
+                            Done
+                          </button>
+                        </div>
+                      )}
+                    </div>
 
-      {/* ⚙️ Availability Settings */}
-      <div className="availability-settings">
-        <h3>Stay duration</h3>
+                    <div className="availability-settings">
+                      <h3>Stay duration</h3>
 
-        <div className="setting-item">
-          <label>Minimum stay</label>
-          <select
-            value={hostData.minStay || "1"}
-            onChange={(e) =>
-              handleInputChange("minStay", e.target.value)
-            }
-          >
-            <option value="1">1 night</option>
-            <option value="2">2 nights</option>
-            <option value="3">3 nights</option>
-            <option value="7">1 week</option>
-          </select>
-        </div>
+                      <div className="setting-item">
+                        <label>Minimum stay</label>
+                        <select
+                          value={hostData.minStay || "1"}
+                          onChange={(e) =>
+                            handleInputChange("minStay", e.target.value)
+                          }
+                        >
+                          <option value="1">1 night</option>
+                          <option value="2">2 nights</option>
+                          <option value="3">3 nights</option>
+                          <option value="7">1 week</option>
+                        </select>
+                      </div>
 
-        <div className="setting-item">
-          <label>Maximum stay</label>
-          <select
-            value={hostData.maxStay || "No limit"}
-            onChange={(e) =>
-              handleInputChange("maxStay", e.target.value)
-            }
-          >
-            <option value="No limit">No limit</option>
-            <option value="7">7 nights</option>
-            <option value="14">14 nights</option>
-            <option value="28">28 nights</option>
-          </select>
-        </div>
-      </div>
-    </div>
-  </div>
-)}
+                      <div className="setting-item">
+                        <label>Maximum stay</label>
+                        <select
+                          value={hostData.maxStay || "No limit"}
+                          onChange={(e) =>
+                            handleInputChange("maxStay", e.target.value)
+                          }
+                        >
+                          <option value="No limit">No limit</option>
+                          <option value="7">7 nights</option>
+                          <option value="14">14 nights</option>
+                          <option value="28">28 nights</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Step 10: Review */}
               {currentStep === 10 && (
                 <div className="step-content">
@@ -647,12 +839,26 @@ const HostOnboardingPage = () => {
                     
                     <div className="summary-section">
                       <h3>Amenities</h3>
-                      <p>{hostData.amenities.join(", ")}</p>
+                      <p>{hostData.amenities.map(amenity => AMENITIES_MAPPING[amenity]).join(", ")}</p>
                     </div>
                     
                     <div className="summary-section">
                       <h3>Pricing</h3>
                       <p><strong>Base price:</strong> ${hostData.basePrice} per night</p>
+                    </div>
+
+                    <div className="summary-section">
+                      <h3>Availability</h3>
+                      <p><strong>Minimum stay:</strong> {hostData.minStay} nights</p>
+                      <p><strong>Maximum stay:</strong> {hostData.maxStay}</p>
+                      {hostData.availability.startDate && hostData.availability.endDate && (
+                        <p><strong>Available from:</strong> {new Date(hostData.availability.startDate).toLocaleDateString()} to {new Date(hostData.availability.endDate).toLocaleDateString()}</p>
+                      )}
+                    </div>
+
+                    <div className="summary-section">
+                      <h3>Photos</h3>
+                      <p><strong>Number of photos:</strong> {hostData.photos.length}</p>
                     </div>
                     
                     <div className="agreement-section">
@@ -693,9 +899,9 @@ const HostOnboardingPage = () => {
                   <button 
                     onClick={handleSubmitListing} 
                     className="nav-button submit"
-                    disabled={!isStepValid()}
+                    disabled={!isStepValid() || isSubmitting}
                   >
-                    Publish listing
+                    {isSubmitting ? "Publishing..." : "Publish listing"}
                   </button>
                 )}
               </div>

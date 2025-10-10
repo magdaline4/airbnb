@@ -38,7 +38,6 @@ app.use("/api/listings", listingRoutes);
 app.use("/api/rooms", roomsRoutes);
 app.use('/api/amenities', amenitiesRoutes);
 app.use('/api/amenitiesitem', amenitiesitemRoutes);
-app.use("/api/rooms", roomsRoutes);
 
 
 // Root endpoint
