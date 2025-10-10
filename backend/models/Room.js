@@ -18,15 +18,12 @@ const PROPERTY_TYPES = [
 
 // ✅ Allowed room types based on your list
 const ROOM_TYPES = [
-  "Any type Room",
-  "Entire home",
-  "Room",
-  "Entire Place",
-  "Private Room",
-  "Shared Room"
+ "Entire home",    // For entire places
+  "Private Room",   // For private rooms  
+  "Shared Room"     // For shared rooms
 ];
 
-// ✅ Allowed amenities based on your list
+// ✅ Allowed amenities
 const AMENITIES = [
   "Wifi",
   "Air conditioning",

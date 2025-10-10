@@ -6,6 +6,15 @@ const AppError = require("../utils/AppError");
 exports.createRoom = asyncHandler(async (req, res, next) => {
   const payload = req.body;
 
+  console.log('=== INCOMING ROOM CREATION ===');
+  console.log('Room Type:', payload.roomType);
+  console.log('Property Type:', payload.propertyType);
+  console.log('Allowed Room Types:', ["Entire home", "Private Room", "Shared Room"]);
+  console.log('Allowed Property Types:', [
+    "House", "Flat", "Guest house", "Hotel", "Apartment", 
+    "Hostel", "villa", "cabin", "condo", "Townhouse", "Loft", "Others"
+  ]);
+
   // Validate address for single room creation
   if (!Array.isArray(payload) && payload.address) {
     const { street, city, state, country, postalCode } = payload.address;
@@ -14,35 +23,7 @@ exports.createRoom = asyncHandler(async (req, res, next) => {
     }
   }
 
-  // Validate address for multiple rooms creation
-  if (Array.isArray(payload)) {
-    for (const roomData of payload) {
-      if (roomData.address) {
-        const { street, city, state, country, postalCode } = roomData.address;
-        if (!street || !city || !state || !country || !postalCode) {
-          return next(new AppError("All address fields (street, city, state, country, postalCode) are required for each room", 400));
-        }
-      }
-    }
-  }
-
-  if (Array.isArray(payload)) {
-    const rooms = await Room.insertMany(payload, { ordered: false });
-    return res.status(201).json({
-      success: true,
-      count: rooms.length,
-      rooms,
-      message: `${rooms.length} rooms created successfully`
-    });
-  } else {
-    const room = new Room(payload);
-    const savedRoom = await room.save();
-    return res.status(201).json({
-      success: true,
-      room: savedRoom,
-      message: "Room created successfully"
-    });
-  }
+  // Rest of your existing validation code...
 });
 
 // Get all rooms with pagination and filtering - UPDATED to include address

@@ -9,15 +9,15 @@ const api = axios.create({
 
 export const roomService = {
   createRoom: async (roomData) => {
-    const response = await api.post("/rooms", roomData); // matches Express router POST /api/rooms
+    const response = await api.post("/api/rooms", roomData); // matches Express router POST /api/rooms
     return response.data;
   },
   getRoomById: async (id) => {
-    const response = await api.get(`/rooms/${id}`);
+    const response = await api.get(`/api/rooms/${id}`);
     return response.data;
   },
   updateRoom: async (id, roomData) => {
-    const response = await api.put(`/rooms/${id}`, roomData);
+    const response = await api.put(`/api/rooms/${id}`, roomData);
     return response.data;
   },
 };

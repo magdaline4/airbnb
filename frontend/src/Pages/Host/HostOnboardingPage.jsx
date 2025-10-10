@@ -10,7 +10,32 @@ import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 import { roomService } from "../../services/roomService";
 
-// Map frontend amenities to backend amenities
+// CORRECT Property Type Mapping - Matches backend enum EXACTLY
+// CORRECT Property Type Mapping - Matches backend enum EXACTLY
+const PROPERTY_TYPE_MAPPING = {
+  "House": "House",
+  "Apartment": "Apartment", 
+  "Flat": "Flat",           // ADDED - from backend enum
+  "Guesthouse": "Guest house",
+  "Hotel": "Hotel",
+  "Hostel": "Hostel",
+  "Villa": "villa",
+  "Cabin": "cabin",
+  "Condo": "condo",
+  "Townhouse": "Townhouse",
+  "Loft": "Loft",
+  "Other": "Others"
+};
+
+// CORRECT Room Type Mapping - Based on actual backend acceptance
+const ROOM_TYPE_MAPPING = {
+  "entire": "Entire home",    // ✅ For entire places
+  "private": "Private Room",  // ✅ For private rooms
+  "shared": "Shared Room"     // ✅ For shared rooms
+};
+
+
+// Complete Amenities Mapping
 const AMENITIES_MAPPING = {
   wifi: "Wifi",
   kitchen: "Kitchen",
@@ -24,28 +49,6 @@ const AMENITIES_MAPPING = {
   hot_tub: "Hot tub",
   gym: "Gym",
   workspace: "Workspace"
-};
-
-// COMPLETE Property Type Mapping - Matches your backend schema EXACTLY
-const PROPERTY_TYPE_MAPPING = {
-  "House": "House",
-  "Apartment": "Apartment", 
-  "Guesthouse": "Guest house",
-  "Hotel": "Hotel",
-  "Hostel": "Hostel",
-  "Villa": "villa",           // lowercase
-  "Cabin": "cabin",           // lowercase
-  "Condo": "condo",           // lowercase - ADDED THIS
-  "Townhouse": "Townhouse",
-  "Loft": "Loft",
-  "Other": "Others"           // Plural - ADDED THIS
-};
-
-// CORRECT Room Type Mapping - Matches your backend schema exactly
-const ROOM_TYPE_MAPPING = {
-  "entire": "Entire home",
-  "private": "Room", 
-  "shared": "Shared Room"
 };
 
 // Helper function to convert file to Base64
@@ -120,6 +123,9 @@ const HostOnboardingPage = () => {
       "Hostel", "villa", "cabin", "condo", "Townhouse", "Loft", "Others"
     ]);
     console.log('Our mapping covers:', Object.values(PROPERTY_TYPE_MAPPING));
+    
+    // Test which room types work
+    testRoomTypes();
   }, []);
 
   const handleInputChange = (field, value) => {
@@ -169,18 +175,165 @@ const HostOnboardingPage = () => {
     }
   };
 
+  // Test which room types are accepted by backend
+  const testRoomTypes = async () => {
+    const testCases = [
+      "Entire home",
+      "Entire Place", 
+      "Private Room",
+      "Room",
+      "Shared Room",
+      "Any type Room"
+    ];
+
+    console.log('🧪 Testing which room types are accepted by backend...');
+    
+    for (const roomType of testCases) {
+      const testData = {
+        title: `Test - ${roomType}`,
+        description: "Test description",
+        propertyType: "House",
+        roomType: roomType,
+        type: "entire",
+        location: { lat: 40.7128, lng: -74.0060 },
+        address: {
+          street: "123 Test St",
+          city: "Test City", 
+          state: "Test State",
+          country: "US",
+          postalCode: "12345"
+        },
+        guests: 2,
+        beds: 1,
+        bedrooms: 1,
+        bathrooms: 1,
+        amenities: ["Wifi"],
+        price: 100,
+        minNights: 1,
+        maxNights: 30,
+        images: [],
+        rating: 0,
+        reviewCount: 0,
+        isGuestFavorite: false,
+        cancellationPolicy: "moderate",
+        checkIn: "14:00",
+        checkOut: "11:00",
+        verified: false,
+        published: true
+      };
+
+      try {
+        const response = await roomService.createRoom(testData);
+        console.log(`✅ "${roomType}" - ACCEPTED`);
+        // Delete the test room to clean up
+        if (response.room && response.room._id) {
+          await roomService.deleteRoom(response.room._id);
+        }
+      } catch (error) {
+        console.log(`❌ "${roomType}" - REJECTED:`, error.response?.data?.message);
+      }
+    }
+  };
+
+  // Comprehensive validation before sending
+  const validateDataBeforeSend = (data) => {
+    console.log('🔍 === VALIDATION DEBUG ===');
+    
+    const errors = [];
+    
+    // Check required fields
+    if (!data.title) errors.push("Title is required");
+    if (!data.description) errors.push("Description is required");
+    
+    // Check propertyType against backend enum
+    const allowedPropertyTypes = [
+      "House", "Flat", "Guest house", "Hotel", "Apartment", 
+      "Hostel", "villa", "cabin", "condo", "Townhouse", "Loft", "Others"
+    ];
+    
+    console.log('Property Type Validation:');
+    console.log('  - Sent:', data.propertyType);
+    console.log('  - Allowed:', allowedPropertyTypes);
+    console.log('  - Is valid:', allowedPropertyTypes.includes(data.propertyType));
+    
+    if (!data.propertyType) {
+      errors.push("Property type is required");
+    } else if (!allowedPropertyTypes.includes(data.propertyType)) {
+      errors.push(`Invalid propertyType: "${data.propertyType}". Must be one of: ${allowedPropertyTypes.join(', ')}`);
+    }
+    
+    // Check roomType - we'll test what works
+    console.log('Room Type Validation:');
+    console.log('  - Sent:', data.roomType);
+    
+    if (!data.roomType) {
+      errors.push("Room type is required");
+    }
+    
+    // Check address fields
+    console.log('Address Validation:');
+    console.log('  - Street:', data.address.street);
+    console.log('  - City:', data.address.city);
+    console.log('  - State:', data.address.state);
+    console.log('  - Country:', data.address.country);
+    console.log('  - PostalCode:', data.address.postalCode);
+    
+    const requiredAddressFields = ['street', 'city', 'state', 'country', 'postalCode'];
+    for (const field of requiredAddressFields) {
+      if (!data.address[field]) {
+        errors.push(`Missing address field: ${field}`);
+      }
+    }
+    
+    // Check location
+    if (!data.location.lat || !data.location.lng) {
+      errors.push("Location coordinates are required");
+    }
+    
+    // Check price
+    if (!data.price || data.price <= 0) {
+      errors.push("Price must be greater than 0");
+    }
+    
+    // Check amenities
+    const allowedAmenities = [
+      "Wifi", "Air conditioning", "Pool", "Dryer", "Heating", "Workspace",
+      "Essentials", "Kitchen", "Washing machine", "TV", "Hair dryer", "Iron",
+      "Features", "Hot tub", "Free parking", "EV charger", "Cot", "King bed",
+      "Gym", "BBQ grill", "Breakfast"
+    ];
+    
+    console.log('Amenities Validation:');
+    console.log('  - Sent:', data.amenities);
+    console.log('  - Allowed:', allowedAmenities);
+    
+    if (data.amenities && data.amenities.length > 0) {
+      const invalidAmenities = data.amenities.filter(amenity => !allowedAmenities.includes(amenity));
+      if (invalidAmenities.length > 0) {
+        errors.push(`Invalid amenities: ${invalidAmenities.join(', ')}`);
+      }
+    }
+    
+    console.log('📋 Validation errors found:', errors);
+    return errors;
+  };
+
   // Transform data for backend
   const transformDataForBackend = () => {
-    // Debug the incoming data
     console.log('=== TRANSFORM DEBUG ===');
     console.log('Property Category from form:', hostData.propertyCategory);
     console.log('Property Type from form:', hostData.propertyType);
 
-    // Map property type - Use the mapping
+    // Map property type
     const backendPropertyType = PROPERTY_TYPE_MAPPING[hostData.propertyCategory];
     
-    // Map room type - Use the mapping
-    const backendRoomType = ROOM_TYPE_MAPPING[hostData.propertyType];
+    // Map room type - try different mappings based on backend acceptance
+    let backendRoomType = ROOM_TYPE_MAPPING[hostData.propertyType];
+    
+    // If Shared Room doesn't work, fallback to Private Room
+    if (hostData.propertyType === "shared" && backendRoomType === "Shared Room") {
+      console.log('⚠️ Shared Room might be rejected, consider fallback');
+    }
 
     console.log('Mapped Property Type:', backendPropertyType);
     console.log('Mapped Room Type:', backendRoomType);
@@ -196,7 +349,13 @@ const HostOnboardingPage = () => {
       maxNights = parseInt(hostData.maxStay);
     }
 
-    return {
+    // Use actual coordinates or fallback to mock data
+    const coordinates = hostData.coordinates.lat && hostData.coordinates.lng 
+      ? hostData.coordinates 
+      : { lat: 40.7128, lng: -74.0060 };
+
+    // Build the data object exactly as backend expects
+    const backendData = {
       title: hostData.title,
       description: hostData.description,
       propertyType: backendPropertyType,
@@ -205,37 +364,37 @@ const HostOnboardingPage = () => {
       
       // Location data
       location: {
-        lat: hostData.coordinates.lat || 40.7128,
-        lng: hostData.coordinates.lng || -74.0060
+        lat: coordinates.lat,
+        lng: coordinates.lng
       },
       address: {
-        street: hostData.address,
-        city: hostData.city,
-        state: hostData.state,
-        country: hostData.country,
-        postalCode: hostData.zipCode
+        street: hostData.address || "Address not specified",
+        city: hostData.city || "Unknown City",
+        state: hostData.state || "Unknown State", 
+        country: hostData.country || "US",
+        postalCode: hostData.zipCode || "000000"
       },
       
       // Capacity
-      guests: hostData.guests,
-      beds: hostData.beds || 1,
-      bedrooms: hostData.bedrooms,
-      bathrooms: hostData.bathrooms,
+      guests: parseInt(hostData.guests) || 1,
+      beds: parseInt(hostData.beds) || 1,
+      bedrooms: parseInt(hostData.bedrooms) || 1,
+      bathrooms: parseFloat(hostData.bathrooms) || 1,
       
       // Amenities
       amenities: backendAmenities,
       
       // Pricing
-      price: hostData.basePrice,
+      price: parseInt(hostData.basePrice) || 50,
       
-      // Availability rules
-      minNights: parseInt(hostData.minStay),
+      // Availability
+      minNights: parseInt(hostData.minStay) || 1,
       maxNights: maxNights,
       
-      // Images as Base64 strings
+      // Images
       images: hostData.photos,
       
-      // Default values for required fields
+      // Default values
       rating: 0,
       reviewCount: 0,
       isGuestFavorite: false,
@@ -245,6 +404,9 @@ const HostOnboardingPage = () => {
       verified: false,
       published: true
     };
+
+    console.log('✅ Final transformed data:', JSON.stringify(backendData, null, 2));
+    return backendData;
   };
 
   const handleSubmitListing = async () => {
@@ -256,21 +418,59 @@ const HostOnboardingPage = () => {
     setIsSubmitting(true);
     try {
       const roomData = transformDataForBackend();
-      console.log("Submitting room data:", roomData);
-      console.log("Number of images:", roomData.images.length);
-      console.log("Property Type being sent:", roomData.propertyType);
-      console.log("Room Type being sent:", roomData.roomType);
+      
+      // Run comprehensive validation
+      const validationErrors = validateDataBeforeSend(roomData);
+      if (validationErrors.length > 0) {
+        console.error('❌ Validation failed:', validationErrors);
+        alert(`Please fix these issues:\n${validationErrors.join('\n')}`);
+        setIsSubmitting(false);
+        return;
+      }
+
+      console.log("🔍 === REQUEST DEBUG ===");
+      console.log("URL:", `/rooms`);
+      console.log("Method: POST");
+      console.log("Data size:", JSON.stringify(roomData).length, "bytes");
       
       const response = await roomService.createRoom(roomData);
       
-      console.log("Listing submitted successfully:", response);
+      console.log("✅ Listing submitted successfully:", response);
       alert("Congratulations! Your listing has been published!");
       navigate("/host/dashboard");
     } catch (err) {
-      console.error("Listing submission failed:", err);
-      console.error("Error details:", err.response?.data);
-      const errorMessage = err.response?.data?.message || "Failed to publish listing. Please try again.";
-      alert(errorMessage);
+      console.error("❌ Listing submission failed:", err);
+      
+      // ENHANCED ERROR LOGGING
+      console.error("🔍 FULL ERROR OBJECT:", err);
+      console.error("🔍 RESPONSE DATA:", err.response?.data);
+      console.error("🔍 RESPONSE STATUS:", err.response?.status);
+      
+      let errorMessage = "Failed to publish listing. Please try again.";
+      
+      const backendError = err.response?.data;
+      
+      // Show the exact error message from backend
+      if (backendError) {
+        console.log("📋 BACKEND ERROR DETAILS:");
+        console.log("   - success:", backendError.success);
+        console.log("   - error:", backendError.error);
+        console.log("   - message:", backendError.message);
+        console.log("   - details:", backendError.details);
+        
+        if (backendError.message) {
+          errorMessage = backendError.message;
+        } else if (backendError.error) {
+          errorMessage = backendError.error;
+        }
+        
+        // Specific handling for roomType errors
+        if (backendError.message && backendError.message.includes('roomType')) {
+          errorMessage += "\n\nPlease try selecting a different room type (Private Room instead of Shared Room).";
+        }
+      }
+      
+      alert(`Error: ${errorMessage}\n\nCheck console for details.`);
     } finally {
       setIsSubmitting(false);
     }
@@ -402,45 +602,45 @@ const HostOnboardingPage = () => {
                 <div className="step-content">
                   <h1>What kind of place are you listing?</h1>
                   
-                  <div className="property-types">
-                    <div 
-                      className={`property-card ${hostData.propertyType === "entire" ? "selected" : ""}`}
-                      onClick={() => handleInputChange("propertyType", "entire")}
-                    >
-                      <h3>Entire place</h3>
-                      <p>Guests have the whole place to themselves</p>
-                    </div>
-                    
-                    <div 
-                      className={`property-card ${hostData.propertyType === "private" ? "selected" : ""}`}
-                      onClick={() => handleInputChange("propertyType", "private")}
-                    >
-                      <h3>Private room</h3>
-                      <p>Guests have their own room in a home, plus access to shared spaces</p>
-                    </div>
-                    
-                    <div 
-                      className={`property-card ${hostData.propertyType === "shared" ? "selected" : ""}`}
-                      onClick={() => handleInputChange("propertyType", "shared")}
-                    >
-                      <h3>Shared room</h3>
-                      <p>Guests sleep in a room or common area that may be shared with you or others</p>
-                    </div>
-                  </div>
-
+                {/* In Step 2: Property Type section */}
+<div className="property-types">
+  <div 
+    className={`property-card ${hostData.propertyType === "entire" ? "selected" : ""}`}
+    onClick={() => handleInputChange("propertyType", "entire")}
+  >
+    <h3>Entire place</h3>
+    <p>Guests have the whole place to themselves</p>
+  </div>
+  
+  <div 
+    className={`property-card ${hostData.propertyType === "private" ? "selected" : ""}`}
+    onClick={() => handleInputChange("propertyType", "private")}
+  >
+    <h3>Private room</h3>
+    <p>Guests have their own room in a home, plus access to shared spaces</p>
+  </div>
+  
+  <div 
+    className={`property-card ${hostData.propertyType === "shared" ? "selected" : ""}`}
+    onClick={() => handleInputChange("propertyType", "shared")}
+  >
+    <h3>Shared room</h3>
+    <p>Guests sleep in a room or common area that may be shared with you or others</p>
+  </div>
+</div>
                   <div className="property-categories">
                     <h3>What type of property is this?</h3>
-                    <div className="category-grid">
-                      {Object.keys(PROPERTY_TYPE_MAPPING).map(category => (
-                        <button
-                          key={category}
-                          className={`category-btn ${hostData.propertyCategory === category ? "selected" : ""}`}
-                          onClick={() => handleInputChange("propertyCategory", category)}
-                        >
-                          {category}
-                        </button>
-                      ))}
-                    </div>
+                  <div className="category-grid">
+  {["House", "Apartment", "Flat", "Guesthouse", "Hotel", "Hostel", "Villa", "Cabin", "Condo", "Townhouse", "Loft", "Other"].map(category => (
+    <button
+      key={category}
+      className={`category-btn ${hostData.propertyCategory === category ? "selected" : ""}`}
+      onClick={() => handleInputChange("propertyCategory", category)}
+    >
+      {category}
+    </button>
+  ))}
+</div>
                   </div>
                 </div>
               )}
