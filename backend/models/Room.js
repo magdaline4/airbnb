@@ -16,6 +16,7 @@ const PROPERTY_TYPES = [
   "Others",
 ];
 
+
 // ✅ Allowed room types
 const ROOM_TYPES = ["Entire home", "Private Room", "Shared Room"];
 
