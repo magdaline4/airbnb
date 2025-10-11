@@ -11,7 +11,7 @@ exports.createRoom = asyncHandler(async (req, res, next) => {
   console.log('Property Type:', payload.propertyType);
   console.log('Allowed Room Types:', ["Entire home", "Private Room", "Shared Room"]);
   console.log('Allowed Property Types:', [
-    "House", "Flat", "Guest house", "Hotel", "Apartment", 
+    "House", "flat", "Guest house", "Hotel", "Apartment", 
     "Hostel", "villa", "cabin", "condo", "Townhouse", "Loft", "Others"
   ]);
 

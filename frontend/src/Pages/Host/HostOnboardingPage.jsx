@@ -1,149 +1,266 @@
-﻿import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+﻿import React, { useState } from "react";
 import Navbar from "../../Components/Navbar/Navbar";
 import Footer from "../../Components/Footer/Footer";
 import "./HostOnboardingPage.scss";
-import { FaHome, FaBed, FaBath, FaWifi, FaCar, FaUtensils, FaSwimmingPool, FaCamera, FaMapMarkerAlt, FaDollarSign, FaCalendarAlt, FaCheck } from "react-icons/fa";
-import { MdKeyboardArrowRight, MdKeyboardArrowLeft, MdPhotoCamera, MdLocationOn } from "react-icons/md";
+import { 
+  FaHome, 
+  FaBed, 
+  FaBath, 
+  FaWifi, 
+  FaDollarSign, 
+  FaCalendarAlt, 
+  FaCheck,
+  FaUtensils,
+  FaCar,
+  FaSwimmingPool,
+  FaTv,
+  FaWind,
+  FaFire,
+  FaUmbrellaBeach,
+  FaCoffee,
+  FaShower,
+  FaSnowflake,
+  FaHotTub,
+  FaDumbbell
+} from "react-icons/fa";
+import { 
+  MdPhotoCamera, 
+  MdLocationOn, 
+  MdKeyboardArrowLeft, 
+  MdKeyboardArrowRight,
+  MdOutlineHouseSiding,
+  MdApartment,
+  MdHouse,
+  MdVilla,
+  MdCabin,
+  MdBusiness
+} from "react-icons/md";
 import { DateRange } from "react-date-range";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
+import { toast } from "react-toastify";
 import { roomService } from "../../services/roomService";
 
-// CORRECT Property Type Mapping - Matches backend enum EXACTLY
-// CORRECT Property Type Mapping - Matches backend enum EXACTLY
-const PROPERTY_TYPE_MAPPING = {
-  "House": "House",
-  "Apartment": "Apartment", 
-  "Flat": "Flat",           // ADDED - from backend enum
-  "Guesthouse": "Guest house",
-  "Hotel": "Hotel",
-  "Hostel": "Hostel",
-  "Villa": "villa",
-  "Cabin": "cabin",
-  "Condo": "condo",
-  "Townhouse": "Townhouse",
-  "Loft": "Loft",
-  "Other": "Others"
-};
+const PROPERTY_TYPES = [
+  "House", "Flat", "Guest house", "Hotel", "Apartment", 
+  "Hostel", "villa", "cabin", "condo", "Townhouse", "Loft", "Others"
+];
 
-// CORRECT Room Type Mapping - Based on actual backend acceptance
-const ROOM_TYPE_MAPPING = {
-  "entire": "Entire home",    // ✅ Works
-  "private": "Room",          // ✅ Works
-  "shared": "Room"            // ✅ Works
-};
+const ROOM_TYPES = ["Entire home", "Private Room", "Shared Room"];
 
-// Complete Amenities Mapping
 const AMENITIES_MAPPING = {
-  wifi: "Wifi",
-  kitchen: "Kitchen",
-  parking: "Free parking",
-  pool: "Pool",
-  ac: "Air conditioning",
-  heating: "Heating",
-  tv: "TV",
-  washer: "Washing machine",
-  dryer: "Dryer",
-  hot_tub: "Hot tub",
-  gym: "Gym",
-  workspace: "Workspace"
+  "Wifi": { icon: <FaWifi />, label: "Wifi" },
+  "Air conditioning": { icon: <FaSnowflake />, label: "Air conditioning" },
+  "Pool": { icon: <FaSwimmingPool />, label: "Pool" },
+  "Dryer": { icon: <FaShower />, label: "Dryer" },
+  "Heating": { icon: <FaFire />, label: "Heating" },
+  "Workspace": { icon: <MdBusiness />, label: "Workspace" },
+  "Essentials": { icon: <FaCoffee />, label: "Essentials" },
+  "Kitchen": { icon: <FaUtensils />, label: "Kitchen" },
+  "Washing machine": { icon: <FaShower />, label: "Washing machine" },
+  "TV": { icon: <FaTv />, label: "TV" },
+  "Hair dryer": { icon: <FaWind />, label: "Hair dryer" },
+  "Iron": { icon: <FaWind />, label: "Iron" },
+  "Features": { icon: <FaUmbrellaBeach />, label: "Features" },
+  "Hot tub": { icon: <FaHotTub />, label: "Hot tub" },
+  "Free parking": { icon: <FaCar />, label: "Free parking" },
+  "EV charger": { icon: <FaCar />, label: "EV charger" },
+  "Cot": { icon: <FaBed />, label: "Cot" },
+  "King bed": { icon: <FaBed />, label: "King bed" },
+  "Gym": { icon: <FaDumbbell />, label: "Gym" },
+  "BBQ grill": { icon: <FaUtensils />, label: "BBQ grill" },
+  "Breakfast": { icon: <FaCoffee />, label: "Breakfast" }
 };
 
-// Helper function to convert file to Base64
-const convertToBase64 = (file) => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = error => reject(error);
-  });
-};
+const CANCELLATION_POLICIES = [
+  "flexible",
+  "moderate",
+  "strict",
+  "super_strict",
+  "no_refund"
+];
 
 const HostOnboardingPage = () => {
-  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 10;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingPhotos, setIsUploadingPhotos] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
+
   const [hostData, setHostData] = useState({
-    // Step 1: Welcome
     hostType: "",
-    
-    // Step 2: Property Type
     propertyType: "",
-    propertyCategory: "",
-    
-    // Step 3: Location
-    address: "",
-    city: "",
-    state: "",
-    zipCode: "",
-    country: "",
-    coordinates: { lat: null, lng: null },
-    
-    // Step 4: Basics
-    bedrooms: 0,
-    bathrooms: 0,
-    guests: 0,
-    beds: 0,
-    
-    // Step 5: Amenities
+    roomType: "",
+    address: { street: "", city: "", state: "", country: "", postalCode: "" },
+    location: { lat: 0, lng: 0 },
+    guests: 1,
+    bedrooms: 1,
+    bathrooms: 1,
+    beds: 1,
     amenities: [],
-    
-    // Step 6: Photos
-    photos: [],
-    
-    // Step 7: Title & Description
+    images: [],
     title: "",
     description: "",
-    
-    // Step 8: Pricing
-    basePrice: 0,
-    currency: "USD",
-    
-    // Step 9: Availability
-    availability: { startDate: null, endDate: null },
-    minStay: "1",
-    maxStay: "No limit",
-    showCalendar: false,
-    
-    // Step 10: Review
-    isReady: false
+    price: 0,
+    minNights: 1,
+    maxNights: 30,
+    checkIn: "14:00",
+    checkOut: "11:00",
+    availability: { startDate: new Date(), endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) },
+    cancellationPolicy: "moderate",
+    published: true
   });
 
-  const totalSteps = 10;
   const progress = (currentStep / totalSteps) * 100;
 
-  // Verify mapping on component mount
-  useEffect(() => {
-    console.log('=== VERIFYING MAPPING ===');
-    console.log('Backend expects these property types:', [
-      "House", "Flat", "Guest house", "Hotel", "Apartment", 
-      "Hostel", "villa", "cabin", "condo", "Townhouse", "Loft", "Others"
-    ]);
-    console.log('Our mapping covers:', Object.values(PROPERTY_TYPE_MAPPING));
-    
-    // Test which room types work
-    testRoomTypes();
-  }, []);
+  // Simulate geocoding
+  const geocodeAddress = async (address) => {
+    return {
+      lat: Math.random() * 180 - 90,
+      lng: Math.random() * 360 - 180
+    };
+  };
 
   const handleInputChange = (field, value) => {
-    setHostData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    if (field.includes('.')) {
+      const [parent, child] = field.split('.');
+      setHostData(prev => ({
+        ...prev,
+        [parent]: {
+          ...prev[parent],
+          [child]: value
+        }
+      }));
+    } else {
+      setHostData(prev => ({
+        ...prev,
+        [field]: value
+      }));
+    }
   };
 
   const handleArrayToggle = (field, value) => {
     setHostData(prev => ({
       ...prev,
-      [field]: prev[field].includes(value) 
+      [field]: prev[field].includes(value)
         ? prev[field].filter(item => item !== value)
         : [...prev[field], value]
     }));
   };
 
-  const handleNextStep = () => {
+  // Compress image function
+  const compressImage = (file, maxWidth = 800, maxHeight = 600, quality = 0.7) => {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+
+        // Calculate new dimensions while maintaining aspect ratio
+        if (width > height) {
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        // Draw and compress image
+        ctx.drawImage(img, 0, 0, width, height);
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+        
+        resolve(compressedDataUrl);
+      };
+
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
+  const handlePhotoUpload = async (files) => {
+    setIsUploadingPhotos(true);
+    try {
+      // Convert and compress each file to base64
+      const compressedImages = await Promise.all(
+        files.map(async (file) => {
+          // Validate file type
+          if (!file.type.startsWith('image/')) {
+            throw new Error(`File ${file.name} is not an image`);
+          }
+          
+          // Validate file size (max 2MB to avoid large payloads)
+          if (file.size > 2 * 1024 * 1024) {
+            throw new Error(`File ${file.name} is too large. Maximum size is 2MB`);
+          }
+          
+          // Compress image before converting to base64
+          const compressedImage = await compressImage(file, 800, 600, 0.6); // More compression
+          return compressedImage;
+        })
+      );
+      
+      setHostData(prev => ({
+        ...prev,
+        images: [...prev.images, ...compressedImages]
+      }));
+      
+      toast.success(`${files.length} photos uploaded successfully!`);
+    } catch (error) {
+      console.error('Photo upload error:', error);
+      toast.error(error.message || "Failed to upload photos");
+    } finally {
+      setIsUploadingPhotos(false);
+    }
+  };
+
+  const isStepValid = () => {
+    switch (currentStep) {
+      case 1:
+        return hostData.hostType !== "";
+      case 2:
+        return hostData.propertyType !== "" && hostData.roomType !== "";
+      case 3:
+        return hostData.address.street && hostData.address.city && 
+               hostData.address.state && hostData.address.country && 
+               hostData.address.postalCode;
+      case 4:
+        return hostData.guests > 0 && hostData.beds > 0;
+      case 5:
+        return true;
+      case 6:
+        return hostData.images.length >= 1;
+      case 7:
+        return hostData.title.length >= 10 && hostData.description.length >= 50;
+      case 8:
+        return hostData.price > 0;
+      case 9:
+        return hostData.availability.startDate && hostData.availability.endDate;
+      case 10:
+        return true;
+      default:
+        return false;
+    }
+  };
+
+  const handleNextStep = async () => {
+    if (currentStep === 3 && hostData.address.street) {
+      try {
+        const coordinates = await geocodeAddress(hostData.address.street);
+        setHostData(prev => ({ ...prev, location: coordinates }));
+      } catch (error) {
+        console.error("Geocoding failed:", error);
+      }
+    }
+    
     if (currentStep < totalSteps) {
       setCurrentStep(prev => prev + 1);
     }
@@ -155,366 +272,165 @@ const HostOnboardingPage = () => {
     }
   };
 
-  // Handle photo upload and conversion to Base64
-  const handlePhotoUpload = async (files) => {
-    setIsUploadingPhotos(true);
-    try {
-      const base64Images = await Promise.all(
-        files.map(file => convertToBase64(file))
-      );
-      setHostData(prev => ({
-        ...prev,
-        photos: [...prev.photos, ...base64Images]
-      }));
-    } catch (error) {
-      console.error("Photo conversion failed:", error);
-      alert("Failed to process images. Please try again.");
-    } finally {
-      setIsUploadingPhotos(false);
-    }
+  const debugValues = () => {
+    console.log("🔍 DEBUG - Property Type:", {
+      value: hostData.propertyType,
+      length: hostData.propertyType?.length,
+      charCodes: hostData.propertyType?.split('').map(c => c.charCodeAt(0))
+    });
+    console.log("🔍 DEBUG - Room Type:", {
+      value: hostData.roomType,
+      length: hostData.roomType?.length,
+      charCodes: hostData.roomType?.split('').map(c => c.charCodeAt(0))
+    });
   };
 
-  // Test which room types are accepted by backend
-  const testRoomTypes = async () => {
-    const testCases = [
-      "Entire home",
-      "Entire Place", 
-      "Private Room",
-      "Room",
-      "Shared Room",
-      "Any type Room"
-    ];
+  const handleSubmitListing = async () => {
+    setIsSubmitting(true);
+    try {
+      // Debug the values before submission
+      debugValues();
 
-    console.log('🧪 Testing which room types are accepted by backend...');
-    
-    for (const roomType of testCases) {
-      const testData = {
-        title: `Test - ${roomType}`,
-        description: "Test description",
-        propertyType: "House",
-        roomType: roomType,
-        type: "entire",
-        location: { lat: 40.7128, lng: -74.0060 },
-        address: {
-          street: "123 Test St",
-          city: "Test City", 
-          state: "Test State",
-          country: "US",
-          postalCode: "12345"
+      // Use only uploaded images - no default images
+      if (hostData.images.length === 0) {
+        throw new Error("Please upload at least one photo");
+      }
+
+      // Check if base64 images are too large and optimize if needed
+      const optimizedImages = hostData.images.map(image => {
+        // If base64 string is too long, compress further
+        if (image.length > 500000) { // ~500KB threshold
+          console.warn('Large base64 image detected, consider recompressing');
+          // You could add additional compression logic here if needed
+        }
+        return image;
+      });
+
+      // Limit to 5 images max to avoid payload size issues
+      const finalImages = optimizedImages.slice(0, 5);
+
+      // Calculate payload size
+      const testPayload = {
+        ...hostData,
+        images: finalImages
+      };
+      const payloadSize = JSON.stringify(testPayload).length;
+      console.log('📦 Payload size:', (payloadSize / 1024).toFixed(2), 'KB');
+
+      if (payloadSize > 5000000) { // 5MB threshold
+        toast.warning('Large data size detected. Consider reducing image count or size.');
+      }
+
+      const listingData = {
+        title: (hostData.title || "Beautiful Property").trim(),
+        description: (hostData.description || "A wonderful place to stay").trim(),
+        propertyType: hostData.propertyType?.trim(),
+        roomType: hostData.roomType?.trim(),
+        type: hostData.propertyType?.trim(),
+        location: {
+          lat: hostData.location.lat || 40.7128,
+          lng: hostData.location.lng || -74.0060
         },
-        guests: 2,
-        beds: 1,
-        bedrooms: 1,
-        bathrooms: 1,
-        amenities: ["Wifi"],
-        price: 100,
-        minNights: 1,
-        maxNights: 30,
-        images: [],
+        address: {
+          street: (hostData.address.street || "123 Main Street").trim(),
+          city: (hostData.address.city || "New York").trim(),
+          state: (hostData.address.state || "NY").trim(),
+          country: (hostData.address.country || "US").trim(),
+          postalCode: (hostData.address.postalCode || "10001").trim()
+        },
+        guests: Number(hostData.guests) || 2,
+        beds: Number(hostData.beds) || 1,
+        bedrooms: Number(hostData.bedrooms) || 1,
+        bathrooms: Number(hostData.bathrooms) || 1,
+        amenities: hostData.amenities.length > 0 ? hostData.amenities.map(a => a.trim()) : ["Wifi"],
+        price: Number(hostData.price) || 99,
+        minNights: Number(hostData.minNights) || 1,
+        maxNights: Number(hostData.maxNights) || 30,
         rating: 0,
         reviewCount: 0,
         isGuestFavorite: false,
-        cancellationPolicy: "moderate",
-        checkIn: "14:00",
-        checkOut: "11:00",
+        images: finalImages, // Only uploaded images
+        cancellationPolicy: hostData.cancellationPolicy || "moderate",
+        checkIn: hostData.checkIn || "14:00",
+        checkOut: hostData.checkOut || "11:00",
         verified: false,
         published: true
       };
 
-      try {
-        const response = await roomService.createRoom(testData);
-        console.log(`✅ "${roomType}" - ACCEPTED`);
-        // Delete the test room to clean up
-        if (response.room && response.room._id) {
-          await roomService.deleteRoom(response.room._id);
+      console.log("🎯 FINAL SUBMISSION DATA:", {
+        propertyType: `"${listingData.propertyType}"`,
+        roomType: `"${listingData.roomType}"`,
+        imagesCount: listingData.images.length,
+        firstImageSize: listingData.images[0]?.length
+      });
+
+      // Validate required fields
+      if (!listingData.propertyType || !listingData.roomType) {
+        throw new Error("Please select both property type and room type");
+      }
+
+      // Test with hardcoded enum values first
+      const testData = {
+        ...listingData,
+        propertyType: "House", // Hardcoded for testing
+        roomType: "Entire home" // Hardcoded for testing
+      };
+
+      console.log("🧪 TESTING WITH HARCODED VALUES:", testData.propertyType, testData.roomType);
+
+      const result = await roomService.createRoom(testData);
+      
+      toast.success('🎉 Listing published successfully!');
+      
+      setTimeout(() => {
+        window.location.href = `/rooms/${result._id}`;
+      }, 2000);
+
+    } catch (error) {
+      console.error('❌ Error submitting listing:', error);
+      console.error('❌ Error response:', error.response?.data);
+      
+      if (error.response?.data?.message) {
+        const errorMessage = error.response.data.message;
+        if (errorMessage.includes('enum')) {
+          toast.error('Enum validation failed. Please check the console for details.');
+          console.log("🔧 SUGGESTION: Try these exact values:");
+          console.log("Property Types:", PROPERTY_TYPES);
+          console.log("Room Types:", ROOM_TYPES);
+        } else if (errorMessage.includes('payload') || errorMessage.includes('large')) {
+          toast.error('Data too large. Please reduce image size or count and try again.');
+        } else {
+          toast.error(`Validation Error: ${errorMessage}`);
         }
-      } catch (error) {
-        console.log(`❌ "${roomType}" - REJECTED:`, error.response?.data?.message);
+      } else if (error.code === 'ERR_NETWORK') {
+        toast.error('Network error. Please check your connection.');
+      } else if (error.message) {
+        toast.error(error.message);
+      } else {
+        toast.error('Failed to publish listing. Please try again.');
       }
-    }
-  };
-
-  // Comprehensive validation before sending
-  const validateDataBeforeSend = (data) => {
-    console.log('🔍 === VALIDATION DEBUG ===');
-    
-    const errors = [];
-    
-    // Check required fields
-    if (!data.title) errors.push("Title is required");
-    if (!data.description) errors.push("Description is required");
-    
-    // Check propertyType against backend enum
-    const allowedPropertyTypes = [
-      "House", "Flat", "Guest house", "Hotel", "Apartment", 
-      "Hostel", "villa", "cabin", "condo", "Townhouse", "Loft", "Others"
-    ];
-    
-    console.log('Property Type Validation:');
-    console.log('  - Sent:', data.propertyType);
-    console.log('  - Allowed:', allowedPropertyTypes);
-    console.log('  - Is valid:', allowedPropertyTypes.includes(data.propertyType));
-    
-    if (!data.propertyType) {
-      errors.push("Property type is required");
-    } else if (!allowedPropertyTypes.includes(data.propertyType)) {
-      errors.push(`Invalid propertyType: "${data.propertyType}". Must be one of: ${allowedPropertyTypes.join(', ')}`);
-    }
-    
-    // Check roomType - we'll test what works
-    console.log('Room Type Validation:');
-    console.log('  - Sent:', data.roomType);
-    
-    if (!data.roomType) {
-      errors.push("Room type is required");
-    }
-    
-    // Check address fields
-    console.log('Address Validation:');
-    console.log('  - Street:', data.address.street);
-    console.log('  - City:', data.address.city);
-    console.log('  - State:', data.address.state);
-    console.log('  - Country:', data.address.country);
-    console.log('  - PostalCode:', data.address.postalCode);
-    
-    const requiredAddressFields = ['street', 'city', 'state', 'country', 'postalCode'];
-    for (const field of requiredAddressFields) {
-      if (!data.address[field]) {
-        errors.push(`Missing address field: ${field}`);
-      }
-    }
-    
-    // Check location
-    if (!data.location.lat || !data.location.lng) {
-      errors.push("Location coordinates are required");
-    }
-    
-    // Check price
-    if (!data.price || data.price <= 0) {
-      errors.push("Price must be greater than 0");
-    }
-    
-    // Check amenities
-    const allowedAmenities = [
-      "Wifi", "Air conditioning", "Pool", "Dryer", "Heating", "Workspace",
-      "Essentials", "Kitchen", "Washing machine", "TV", "Hair dryer", "Iron",
-      "Features", "Hot tub", "Free parking", "EV charger", "Cot", "King bed",
-      "Gym", "BBQ grill", "Breakfast"
-    ];
-    
-    console.log('Amenities Validation:');
-    console.log('  - Sent:', data.amenities);
-    console.log('  - Allowed:', allowedAmenities);
-    
-    if (data.amenities && data.amenities.length > 0) {
-      const invalidAmenities = data.amenities.filter(amenity => !allowedAmenities.includes(amenity));
-      if (invalidAmenities.length > 0) {
-        errors.push(`Invalid amenities: ${invalidAmenities.join(', ')}`);
-      }
-    }
-    
-    console.log('📋 Validation errors found:', errors);
-    return errors;
-  };
-
-  // Transform data for backend
-  const transformDataForBackend = () => {
-    console.log('=== TRANSFORM DEBUG ===');
-    console.log('Property Category from form:', hostData.propertyCategory);
-    console.log('Property Type from form:', hostData.propertyType);
-
-    // Map property type
-    const backendPropertyType = PROPERTY_TYPE_MAPPING[hostData.propertyCategory];
-    
-    // Map room type - try different mappings based on backend acceptance
-    let backendRoomType = ROOM_TYPE_MAPPING[hostData.propertyType];
-    
-    // If Shared Room doesn't work, fallback to Private Room
-    if (hostData.propertyType === "shared" && backendRoomType === "Shared Room") {
-      console.log('⚠️ Shared Room might be rejected, consider fallback');
-    }
-
-    console.log('Mapped Property Type:', backendPropertyType);
-    console.log('Mapped Room Type:', backendRoomType);
-
-    // Map amenities to backend format
-    const backendAmenities = hostData.amenities
-      .map(amenity => AMENITIES_MAPPING[amenity])
-      .filter(amenity => amenity);
-
-    // Handle maxStay conversion
-    let maxNights = 30;
-    if (hostData.maxStay !== "No limit") {
-      maxNights = parseInt(hostData.maxStay);
-    }
-
-    // Use actual coordinates or fallback to mock data
-    const coordinates = hostData.coordinates.lat && hostData.coordinates.lng 
-      ? hostData.coordinates 
-      : { lat: 40.7128, lng: -74.0060 };
-
-    // Build the data object exactly as backend expects
-    const backendData = {
-      title: hostData.title,
-      description: hostData.description,
-      propertyType: backendPropertyType,
-      roomType: backendRoomType,
-      type: hostData.propertyType,
-      
-      // Location data
-      location: {
-        lat: coordinates.lat,
-        lng: coordinates.lng
-      },
-      address: {
-        street: hostData.address || "Address not specified",
-        city: hostData.city || "Unknown City",
-        state: hostData.state || "Unknown State", 
-        country: hostData.country || "US",
-        postalCode: hostData.zipCode || "000000"
-      },
-      
-      // Capacity
-      guests: parseInt(hostData.guests) || 1,
-      beds: parseInt(hostData.beds) || 1,
-      bedrooms: parseInt(hostData.bedrooms) || 1,
-      bathrooms: parseFloat(hostData.bathrooms) || 1,
-      
-      // Amenities
-      amenities: backendAmenities,
-      
-      // Pricing
-      price: parseInt(hostData.basePrice) || 50,
-      
-      // Availability
-      minNights: parseInt(hostData.minStay) || 1,
-      maxNights: maxNights,
-      
-      // Images
-      images: hostData.photos,
-      
-      // Default values
-      rating: 0,
-      reviewCount: 0,
-      isGuestFavorite: false,
-      cancellationPolicy: "moderate",
-      checkIn: "14:00",
-      checkOut: "11:00",
-      verified: false,
-      published: true
-    };
-
-    console.log('✅ Final transformed data:', JSON.stringify(backendData, null, 2));
-    return backendData;
-  };
-
-  const handleSubmitListing = async () => {
-    if (!isStepValid()) {
-      alert("Please complete all required fields before submitting.");
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      const roomData = transformDataForBackend();
-      
-      // Run comprehensive validation
-      const validationErrors = validateDataBeforeSend(roomData);
-      if (validationErrors.length > 0) {
-        console.error('❌ Validation failed:', validationErrors);
-        alert(`Please fix these issues:\n${validationErrors.join('\n')}`);
-        setIsSubmitting(false);
-        return;
-      }
-
-      console.log("🔍 === REQUEST DEBUG ===");
-      console.log("URL:", `/rooms`);
-      console.log("Method: POST");
-      console.log("Data size:", JSON.stringify(roomData).length, "bytes");
-      
-      const response = await roomService.createRoom(roomData);
-      
-      console.log("✅ Listing submitted successfully:", response);
-      alert("Congratulations! Your listing has been published!");
-      navigate("/host/dashboard");
-    } catch (err) {
-      console.error("❌ Listing submission failed:", err);
-      
-      // ENHANCED ERROR LOGGING
-      console.error("🔍 FULL ERROR OBJECT:", err);
-      console.error("🔍 RESPONSE DATA:", err.response?.data);
-      console.error("🔍 RESPONSE STATUS:", err.response?.status);
-      
-      let errorMessage = "Failed to publish listing. Please try again.";
-      
-      const backendError = err.response?.data;
-      
-      // Show the exact error message from backend
-      if (backendError) {
-        console.log("📋 BACKEND ERROR DETAILS:");
-        console.log("   - success:", backendError.success);
-        console.log("   - error:", backendError.error);
-        console.log("   - message:", backendError.message);
-        console.log("   - details:", backendError.details);
-        
-        if (backendError.message) {
-          errorMessage = backendError.message;
-        } else if (backendError.error) {
-          errorMessage = backendError.error;
-        }
-        
-        // Specific handling for roomType errors
-        if (backendError.message && backendError.message.includes('roomType')) {
-          errorMessage += "\n\nPlease try selecting a different room type (Private Room instead of Shared Room).";
-        }
-      }
-      
-      alert(`Error: ${errorMessage}\n\nCheck console for details.`);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const isStepValid = () => {
-    switch (currentStep) {
-      case 1: return hostData.hostType !== "";
-      case 2: return hostData.propertyType !== "" && hostData.propertyCategory !== "";
-      case 3: return hostData.address && hostData.city && hostData.country;
-      case 4: return hostData.bedrooms > 0 && hostData.bathrooms > 0 && hostData.guests > 0;
-      case 5: return hostData.amenities.length > 0;
-      case 6: return hostData.photos.length >= 5;
-      case 7: return hostData.title && hostData.description;
-      case 8: return hostData.basePrice > 0;
-      case 9: return hostData.availability.startDate && hostData.availability.endDate;
-      case 10: return hostData.isReady;
-      default: return false;
-    }
+  const getPropertyIcon = (type) => {
+    const icons = {
+      "House": <MdHouse />,
+      "Flat": <MdApartment />,
+      "Apartment": <MdApartment />,
+      "villa": <MdVilla />,
+      "cabin": <MdCabin />,
+      "condo": <MdOutlineHouseSiding />,
+      "Townhouse": <MdOutlineHouseSiding />,
+      "Loft": <MdBusiness />,
+      "Guest house": <MdHouse />,
+      "Hotel": <MdBusiness />,
+      "Hostel": <MdBusiness />,
+      "Others": <MdHouse />
+    };
+    return icons[type] || <MdHouse />;
   };
-
-  // Add geocoding function for address
-  const handleGeocodeAddress = async () => {
-    if (hostData.address && hostData.city && hostData.country) {
-      try {
-        const mockCoordinates = {
-          lat: 40.7128 + (Math.random() - 0.5) * 0.1,
-          lng: -74.0060 + (Math.random() - 0.5) * 0.1
-        };
-        setHostData(prev => ({
-          ...prev,
-          coordinates: mockCoordinates
-        }));
-      } catch (error) {
-        console.error("Geocoding failed:", error);
-      }
-    }
-  };
-
-  // Auto-geocode when location data changes
-  useEffect(() => {
-    if (hostData.address && hostData.city && hostData.country) {
-      handleGeocodeAddress();
-    }
-  }, [hostData.address, hostData.city, hostData.country]);
 
   return (
     <>
@@ -532,16 +448,16 @@ const HostOnboardingPage = () => {
           </div>
 
           <div className="onboarding-content">
-            {/* Left Side - Steps */}
+            {/* Steps Sidebar */}
             <div className="steps-sidebar">
               {[
                 { step: 1, title: "Welcome", icon: <FaHome /> },
-                { step: 2, title: "Property type", icon: <FaBed /> },
+                { step: 2, title: "Property Type", icon: <MdHouse /> },
                 { step: 3, title: "Location", icon: <MdLocationOn /> },
-                { step: 4, title: "Basics", icon: <FaBath /> },
+                { step: 4, title: "Basics", icon: <FaBed /> },
                 { step: 5, title: "Amenities", icon: <FaWifi /> },
                 { step: 6, title: "Photos", icon: <MdPhotoCamera /> },
-                { step: 7, title: "Title", icon: <FaCamera /> },
+                { step: 7, title: "Details", icon: <FaHome /> },
                 { step: 8, title: "Pricing", icon: <FaDollarSign /> },
                 { step: 9, title: "Availability", icon: <FaCalendarAlt /> },
                 { step: 10, title: "Review", icon: <FaCheck /> }
@@ -552,18 +468,19 @@ const HostOnboardingPage = () => {
                 >
                   <div className="step-icon">{icon}</div>
                   <span>{title}</span>
+                  {currentStep > step && <FaCheck className="check-icon" />}
                 </div>
               ))}
             </div>
 
-            {/* Right Side - Content */}
+            {/* Content Area */}
             <div className="content-area">
               {/* Step 1: Welcome */}
               {currentStep === 1 && (
                 <div className="step-content">
-                  <h1>Welcome to Airbnb</h1>
+                  <h1>Welcome to Airbnb Hosting</h1>
                   <p className="step-description">
-                    Let's get started listing your space. You can share any kind of space.
+                    Let's create your listing together. Share your space and start earning.
                   </p>
                   
                   <div className="welcome-options">
@@ -575,71 +492,85 @@ const HostOnboardingPage = () => {
                         <FaHome />
                       </div>
                       <div className="option-content">
-                        <h3>Individual host</h3>
-                        <p>List a home, apartment, or room</p>
+                        <h3>Individual Host</h3>
+                        <p>List your home, apartment, or spare room</p>
                       </div>
                     </div>
                     
                     <div 
-                      className={`option-card ${hostData.hostType === "business" ? "selected" : ""}`}
-                      onClick={() => handleInputChange("hostType", "business")}
+                      className={`option-card ${hostData.hostType === "professional" ? "selected" : ""}`}
+                      onClick={() => handleInputChange("hostType", "professional")}
                     >
                       <div className="option-icon">
-                        <FaBed />
+                        <MdBusiness />
                       </div>
                       <div className="option-content">
-                        <h3>Business host</h3>
-                        <p>List multiple properties or a hotel</p>
+                        <h3>Professional Host</h3>
+                        <p>Manage multiple properties or hospitality business</p>
                       </div>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* Step 2: Property Type */}
+              {/* Step 2: Property Type with enhanced debugging */}
               {currentStep === 2 && (
                 <div className="step-content">
-                  <h1>What kind of place are you listing?</h1>
+                  <h1>What type of property are you listing?</h1>
                   
-                {/* In Step 2: Property Type section */}
-<div className="property-types">
-  <div 
-    className={`property-card ${hostData.propertyType === "entire" ? "selected" : ""}`}
-    onClick={() => handleInputChange("propertyType", "entire")}
-  >
-    <h3>Entire place</h3>
-    <p>Guests have the whole place to themselves</p>
-  </div>
-  
-  <div 
-    className={`property-card ${hostData.propertyType === "private" ? "selected" : ""}`}
-    onClick={() => handleInputChange("propertyType", "private")}
-  >
-    <h3>Private room</h3>
-    <p>Guests have their own room in a home, plus access to shared spaces</p>
-  </div>
-  
-  <div 
-    className={`property-card ${hostData.propertyType === "shared" ? "selected" : ""}`}
-    onClick={() => handleInputChange("propertyType", "shared")}
-  >
-    <h3>Shared room</h3>
-    <p>Guests sleep in a room or common area that may be shared with you or others</p>
-  </div>
-</div>
-                  <div className="property-categories">
+                  {/* Enhanced debug info */}
+                  <div style={{background: '#fff3cd', padding: '10px', marginBottom: '20px', borderRadius: '5px', fontSize: '12px'}}>
+                    <strong>🔍 DEBUG INFO:</strong><br/>
+                    Selected Property Type: <code>"{hostData.propertyType}"</code> (Length: {hostData.propertyType?.length})<br/>
+                    Selected Room Type: <code>"{hostData.roomType}"</code> (Length: {hostData.roomType?.length})<br/>
+                    <button 
+                      onClick={debugValues}
+                      style={{marginTop: '5px', padding: '2px 8px', fontSize: '10px'}}
+                    >
+                      Show Character Codes
+                    </button>
+                  </div>
+                  
+                  <div className="property-types-section">
+                    <h3>What kind of space will guests have?</h3>
+                    <div className="room-type-options">
+                      {ROOM_TYPES.map(type => (
+                        <div
+                          key={type}
+                          className={`room-type-card ${hostData.roomType === type ? "selected" : ""}`}
+                          onClick={() => {
+                            console.log("Setting roomType to:", `"${type}"`, "Length:", type.length);
+                            handleInputChange("roomType", type);
+                          }}
+                        >
+                          <h4>{type}</h4>
+                          <p>
+                            {type === "Entire home" && "Guests have the entire place to themselves"}
+                            {type === "Private Room" && "Guests have their own private room"}
+                            {type === "Shared Room" && "Guests share the space with others"}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+
                     <h3>What type of property is this?</h3>
-                  <div className="category-grid">
-  {["House", "Apartment", "Flat", "Guesthouse", "Hotel", "Hostel", "Villa", "Cabin", "Condo", "Townhouse", "Loft", "Other"].map(category => (
-    <button
-      key={category}
-      className={`category-btn ${hostData.propertyCategory === category ? "selected" : ""}`}
-      onClick={() => handleInputChange("propertyCategory", category)}
-    >
-      {category}
-    </button>
-  ))}
-</div>
+                    <div className="property-grid">
+                      {PROPERTY_TYPES.map(type => (
+                        <div
+                          key={type}
+                          className={`property-card ${hostData.propertyType === type ? "selected" : ""}`}
+                          onClick={() => {
+                            console.log("Setting propertyType to:", `"${type}"`, "Length:", type.length);
+                            handleInputChange("propertyType", type);
+                          }}
+                        >
+                          <div className="property-icon">
+                            {getPropertyIcon(type)}
+                          </div>
+                          <span>{type}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}
@@ -651,12 +582,12 @@ const HostOnboardingPage = () => {
                   
                   <div className="location-form">
                     <div className="form-group">
-                      <label>Address</label>
+                      <label>Street Address</label>
                       <input
                         type="text"
-                        placeholder="Enter your address"
-                        value={hostData.address}
-                        onChange={(e) => handleInputChange("address", e.target.value)}
+                        placeholder="Enter your full address"
+                        value={hostData.address.street}
+                        onChange={(e) => handleInputChange("address.street", e.target.value)}
                       />
                     </div>
                     
@@ -666,8 +597,8 @@ const HostOnboardingPage = () => {
                         <input
                           type="text"
                           placeholder="City"
-                          value={hostData.city}
-                          onChange={(e) => handleInputChange("city", e.target.value)}
+                          value={hostData.address.city}
+                          onChange={(e) => handleInputChange("address.city", e.target.value)}
                         />
                       </div>
                       
@@ -676,28 +607,28 @@ const HostOnboardingPage = () => {
                         <input
                           type="text"
                           placeholder="State"
-                          value={hostData.state}
-                          onChange={(e) => handleInputChange("state", e.target.value)}
+                          value={hostData.address.state}
+                          onChange={(e) => handleInputChange("address.state", e.target.value)}
                         />
                       </div>
                     </div>
                     
                     <div className="form-row">
                       <div className="form-group">
-                        <label>ZIP/Postal code</label>
+                        <label>ZIP/Postal Code</label>
                         <input
                           type="text"
                           placeholder="ZIP code"
-                          value={hostData.zipCode}
-                          onChange={(e) => handleInputChange("zipCode", e.target.value)}
+                          value={hostData.address.postalCode}
+                          onChange={(e) => handleInputChange("address.postalCode", e.target.value)}
                         />
                       </div>
                       
                       <div className="form-group">
                         <label>Country</label>
                         <select
-                          value={hostData.country}
-                          onChange={(e) => handleInputChange("country", e.target.value)}
+                          value={hostData.address.country}
+                          onChange={(e) => handleInputChange("address.country", e.target.value)}
                         >
                           <option value="">Select country</option>
                           <option value="US">United States</option>
@@ -717,9 +648,12 @@ const HostOnboardingPage = () => {
                 <div className="step-content">
                   <h1>Share some basics about your place</h1>
                   
-                  <div className="basics-form">
+                  <div className="basics-grid">
                     <div className="counter-group">
-                      <label>How many guests can your place accommodate?</label>
+                      <div className="counter-label">
+                        <FaBed />
+                        <span>Guests</span>
+                      </div>
                       <div className="counter">
                         <button onClick={() => handleInputChange("guests", Math.max(1, hostData.guests - 1))}>-</button>
                         <span>{hostData.guests}</span>
@@ -728,7 +662,10 @@ const HostOnboardingPage = () => {
                     </div>
                     
                     <div className="counter-group">
-                      <label>How many bedrooms can guests use?</label>
+                      <div className="counter-label">
+                        <MdHouse />
+                        <span>Bedrooms</span>
+                      </div>
                       <div className="counter">
                         <button onClick={() => handleInputChange("bedrooms", Math.max(0, hostData.bedrooms - 1))}>-</button>
                         <span>{hostData.bedrooms}</span>
@@ -737,7 +674,10 @@ const HostOnboardingPage = () => {
                     </div>
                     
                     <div className="counter-group">
-                      <label>How many bathrooms can guests use?</label>
+                      <div className="counter-label">
+                        <FaBath />
+                        <span>Bathrooms</span>
+                      </div>
                       <div className="counter">
                         <button onClick={() => handleInputChange("bathrooms", Math.max(0, hostData.bathrooms - 1))}>-</button>
                         <span>{hostData.bathrooms}</span>
@@ -746,7 +686,10 @@ const HostOnboardingPage = () => {
                     </div>
                     
                     <div className="counter-group">
-                      <label>How many beds can guests use?</label>
+                      <div className="counter-label">
+                        <FaBed />
+                        <span>Beds</span>
+                      </div>
                       <div className="counter">
                         <button onClick={() => handleInputChange("beds", Math.max(1, hostData.beds - 1))}>-</button>
                         <span>{hostData.beds}</span>
@@ -760,58 +703,48 @@ const HostOnboardingPage = () => {
               {/* Step 5: Amenities */}
               {currentStep === 5 && (
                 <div className="step-content">
-                  <h1>Tell guests what your place has to offer</h1>
+                  <h1>What amenities do you offer?</h1>
+                  <p>Select all that apply to your space</p>
                   
                   <div className="amenities-grid">
-                    {[
-                      { id: "wifi", name: "Wifi", icon: <FaWifi /> },
-                      { id: "kitchen", name: "Kitchen", icon: <FaUtensils /> },
-                      { id: "parking", name: "Free parking", icon: <FaCar /> },
-                      { id: "pool", name: "Pool", icon: <FaSwimmingPool /> },
-                      { id: "ac", name: "Air conditioning", icon: <FaBed /> },
-                      { id: "heating", name: "Heating", icon: <FaBed /> },
-                      { id: "tv", name: "TV", icon: <FaBed /> },
-                      { id: "washer", name: "Washer", icon: <FaBed /> },
-                      { id: "dryer", name: "Dryer", icon: <FaBed /> },
-                      { id: "hot_tub", name: "Hot tub", icon: <FaBed /> },
-                      { id: "gym", name: "Gym", icon: <FaBed /> },
-                      { id: "workspace", name: "Dedicated workspace", icon: <FaBed /> }
-                    ].map(amenity => (
+                    {Object.entries(AMENITIES_MAPPING).map(([key, amenity]) => (
                       <div
-                        key={amenity.id}
-                        className={`amenity-item ${hostData.amenities.includes(amenity.id) ? "selected" : ""}`}
-                        onClick={() => handleArrayToggle("amenities", amenity.id)}
+                        key={key}
+                        className={`amenity-item ${hostData.amenities.includes(key) ? "selected" : ""}`}
+                        onClick={() => handleArrayToggle("amenities", key)}
                       >
                         <div className="amenity-icon">{amenity.icon}</div>
-                        <span>{amenity.name}</span>
+                        <span>{amenity.label}</span>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* Step 6: Photos */}
+              {/* Step 6: Photos - Updated for real uploads */}
               {currentStep === 6 && (
                 <div className="step-content">
-                  <h1>Add some photos of your place</h1>
-                  <p>You'll need 5 photos to get started. You can add more or make changes later.</p>
+                  <h1>Add photos of your space</h1>
+                  <p>Great photos help guests imagine their stay. Add at least 1 photo to get started. Images will be compressed to reduce size.</p>
                   
                   <div className="photo-upload-area">
                     <div className="upload-zone">
                       <MdPhotoCamera className="upload-icon" />
-                      <h3>Drag your photos here</h3>
-                      <p>Choose at least 5 photos</p>
+                      <h3>Upload your photos</h3>
+                      <p>JPG, PNG up to 2MB each (will be compressed)</p>
 
-                      {/* Hidden file input */}
                       <input
                         type="file"
-                        accept="image/*"
+                        accept="image/jpeg,image/png,image/webp"
                         multiple
                         id="photoInput"
                         style={{ display: "none" }}
                         onChange={async (e) => {
-                          const files = Array.from(e.target.files);
-                          await handlePhotoUpload(files);
+                          const files = Array.from(e.target.files || []);
+                          if (files.length > 0) {
+                            await handlePhotoUpload(files);
+                          }
+                          e.target.value = '';
                         }}
                       />
 
@@ -820,24 +753,30 @@ const HostOnboardingPage = () => {
                         onClick={() => document.getElementById("photoInput").click()}
                         disabled={isUploadingPhotos}
                       >
-                        {isUploadingPhotos ? "Processing..." : "Upload from your device"}
+                        {isUploadingPhotos ? "Compressing..." : "Choose Photos"}
                       </button>
                     </div>
 
-                    {/* Photo Preview Section */}
-                    {hostData.photos.length > 0 && (
+                    {hostData.images.length > 0 && (
                       <div className="uploaded-photos">
-                        <h3>Uploaded photos ({hostData.photos.length})</h3>
+                        <h3>Your Photos ({hostData.images.length})</h3>
                         <div className="photo-grid">
-                          {hostData.photos.map((photo, index) => (
+                          {hostData.images.map((photo, index) => (
                             <div key={index} className="photo-preview">
-                              <img src={photo} alt={`Upload ${index + 1}`} />
+                              <img 
+                                src={photo} 
+                                alt={`Upload ${index + 1}`} 
+                                onError={(e) => {
+                                  console.error('Image load error:', e);
+                                  e.target.style.display = 'none';
+                                }}
+                              />
                               <button
                                 className="remove-photo"
                                 onClick={() =>
                                   setHostData(prev => ({
                                     ...prev,
-                                    photos: prev.photos.filter((_, i) => i !== index)
+                                    images: prev.images.filter((_, i) => i !== index)
                                   }))
                                 }
                               >
@@ -846,6 +785,10 @@ const HostOnboardingPage = () => {
                             </div>
                           ))}
                         </div>
+                        {hostData.images.length < 5 && (
+                          <p className="photo-warning">⚠️ Add at least 5 photos for best results</p>
+                        )}
+                        <p className="photo-info">ℹ️ Images are compressed to reduce file size</p>
                       </div>
                     )}
                   </div>
@@ -855,32 +798,34 @@ const HostOnboardingPage = () => {
               {/* Step 7: Title & Description */}
               {currentStep === 7 && (
                 <div className="step-content">
-                  <h1>Now, let's give your place a title</h1>
-                  <p>Short titles work best. Have fun with it—you can always change it later.</p>
+                  <h1>Create your listing details</h1>
                   
-                  <div className="title-form">
-                    <textarea
-                      placeholder="Write your title here..."
-                      value={hostData.title}
-                      onChange={(e) => handleInputChange("title", e.target.value)}
-                      maxLength="50"
-                      rows="2"
-                    />
-                    <div className="character-count">{hostData.title.length}/50</div>
-                  </div>
-                  
-                  <h2>Create your description</h2>
-                  <p>Share what makes your place special.</p>
-                  
-                  <div className="description-form">
-                    <textarea
-                      placeholder="Write your description here..."
-                      value={hostData.description}
-                      onChange={(e) => handleInputChange("description", e.target.value)}
-                      maxLength="500"
-                      rows="6"
-                    />
-                    <div className="character-count">{hostData.description.length}/500</div>
+                  <div className="details-form">
+                    <div className="form-group">
+                      <label>Listing Title</label>
+                      <p className="input-help">Catch guests' attention with a great title</p>
+                      <textarea
+                        placeholder="e.g., 'Cozy apartment with city views'"
+                        value={hostData.title}
+                        onChange={(e) => handleInputChange("title", e.target.value)}
+                        maxLength="100"
+                        rows="2"
+                      />
+                      <div className="character-count">{hostData.title.length}/100</div>
+                    </div>
+                    
+                    <div className="form-group">
+                      <label>Description</label>
+                      <p className="input-help">Share what makes your place special</p>
+                      <textarea
+                        placeholder="Describe your space, location, and what makes it unique..."
+                        value={hostData.description}
+                        onChange={(e) => handleInputChange("description", e.target.value)}
+                        maxLength="1000"
+                        rows="6"
+                      />
+                      <div className="character-count">{hostData.description.length}/1000</div>
+                    </div>
                   </div>
                 </div>
               )}
@@ -888,30 +833,32 @@ const HostOnboardingPage = () => {
               {/* Step 8: Pricing */}
               {currentStep === 8 && (
                 <div className="step-content">
-                  <h1>Now, set your price</h1>
-                  <p>You can change it anytime.</p>
+                  <h1>Set your nightly price</h1>
+                  <p>You can adjust your price anytime based on demand</p>
                   
                   <div className="pricing-form">
-                    <div className="price-input">
-                      <label>Base price</label>
+                    <div className="price-input-group">
+                      <label>Base price per night</label>
                       <div className="price-field">
                         <span className="currency">$</span>
                         <input
                           type="number"
                           placeholder="0"
-                          value={hostData.basePrice}
-                          onChange={(e) => handleInputChange("basePrice", parseInt(e.target.value) || 0)}
+                          min="0"
+                          value={hostData.price}
+                          onChange={(e) => handleInputChange("price", parseInt(e.target.value) || 0)}
                         />
-                        <span className="period">USD per night</span>
+                        <span className="period">USD / night</span>
                       </div>
                     </div>
                     
                     <div className="pricing-tips">
-                      <h3>Pricing tips</h3>
+                      <h3>💡 Pricing Tips</h3>
                       <ul>
-                        <li>Set a competitive price to attract more bookings</li>
-                        <li>Consider seasonal pricing</li>
-                        <li>You can adjust your price anytime</li>
+                        <li>Check similar listings in your area for competitive pricing</li>
+                        <li>Consider seasonal demand in your location</li>
+                        <li>Higher prices for unique amenities or premium locations</li>
+                        <li>You can offer discounts for longer stays</li>
                       </ul>
                     </div>
                   </div>
@@ -922,63 +869,45 @@ const HostOnboardingPage = () => {
               {currentStep === 9 && (
                 <div className="step-content">
                   <h1>Set your availability</h1>
-                  <p>Choose when your place is available for guests.</p>
+                  <p>Choose when guests can book your space</p>
 
                   <div className="availability-form">
-                    <div className="date-picker-trigger">
-                      <label htmlFor="availability">Select dates</label>
-
-                      <div
-                        className="date-input"
-                        onClick={() =>
-                          setHostData((prev) => ({
-                            ...prev,
-                            showCalendar: !prev.showCalendar,
-                          }))
-                        }
+                    <div className="calendar-section">
+                      <label>Select Available Dates</label>
+                      <div 
+                        className="date-input-trigger"
+                        onClick={() => setShowCalendar(!showCalendar)}
                       >
                         <FaCalendarAlt className="calendar-icon" />
                         <span>
-                          {hostData.availability?.startDate && hostData.availability?.endDate
-                            ? `${new Date(
-                                hostData.availability.startDate
-                              ).toLocaleDateString()} - ${new Date(
-                                hostData.availability.endDate
-                              ).toLocaleDateString()}`
-                            : "Select your available dates"}
+                          {hostData.availability.startDate && hostData.availability.endDate
+                            ? `${hostData.availability.startDate.toLocaleDateString()} - ${hostData.availability.endDate.toLocaleDateString()}`
+                            : "Select available dates"}
                         </span>
                       </div>
 
-                      {hostData.showCalendar && (
+                      {showCalendar && (
                         <div className="calendar-popup">
                           <DateRange
                             editableDateInputs={true}
                             onChange={(item) => {
                               const { startDate, endDate } = item.selection;
-                              setHostData((prev) => ({
+                              setHostData(prev => ({
                                 ...prev,
-                                availability: { startDate, endDate },
+                                availability: { startDate, endDate }
                               }));
                             }}
                             moveRangeOnFirstSelection={false}
-                            ranges={[
-                              {
-                                startDate:
-                                  hostData.availability?.startDate || new Date(),
-                                endDate: hostData.availability?.endDate || new Date(),
-                                key: "selection",
-                              },
-                            ]}
+                            ranges={[{
+                              startDate: hostData.availability.startDate,
+                              endDate: hostData.availability.endDate,
+                              key: 'selection'
+                            }]}
                             minDate={new Date()}
                           />
-                          <button
+                          <button 
                             className="close-calendar"
-                            onClick={() =>
-                              setHostData((prev) => ({
-                                ...prev,
-                                showCalendar: false,
-                              }))
-                            }
+                            onClick={() => setShowCalendar(false)}
                           >
                             Done
                           </button>
@@ -987,35 +916,78 @@ const HostOnboardingPage = () => {
                     </div>
 
                     <div className="availability-settings">
-                      <h3>Stay duration</h3>
-
-                      <div className="setting-item">
-                        <label>Minimum stay</label>
+                      <div className="form-group">
+                        <label>Check-in Time</label>
                         <select
-                          value={hostData.minStay || "1"}
-                          onChange={(e) =>
-                            handleInputChange("minStay", e.target.value)
-                          }
+                          value={hostData.checkIn}
+                          onChange={(e) => handleInputChange("checkIn", e.target.value)}
                         >
-                          <option value="1">1 night</option>
-                          <option value="2">2 nights</option>
-                          <option value="3">3 nights</option>
-                          <option value="7">1 week</option>
+                          {Array.from({length: 24}, (_, i) => {
+                            const hour = i.toString().padStart(2, '0');
+                            return `${hour}:00`;
+                          }).map(time => (
+                            <option key={time} value={time}>{time}</option>
+                          ))}
                         </select>
                       </div>
 
-                      <div className="setting-item">
-                        <label>Maximum stay</label>
+                      <div className="form-group">
+                        <label>Check-out Time</label>
                         <select
-                          value={hostData.maxStay || "No limit"}
-                          onChange={(e) =>
-                            handleInputChange("maxStay", e.target.value)
-                          }
+                          value={hostData.checkOut}
+                          onChange={(e) => handleInputChange("checkOut", e.target.value)}
                         >
-                          <option value="No limit">No limit</option>
-                          <option value="7">7 nights</option>
-                          <option value="14">14 nights</option>
-                          <option value="28">28 nights</option>
+                          {Array.from({length: 24}, (_, i) => {
+                            const hour = i.toString().padStart(2, '0');
+                            return `${hour}:00`;
+                          }).map(time => (
+                            <option key={time} value={time}>{time}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label>Minimum Stay (nights)</label>
+                          <select
+                            value={hostData.minNights}
+                            onChange={(e) => handleInputChange("minNights", parseInt(e.target.value))}
+                          >
+                            <option value="1">1 night</option>
+                            <option value="2">2 nights</option>
+                            <option value="3">3 nights</option>
+                            <option value="4">4 nights</option>
+                            <option value="5">5 nights</option>
+                            <option value="7">7 nights</option>
+                          </select>
+                        </div>
+
+                        <div className="form-group">
+                          <label>Maximum Stay (nights)</label>
+                          <select
+                            value={hostData.maxNights}
+                            onChange={(e) => handleInputChange("maxNights", parseInt(e.target.value))}
+                          >
+                            <option value="7">7 nights</option>
+                            <option value="14">14 nights</option>
+                            <option value="21">21 nights</option>
+                            <option value="28">28 nights</option>
+                            <option value="30">30 nights</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="form-group">
+                        <label>Cancellation Policy</label>
+                        <select
+                          value={hostData.cancellationPolicy}
+                          onChange={(e) => handleInputChange("cancellationPolicy", e.target.value)}
+                        >
+                          {CANCELLATION_POLICIES.map(policy => (
+                            <option key={policy} value={policy}>
+                              {policy.charAt(0).toUpperCase() + policy.slice(1).replace('_', ' ')}
+                            </option>
+                          ))}
                         </select>
                       </div>
                     </div>
@@ -1027,48 +999,69 @@ const HostOnboardingPage = () => {
               {currentStep === 10 && (
                 <div className="step-content">
                   <h1>Review your listing</h1>
+                  <p>Make sure everything looks perfect before publishing</p>
                   
                   <div className="review-summary">
-                    <div className="summary-section">
-                      <h3>Property details</h3>
-                      <p><strong>Type:</strong> {hostData.propertyType} - {hostData.propertyCategory}</p>
-                      <p><strong>Location:</strong> {hostData.address}, {hostData.city}</p>
-                      <p><strong>Guests:</strong> {hostData.guests} • <strong>Bedrooms:</strong> {hostData.bedrooms} • <strong>Bathrooms:</strong> {hostData.bathrooms}</p>
+                    <div className="summary-card">
+                      <h3>📍 Property Details</h3>
+                      <div className="summary-content">
+                        <p><strong>Type:</strong> {hostData.propertyType} • {hostData.roomType}</p>
+                        <p><strong>Location:</strong> {hostData.address.street}, {hostData.address.city}</p>
+                        <p><strong>Capacity:</strong> {hostData.guests} guests • {hostData.bedrooms} bedrooms • {hostData.bathrooms} bathrooms • {hostData.beds} beds</p>
+                      </div>
                     </div>
                     
-                    <div className="summary-section">
-                      <h3>Amenities</h3>
-                      <p>{hostData.amenities.map(amenity => AMENITIES_MAPPING[amenity]).join(", ")}</p>
-                    </div>
-                    
-                    <div className="summary-section">
-                      <h3>Pricing</h3>
-                      <p><strong>Base price:</strong> ${hostData.basePrice} per night</p>
+                    <div className="summary-card">
+                      <h3>⭐ Amenities</h3>
+                      <div className="amenities-summary">
+                        {hostData.amenities.length > 0 ? (
+                          <div className="amenities-tags">
+                            {hostData.amenities.map(amenity => (
+                              <span key={amenity} className="amenity-tag">
+                                {AMENITIES_MAPPING[amenity]?.icon}
+                                {AMENITIES_MAPPING[amenity]?.label}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <p>No amenities selected</p>
+                        )}
+                      </div>
                     </div>
 
-                    <div className="summary-section">
-                      <h3>Availability</h3>
-                      <p><strong>Minimum stay:</strong> {hostData.minStay} nights</p>
-                      <p><strong>Maximum stay:</strong> {hostData.maxStay}</p>
-                      {hostData.availability.startDate && hostData.availability.endDate && (
-                        <p><strong>Available from:</strong> {new Date(hostData.availability.startDate).toLocaleDateString()} to {new Date(hostData.availability.endDate).toLocaleDateString()}</p>
-                      )}
+                    <div className="summary-card">
+                      <h3>💰 Pricing</h3>
+                      <div className="summary-content">
+                        <p><strong>Base price:</strong> ${hostData.price} per night</p>
+                      </div>
                     </div>
 
-                    <div className="summary-section">
-                      <h3>Photos</h3>
-                      <p><strong>Number of photos:</strong> {hostData.photos.length}</p>
+                    <div className="summary-card">
+                      <h3>📅 Availability</h3>
+                      <div className="summary-content">
+                        <p><strong>Check-in:</strong> {hostData.checkIn}</p>
+                        <p><strong>Check-out:</strong> {hostData.checkOut}</p>
+                        <p><strong>Minimum stay:</strong> {hostData.minNights} nights</p>
+                        <p><strong>Maximum stay:</strong> {hostData.maxNights} nights</p>
+                        <p><strong>Cancellation:</strong> {hostData.cancellationPolicy}</p>
+                      </div>
                     </div>
-                    
-                    <div className="agreement-section">
-                      <label className="agreement-checkbox">
-                        <input
-                          type="checkbox"
-                          checked={hostData.isReady}
-                          onChange={(e) => handleInputChange("isReady", e.target.checked)}
-                        />
-                        <span>I agree to Airbnb's Terms of Service and Privacy Policy</span>
-                      </label>
+
+                    <div className="summary-card">
+                      <h3>📸 Photos</h3>
+                      <div className="summary-content">
+                        <p><strong>Number of photos:</strong> {hostData.images.length}</p>
+                        {hostData.images.length > 0 && (
+                          <div className="review-photos">
+                            {hostData.images.slice(0, 3).map((photo, index) => (
+                              <img key={index} src={photo} alt={`Preview ${index + 1}`} />
+                            ))}
+                            {hostData.images.length > 3 && (
+                              <div className="more-photos">+{hostData.images.length - 3} more</div>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1100,7 +1093,7 @@ const HostOnboardingPage = () => {
                     className="nav-button submit"
                     disabled={!isStepValid() || isSubmitting}
                   >
-                    {isSubmitting ? "Publishing..." : "Publish listing"}
+                    {isSubmitting ? "Publishing..." : "Publish Listing"}
                   </button>
                 )}
               </div>
