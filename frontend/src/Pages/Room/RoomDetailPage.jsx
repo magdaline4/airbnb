@@ -21,6 +21,7 @@ import {
   FaBath,
   FaRuler,
 } from "react-icons/fa";
+
 import { MdLocationOn, MdVerified } from "react-icons/md";
 import Navbar from "../../Components/Navbar/Navbar";
 import Footer from "../../Components/Footer/Footer";
@@ -29,6 +30,8 @@ import Calendar from "../../Components/BookingCalendar/Calendar";
 import Imgcard from "../../Components/RoomCard/Imgcard/Imgcard";
 import DatePicker from "../../Components/BookingCalendar/DatePicker";
 import "../../Components/BookingCalendar/DatePicker.scss";
+import PhotoGalleryModal from "../../Components/ImgGallary/ImgGalleryModal";
+
 
 // Leaflet imports
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
@@ -57,7 +60,7 @@ const RoomDetailPage = () => {
   // Local state for UI elements (not in Redux)
   const [currentImage, setCurrentImage] = useState(0);
   const [liked, setLiked] = useState(false);
-  const [showAllPhotos, setShowAllPhotos] = useState(false);
+ const [showPhotoGallery, setShowPhotoGallery] = useState(false)
   const [isSticky, setIsSticky] = useState(false);
   const [showServiceAnimalPopup, setShowServiceAnimalPopup] = useState(false);
   const [isGuestDropdownOpen, setIsGuestDropdownOpen] = useState(false);
@@ -110,6 +113,17 @@ const RoomDetailPage = () => {
     const serviceFee = 25;
 
     return basePrice * nights + cleaningFee + serviceFee;
+  };
+
+  // Photo gallery functions
+  const handleShowAllPhotos = () => {
+    setShowPhotoGallery(true);
+    document.body.style.overflow = "hidden"; // Prevent background scrolling
+  };
+
+  const handleClosePhotoGallery = () => {
+    setShowPhotoGallery(false);
+    document.body.style.overflow = "unset"; // Re-enable scrolling
   };
 
   // Address formatting function
@@ -310,6 +324,7 @@ const RoomDetailPage = () => {
       <Navbar />
 
       <div className="room-detail-page">
+        
         {/* Image Gallery */}
         <div className="image-gallery">
           <div className="main-image">
@@ -322,13 +337,19 @@ const RoomDetailPage = () => {
                 <img src={img} alt={`img-${idx}`} />
                 {idx === 3 && (
                   <div className="overlay">
-                    <button className="show-button"> Show all photos</button>
+                    <button className="show-button" onClick={handleShowAllPhotos}> Show all photos</button>
                   </div>
                 )}
               </div>
             ))}
           </div>
         </div>
+
+         {/* Photo Gallery Modal */}
+        <PhotoGalleryModal 
+          isOpen={showPhotoGallery}
+          onClose={handleClosePhotoGallery}
+        />
 
         <div className="room-detail-content" ref={contentRef}>
           <div className="main-content">

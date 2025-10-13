@@ -2,6 +2,7 @@
   // Account for fixed navbar
   font-size: 1rem !important;
     font-family: "Manrope", sans-serif ;
+    
  
   .image-gallery {
   display: flex;
@@ -375,23 +376,23 @@
     }
 
     .booking-sidebar {
-      width: 350px;
-      position: sticky;
-      top: 100px;
-      align-self: flex-start;
-      transition: all 0.3s ease;
-      flex-shrink: 0;
+        width: 350px;
+        position: sticky;
+         top: 100px;
+         align-self: flex-start;
+          transition: box-shadow 0.3s ease; // Remove position transition
+         flex-shrink: 0;
 
       &.sticky {
+       
         position: fixed;
-        top: 130px;
-        right: calc((100vw - 1200px) / 2 + 48px);
+        // top: 130px;
+        right: auto; 
+        left: calc(50% + 425px);
+        transform: translateX(-50%); 
         z-index: 1000;
 
-        .booking-card {
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-          border-color: #ddd;
-        }
+      
       }
 
       .booking-card {
@@ -586,7 +587,7 @@
 
           .reserve-button {
             width: 100%;
-            background: #ff385c;
+             background: #e31c5f;
             color: white;
             border: none;
             border-radius: 8px;
@@ -598,7 +599,8 @@
             margin-bottom: 12px;
 
             &:hover {
-              background: #e31c5f;
+             
+               background: #ff385c;
             }
           }
 

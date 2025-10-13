@@ -4,7 +4,7 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import "./ImgGalleryModal.scss";
 
-export const PhotoGalleryModal = ({ isOpen, onClose }) => {
+ const PhotoGalleryModal = ({ isOpen, onClose }) => {
   const [selectedCategory, setSelectedCategory] = useState("Room Photos");
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
   const [photos, setPhotos] = useState({});
@@ -203,3 +203,5 @@ export const PhotoGalleryModal = ({ isOpen, onClose }) => {
     </div>
   );
 };
+
+export default PhotoGalleryModal;
