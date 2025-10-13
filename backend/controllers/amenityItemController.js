@@ -6,9 +6,12 @@ const mongoose = require('mongoose');
 // @desc    Get all amenity items
 // @route   GET /api/amenitiesitem/items
 // @access  Public
+// @desc    Get all amenity items (without pagination)
+// @route   GET /api/amenitiesitem/items
+// @access  Public
 exports.getAmenityItems = async (req, res) => {
   try {
-    const { page = 1, limit = 10, search, amenities_Id } = req.query;
+    const { search, amenities_Id } = req.query;
 
     let query = {};
     
@@ -20,23 +23,14 @@ exports.getAmenityItems = async (req, res) => {
       query.item = { $regex: search, $options: 'i' };
     }
 
+    // Fetch all items (no limit/skip)
     const items = await AmenityItem.find(query)
       .populate('amenities_Id', 'name title _id')
-      .limit(limit * 1)
-      .skip((page - 1) * limit)
       .sort({ item: 1 });
-
-    const total = await AmenityItem.countDocuments(query);
 
     res.status(200).json({
       success: true,
       count: items.length,
-      total,
-      pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
-        pages: Math.ceil(total / limit)
-      },
       data: items
     });
   } catch (error) {
