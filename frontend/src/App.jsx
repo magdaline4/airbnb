@@ -5,6 +5,9 @@ import HomePage from "./Pages/home/Home.jsx";
 import RoomPage from "./Pages/Room/RoomPage.jsx";
 import RoomDetailPage from "./Pages/Room/RoomDetailPage.jsx";
 import BookingRequestPage from "./Pages/Room/BookingRequestPage.jsx";
+import BookingPage from "./Pages/booking/BookingPage.jsx";
+import ProfilePage from "./Pages/profile/ProfilePage.jsx";
+import EditProfilePage from "./Pages/profile/EditProfilePage.jsx";
 import HostOnboardingPage from "./Pages/Host/HostOnboardingPage.jsx";
 
 function App() {
@@ -16,6 +19,9 @@ function App() {
           <Route path="/rooms" element={<RoomPage />} />
           <Route path="/rooms/:id" element={<RoomDetailPage />} />
           <Route path="/rooms/:id/book" element={<BookingRequestPage />} />
+          <Route path="/booking" element={<BookingPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/profile/edit" element={<EditProfilePage />} />
           <Route path="/host/onboarding" element={<HostOnboardingPage />} />
         </Routes>
       </Router>
