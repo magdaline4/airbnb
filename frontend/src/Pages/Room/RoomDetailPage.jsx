@@ -1,8 +1,7 @@
-// RoomDetailPage.jsx
-import React, { useEffect, useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import axios from "axios";
+import { fetchRoomById, clearCurrentRoom } from "../../features/roomsSlice"; // Import from your existing slice
 import "./RoomDetailPage.scss";
 import {
   FaHeart,
@@ -22,30 +21,48 @@ import {
   FaBath,
   FaRuler,
 } from "react-icons/fa";
+
 import { MdLocationOn, MdVerified } from "react-icons/md";
 import Navbar from "../../Components/Navbar/Navbar";
 import Footer from "../../Components/Footer/Footer";
 import Amenties from "../../Components/Amenties/Amenties";
 import Calendar from "../../Components/BookingCalendar/Calendar";
+import Imgcard from "../../Components/RoomCard/Imgcard/Imgcard";
 import DatePicker from "../../Components/BookingCalendar/DatePicker";
 import "../../Components/BookingCalendar/DatePicker.scss";
-import { fetchRoomById, clearCurrentRoom } from "../../features/roomsSlice";
+import PhotoGalleryModal from "../../Components/ImgGallary/ImgGalleryModal";
+
+
+// Leaflet imports
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
+
+// Fix for default markers in react-leaflet
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+  iconUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+  shadowUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+});
 
 const RoomDetailPage = () => {
   const { id } = useParams();
-  const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Redux state
-  const roomsState = useSelector((state) => state.rooms) || {};
-  const { room = null, loading = false, error = null } = roomsState;
+  // Redux hooks - get data from your existing roomSlice
+  const dispatch = useDispatch();
+  const { room, loading, error } = useSelector((state) => state.rooms); // Note: state.rooms (plural)
 
-  // UI state
+  // Local state for UI elements (not in Redux)
   const [currentImage, setCurrentImage] = useState(0);
+  const [liked, setLiked] = useState(false);
+ const [showPhotoGallery, setShowPhotoGallery] = useState(false)
   const [isSticky, setIsSticky] = useState(false);
   const [showServiceAnimalPopup, setShowServiceAnimalPopup] = useState(false);
-
-  // Guest dropdown state
   const [isGuestDropdownOpen, setIsGuestDropdownOpen] = useState(false);
   const [guestData, setGuestData] = useState({
     adults: 2,
@@ -53,7 +70,6 @@ const RoomDetailPage = () => {
     infants: 1,
     pets: 0,
   });
-
   const [selectedDates, setSelectedDates] = useState({
     checkIn: new Date(),
     checkOut: new Date(Date.now() + 24 * 60 * 60 * 1000),
@@ -61,32 +77,19 @@ const RoomDetailPage = () => {
 
   const sidebarRef = useRef(null);
   const contentRef = useRef(null);
-
-  const API_URL = import.meta.env.VITE_API_URL;
+  const mapRef = useRef(null);
 
   const maxGuests = room?.guests || 10;
   const totalGuests = guestData.adults + guestData.children;
 
   // Utility functions
-  const formatDateForInput = (date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
-
-  const parseInputDate = (dateString) => {
-    const [year, month, day] = dateString.split("-").map(Number);
-    return new Date(year, month - 1, day);
-  };
-
   const formatCurrency = (amount) => {
-    if (typeof amount !== 'number') {
+    if (typeof amount !== "number") {
       amount = parseFloat(amount) || 0;
     }
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount);
@@ -94,12 +97,12 @@ const RoomDetailPage = () => {
 
   const calculateNights = () => {
     if (!selectedDates.checkIn || !selectedDates.checkOut) return 0;
-    
+
     const checkIn = new Date(selectedDates.checkIn);
     const checkOut = new Date(selectedDates.checkOut);
     const timeDiff = checkOut.getTime() - checkIn.getTime();
     const nights = Math.ceil(timeDiff / (1000 * 3600 * 24));
-    
+
     return nights > 0 ? nights : 0;
   };
 
@@ -108,15 +111,66 @@ const RoomDetailPage = () => {
     const basePrice = room?.price || 0;
     const cleaningFee = 50;
     const serviceFee = 25;
-    
-    return (basePrice * nights) + cleaningFee + serviceFee;
+
+    return basePrice * nights + cleaningFee + serviceFee;
   };
 
-  const renderLocationText = () => {
-    if (!room?.location) return "Location information not available";
-    return typeof room.location === 'string' 
-      ? room.location 
-      : `${room.location.city || ''}, ${room.location.state || ''}, ${room.location.country || ''}`;
+  // Photo gallery functions
+  const handleShowAllPhotos = () => {
+    setShowPhotoGallery(true);
+    document.body.style.overflow = "hidden"; // Prevent background scrolling
+  };
+
+  const handleClosePhotoGallery = () => {
+    setShowPhotoGallery(false);
+    document.body.style.overflow = "unset"; // Re-enable scrolling
+  };
+
+  // Address formatting function
+  const formatAddress = (address) => {
+    if (!address) return "Shenoy Nagar, Chennai, Tamil Nadu";
+
+    if (typeof address === "string") {
+      return address;
+    }
+
+    if (typeof address === "object") {
+      const parts = [];
+      if (address.street) parts.push(address.street);
+      if (address.city) parts.push(address.city);
+      if (address.state) parts.push(address.state);
+      if (address.postalCode) parts.push(address.postalCode);
+      if (address.country) parts.push(address.country);
+
+      return parts.length > 0
+        ? parts.join(", ")
+        : "Shenoy Nagar, Chennai, Tamil Nadu";
+    }
+
+    return "Shenoy Nagar, Chennai, Tamil Nadu";
+  };
+
+  // Get coordinates from room data or use defaults
+  const getCoordinates = () => {
+    if (
+      room?.location?.coordinates &&
+      Array.isArray(room.location.coordinates)
+    ) {
+      return room.location.coordinates;
+    }
+
+    if (room?.latitude && room?.longitude) {
+      return [parseFloat(room.latitude), parseFloat(room.longitude)];
+    }
+
+    if (room?.location?.latitude && room?.location?.longitude) {
+      return [
+        parseFloat(room.location.latitude),
+        parseFloat(room.location.longitude),
+      ];
+    }
+
+    return [13.0827, 80.2707];
   };
 
   // Guest counter functions
@@ -149,6 +203,20 @@ const RoomDetailPage = () => {
     return text;
   };
 
+  // Fetch room details using Redux
+  useEffect(() => {
+    if (id) {
+      dispatch(fetchRoomById(id));
+    }
+  }, [id, dispatch]);
+
+  // Cleanup when component unmounts
+  useEffect(() => {
+    return () => {
+      dispatch(clearCurrentRoom());
+    };
+  }, [dispatch]);
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -166,18 +234,6 @@ const RoomDetailPage = () => {
     };
   }, [isGuestDropdownOpen]);
 
-  // Fetch room details using Redux
-  useEffect(() => {
-    if (id) {
-      dispatch(fetchRoomById(id));
-    }
-    
-    // Cleanup when component unmounts
-    return () => {
-      dispatch(clearCurrentRoom());
-    };
-  }, [id, dispatch]);
-
   // Sticky sidebar behavior
   useEffect(() => {
     const handleScroll = () => {
@@ -186,8 +242,9 @@ const RoomDetailPage = () => {
       const sidebar = sidebarRef.current;
       const content = contentRef.current;
       const scrollTop = window.pageYOffset;
-      const contentTop = contentRef.current.offsetTop;
-      const contentHeight = contentRef.current.offsetHeight;
+      const contentTop = content.offsetTop;
+      const contentHeight = content.offsetHeight;
+      const sidebarHeight = sidebar.offsetHeight;
       const windowHeight = window.innerHeight;
 
       const shouldBeSticky = scrollTop > contentTop - 100;
@@ -218,10 +275,6 @@ const RoomDetailPage = () => {
     setCurrentImage((prev) => (prev === images.length - 1 ? 0 : prev + 1));
   };
 
-  const handleImageClick = (index) => {
-    setCurrentImage(index);
-  };
-
   const handleReserve = (e) => {
     e.preventDefault();
     console.log("Reserved:", selectedDates, guestData);
@@ -236,18 +289,6 @@ const RoomDetailPage = () => {
     if (typeof room.image === "string") return [room.image];
     return [];
   })();
-
-  // Mock amenities data
-  const amenities = [
-    { icon: <FaWifi />, name: "WiFi", category: "Essentials" },
-    { icon: <FaCar />, name: "Free parking", category: "Essentials" },
-    { icon: <FaUtensils />, name: "Kitchen", category: "Kitchen" },
-    { icon: <FaSwimmingPool />, name: "Pool", category: "Facilities" },
-    { icon: <FaSnowflake />, name: "Air conditioning", category: "Climate" },
-    { icon: <FaFire />, name: "Heating", category: "Climate" },
-    { icon: <FaTv />, name: "TV", category: "Entertainment" },
-    { icon: <FaPaw />, name: "Pet friendly", category: "Safety" },
-  ];
 
   if (loading) {
     return (
@@ -275,11 +316,15 @@ const RoomDetailPage = () => {
     );
   }
 
+  const coordinates = getCoordinates();
+  const formattedAddress = formatAddress(room.address);
+
   return (
     <>
       <Navbar />
 
       <div className="room-detail-page">
+        
         {/* Image Gallery */}
         <div className="image-gallery">
           <div className="main-image">
@@ -292,7 +337,7 @@ const RoomDetailPage = () => {
                 <img src={img} alt={`img-${idx}`} />
                 {idx === 3 && (
                   <div className="overlay">
-                    <button className="show-button"> Show all photos</button>
+                    <button className="show-button" onClick={handleShowAllPhotos}> Show all photos</button>
                   </div>
                 )}
               </div>
@@ -300,37 +345,49 @@ const RoomDetailPage = () => {
           </div>
         </div>
 
-        {/* Main Content */}
+         {/* Photo Gallery Modal */}
+        <PhotoGalleryModal 
+          isOpen={showPhotoGallery}
+          onClose={handleClosePhotoGallery}
+        />
+
         <div className="room-detail-content" ref={contentRef}>
           <div className="main-content">
             {/* Header */}
             <div className="room-header">
               <div className="room-title-section">
-                <h1>{room.title}</h1>
+                <h1>{room.title || "Beautiful Room"}</h1>
+                <p>
+                  {room.guests || "2 guests"} guests<span> · </span>
+                  {room.bedrooms || "1 bed"} bedrooms<span> · </span>
+                  {room.beds || "1 bed"} beds<span> · </span>
+                  {room.bathrooms} private bathroom
+                </p>
+
                 <div className="room-meta">
-                  <p>
-                    {room.guests} guests · {room.bedrooms} bedrooms · {room.beds} beds · {room.bathrooms} bath
-                  </p>
                   <div className="rating-section">
                     <FaStar className="star-icon" />
-                    <span className="rating">{room.rating}</span>
-                    <span className="review-count">· {room.reviewCount} reviews</span>
+                    <span className="rating">{room.rating || 4.8}</span>
+                    <span className="review-count">
+                      ·{room.reviewCount || 24} reviews
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Host */}
+            {/* Host Info */}
             <div className="host-section">
               <div className="host-info">
                 <div className="host-avatar">
                   <img
-                    src={room.hostAvatar || "https://a0.muscache.com/im/pictures/user/User/original/ad72d705-4af6-4760-bd27-c7a3f2c5cb5f.jpeg?im_w=240"}
+                    src="https://a0.muscache.com/im/pictures/user/User/original/ad72d705-4af6-4760-bd27-c7a3f2c5cb5f.jpeg?im_w=240"
                     alt="Host"
                   />
                 </div>
                 <div className="host-details">
-                  <h3>Hosted by {room.host}</h3>
+                  <h3>Hosted by {room.host || "GoEarthy"}</h3>
+                  <p>Joined in March 2020</p>
                   <div className="host-verification">
                     <MdVerified className="verified-icon" />
                     <span>Identity verified</span>
@@ -339,7 +396,6 @@ const RoomDetailPage = () => {
               </div>
             </div>
 
-            {/* Host Home Features */}
             <div className="host-home-section">
               <div className="host-home-detail">
                 <svg
@@ -362,7 +418,6 @@ const RoomDetailPage = () => {
                   <p>You can check in with the building staff.</p>
                 </div>
               </div>
-              
               <div className="host-home-detail">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -384,7 +439,6 @@ const RoomDetailPage = () => {
                   <p>Your own room in a home, plus access to shared spaces.</p>
                 </div>
               </div>
-              
               <div className="host-home-detail">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -401,6 +455,7 @@ const RoomDetailPage = () => {
                 >
                   <path d="M11.67 0v1.67h8.66V0h2v1.67h6a2 2 0 0 1 2 1.85v16.07a2 2 0 0 1-.46 1.28l-.12.13L21 29.75a2 2 0 0 1-1.24.58H6.67a5 5 0 0 1-5-4.78V3.67a2 2 0 0 1 1.85-2h6.15V0zm16.66 11.67H3.67v13.66a3 3 0 0 0 2.82 3h11.18v-5.66a5 5 0 0 1 4.78-5h5.88zm-.08 8h-5.58a3 3 0 0 0-3 2.82v5.76zm-18.58-16h-6v6h24.66v-6h-6v1.66h-2V3.67h-8.66v1.66h-2z"></path>
                 </svg>
+
                 <div className="host-home-details-content">
                   <p>Free cancellation for 24 hours</p>
                   <p>Get a full refund if you change your mind.</p>
@@ -411,22 +466,27 @@ const RoomDetailPage = () => {
             {/* Description */}
             <div className="room-description">
               <h2>About this place</h2>
-              <p>{room.description}</p>
+              <p>
+                {room.description ||
+                  "Experience the perfect blend of comfort and style in this beautifully designed space. Located in the heart of the city, this room offers modern amenities and a cozy atmosphere. Perfect for both business and leisure travelers looking for a home away from home."}
+              </p>
             </div>
 
-            {/* Amenities */}
+            {/* Amenities - You can keep your existing Amenties component or update it to use Redux */}
             <Amenties />
 
             {/* Booking Calendar */}
             <Calendar onDateSelect={setSelectedDates} />
 
-            {/* Reviews */}
+            {/* Reviews Section */}
             <div className="reviews-section">
               <div className="reviews-header">
                 <div className="reviews-summary">
                   <FaStar className="star-icon" />
-                  <span className="overall-rating">{room.rating}</span>
-                  <span className="review-count">· {room.reviewCount} reviews</span>
+                  <span className="overall-rating">{room.rating || 4.8}</span>
+                  <span className="review-count">
+                    · {room.reviewCount || 24} reviews
+                  </span>
                 </div>
               </div>
 
@@ -458,17 +518,77 @@ const RoomDetailPage = () => {
             {/* Location */}
             <div className="location-section">
               <h2>Where you'll be</h2>
+              <h3>
+                <MdLocationOn className="location-icon" />
+                {formattedAddress}
+              </h3>
               <div className="location-map">
-                <div className="map-placeholder">
-                  <MdLocationOn className="map-icon" />
-                  <p>Map view</p>
-                  <span>{renderLocationText()}</span>
+                <div className="map-container">
+                  <MapContainer
+                    center={coordinates}
+                    zoom={15}
+                    style={{ height: "400px", width: "100%" }}
+                    ref={mapRef}
+                  >
+                    <TileLayer
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    />
+                    <Marker position={coordinates}>
+                      <Popup>
+                        <div className="map-popup">
+                          <h4>{room.title || "Beautiful Room"}</h4>
+                          <p>{formattedAddress}</p>
+                          <div className="popup-coordinates">
+                            <small>Lat: {coordinates[0].toFixed(6)}</small>
+                            <br />
+                            <small>Lng: {coordinates[1].toFixed(6)}</small>
+                          </div>
+                        </div>
+                      </Popup>
+                    </Marker>
+                  </MapContainer>
                 </div>
               </div>
+
+              {/* Location Details */}
+              {/* <div className="location-details">
+                <div className="location-info">
+                  <p className="location-description">
+                    {room.locationDescription ||
+                      "Conveniently situated in the heart of the city with easy access to transportation, dining, and attractions."}
+                  </p>
+
+                  <div className="location-features">
+                    <div className="location-feature">
+                      <FaCar className="feature-icon" />
+                      <span>Free parking on premises</span>
+                    </div>
+                    <div className="location-feature">
+                      <FaUtensils className="feature-icon" />
+                      <span>Walking distance to restaurants</span>
+                    </div>
+                    <div className="location-feature">
+                      <FaWifi className="feature-icon" />
+                      <span>Public transport nearby</span>
+                    </div>
+                  </div>
+
+                  {/* Coordinates Display */}
+                  {/* <div className="coordinates-display">
+                    <h4>Location Coordinates:</h4>
+                    <div className="coordinate-values">
+                      <span>Latitude: {coordinates[0].toFixed(6)}</span>
+                      <span>Longitude: {coordinates[1].toFixed(6)}</span>
+                    </div>
+                  </div>
+                </div> */}
+              {/* </div> */}
             </div>
           </div>
 
-          {/* Booking Sidebar */}
+          {/* ✅ Booking Sidebar  */}
+
           <div
             className={`booking-sidebar ${isSticky ? "sticky" : ""}`}
             ref={sidebarRef}
@@ -483,7 +603,8 @@ const RoomDetailPage = () => {
                       {formatCurrency(calculateTotalPrice())}
                     </span>
                     <span className="price-details">
-                      for {calculateNights()} night{calculateNights() !== 1 ? "s" : ""}
+                      for {calculateNights()} night
+                      {calculateNights() !== 1 ? "s" : ""}
                     </span>
                   </div>
                 ) : (
@@ -720,6 +841,7 @@ const RoomDetailPage = () => {
       </div>
 
       <Footer />
+      <Imgcard />
     </>
   );
 };
