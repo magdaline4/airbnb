@@ -43,14 +43,66 @@ export const fetchRoomById = createAsyncThunk(
   }
 );
 
-// ✅ NEW: Fetch amenities
+// ✅ UPDATED: Fetch ALL amenities with pagination handling
 export const fetchAmenities = createAsyncThunk(
   "rooms/fetchAmenities",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axios.get(`${API_URL}/api/amenitiesitem/items`);
-      const payload = res?.data?.data ?? res?.data ?? [];
-      return Array.isArray(payload) ? payload : [];
+      // First, get the first page to understand pagination structure
+      const firstPageRes = await axios.get(`${API_URL}/api/amenitiesitem/items`);
+      const firstPageData = firstPageRes.data;
+      
+      // Check if the response has pagination structure
+      if (firstPageData.pagination && firstPageData.pagination.pages > 1) {
+        // If there are multiple pages, fetch all pages
+        let allAmenities = [...(firstPageData.data || [])];
+        const totalPages = firstPageData.pagination.pages;
+        
+        // Fetch remaining pages concurrently
+        const pagePromises = [];
+        for (let page = 2; page <= totalPages; page++) {
+          pagePromises.push(
+            axios.get(`${API_URL}/api/amenitiesitem/items?page=${page}`)
+          );
+        }
+        
+        const responses = await Promise.all(pagePromises);
+        responses.forEach(response => {
+          if (response.data.data && Array.isArray(response.data.data)) {
+            allAmenities = [...allAmenities, ...response.data.data];
+          }
+        });
+        
+        return allAmenities;
+      } else {
+        // If no pagination or only one page, return the data directly
+        return firstPageData.data || firstPageData || [];
+      }
+    } catch (err) {
+      return rejectWithValue(err.response?.data || "Error fetching amenities");
+    }
+  }
+);
+
+// ✅ ALTERNATIVE: Simple version - try to get all amenities at once
+export const fetchAllAmenities = createAsyncThunk(
+  "rooms/fetchAllAmenities",
+  async (_, { rejectWithValue }) => {
+    try {
+      // Try to get all amenities in one request with a large limit
+      const res = await axios.get(`${API_URL}/api/amenitiesitem/items?limit=100`);
+      const responseData = res.data;
+      
+      // Handle different response structures
+      if (Array.isArray(responseData)) {
+        return responseData;
+      } else if (responseData.data && Array.isArray(responseData.data)) {
+        return responseData.data;
+      } else if (responseData.success && Array.isArray(responseData.data)) {
+        return responseData.data;
+      } else {
+        return [];
+      }
     } catch (err) {
       return rejectWithValue(err.response?.data || "Error fetching amenities");
     }
@@ -62,14 +114,14 @@ const roomsSlice = createSlice({
   initialState: {
     rooms: [],
     room: null,          // ✅ for single room details
-    amenities: [],       // ✅ NEW: for amenities
+    amenities: [],       // ✅ for amenities
     totalPages: 1,
     totalRooms: 0,
     currentPage: 1,
     loading: false,
     error: null,
-    amenitiesLoading: false, // ✅ NEW: separate loading for amenities
-    amenitiesError: null,    // ✅ NEW: separate error for amenities
+    amenitiesLoading: false, // ✅ separate loading for amenities
+    amenitiesError: null,    // ✅ separate error for amenities
     likedRooms: [],
   },
   reducers: {
@@ -122,16 +174,30 @@ const roomsSlice = createSlice({
         state.error = action.payload;
       })
 
-      // ✅ NEW: Amenities
+      // ✅ UPDATED: Amenities (with pagination handling)
       .addCase(fetchAmenities.pending, (state) => {
         state.amenitiesLoading = true;
         state.amenitiesError = null;
       })
       .addCase(fetchAmenities.fulfilled, (state, action) => {
         state.amenitiesLoading = false;
-        state.amenities = action.payload;
+        state.amenities = Array.isArray(action.payload) ? action.payload : [];
       })
       .addCase(fetchAmenities.rejected, (state, action) => {
+        state.amenitiesLoading = false;
+        state.amenitiesError = action.payload;
+      })
+
+      // ✅ Alternative: All amenities at once
+      .addCase(fetchAllAmenities.pending, (state) => {
+        state.amenitiesLoading = true;
+        state.amenitiesError = null;
+      })
+      .addCase(fetchAllAmenities.fulfilled, (state, action) => {
+        state.amenitiesLoading = false;
+        state.amenities = Array.isArray(action.payload) ? action.payload : [];
+      })
+      .addCase(fetchAllAmenities.rejected, (state, action) => {
         state.amenitiesLoading = false;
         state.amenitiesError = action.payload;
       });
