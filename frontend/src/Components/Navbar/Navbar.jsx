@@ -6,6 +6,10 @@ import FiltersModal from "../FiltersModal/FiltersModal";
 import { getFilterCount } from "../FiltersModal/filterUtils.js";
 import LanguageCurrencyModal from "../LanguageCurrencyModal/LanguageCurrencyModal.jsx";
 
+// 💡 NEW IMPORT: The Login Modal component
+import LoginModal from "../LoginModal/LoginModal.jsx"; 
+
+
 // Default icons
 import HomeImg from "../../assets/Images/home.avif";
 import ExperImg from "../../assets/Images/experience.avif";
@@ -57,14 +61,17 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // State declarations - ALL AT THE TOP
+  // State declarations
   const [active, setActive] = useState(null);
   const [playing, setPlaying] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [imageErrors, setImageErrors] = useState({});
-  const [showFilterButton, setShowFilterButton] = useState(false); // ✅ FIXED: Added this state
+  const [showFilterButton, setShowFilterButton] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showModal, setShowModal] = useState(false); 
+  // 💡 NEW STATE: State for the login modal
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false); 
 
   const { filters, setFilters } = useContext(FiltersContext);
 
@@ -104,9 +111,7 @@ const Navbar = () => {
     navigate("/");
   };
 
-  const handleLanguageClick = () => {
-    console.log("Language selector clicked");
-  };
+  // Removed unused handleLanguageClick
 
   const handleLogoError = () => {
     console.warn("Logo image failed to load");
@@ -194,7 +199,7 @@ const Navbar = () => {
                 onMouseEnter={() => setActive(item.key)}
                 onMouseLeave={() => setActive(null)}
                 type="button"
-                aria-label={`Navigate to ${item.label}`}
+                aria-label={`Maps to ${item.label}`}
               >
                 {renderIcon(item)}
                 <span className="nav-label">{item.label}</span>
@@ -269,18 +274,19 @@ const Navbar = () => {
             {isMenuOpen && (
               <div className="dropdown" role="menu" aria-label="User menu">
                 <ul>
-                  <li role="menuitem">
-                    <span className="icon">👤</span>
-                    <div>
-                      <div className="bold">Sign up</div>
-                      <div className="small">Create an account</div>
-                    </div>
-                  </li>
-                  <li role="menuitem">
+                  
+                  {/* 💡 UPDATED LOG IN/SIGNUP LIST ITEM */}
+                  <li 
+                    role="menuitem"
+                    onClick={() => { 
+                      setIsLoginModalOpen(true); // ⬅️ Open the Login Modal
+                      setIsMenuOpen(false);      // ⬅️ Close the dropdown menu
+                    }}
+                    style={{ cursor: "pointer" }}
+                  >
                     <span className="icon">🔑</span>
                     <div>
-                      <div className="bold">Log in</div>
-                      <div className="small">Access your account</div>
+                      <div className="bold">Log in or sign up</div>
                     </div>
                   </li>
                   <hr />
@@ -307,14 +313,9 @@ const Navbar = () => {
         </div>
       </nav>
 
-      <LanguageCurrencyModal
-        isVisible={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      />
-
-      {/* Search Box - Only show on home page */}
+      {/* Search Box - Only show on home page (Moved below nav for layout) */}
       {!showFilterButton && (
-        <div className="search-box" onClick={handleSearchClick}>
+        <div className="search-box bottom-search" onClick={handleSearchClick}>
           <div className="search-item">
             <span className="search-label">Where</span>
             <span className="search-placeholder">Search destinations</span>
@@ -336,6 +337,18 @@ const Navbar = () => {
           </button>
         </div>
       )}
+
+      {/* Language/Currency Modal */}
+      <LanguageCurrencyModal
+        isVisible={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
+      
+      {/* 💡 NEW MODAL INTEGRATION */}
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+      />
 
       {/* Filters Modal - Single instance */}
       <FiltersModal

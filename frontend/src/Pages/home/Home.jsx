@@ -5,6 +5,7 @@ import ListingCard from "../../Components/ListingCard/ListingCard";
 import Navbar from "../../Components/Navbar/Navbar";
 import Footer from "../../Components/Footer/Footer";
 import "./Home.scss";
+import { useTranslation } from "react-i18next";
 
 const ITEMS_PER_PAGE = 7;
 
@@ -21,7 +22,10 @@ const sectionTitles = {
 };
 
 const HomePage = () => {
+  const { t } = useTranslation();
+
   const dispatch = useDispatch();
+
   const { listings, loading, error, pageIndexes } = useSelector(
     (state) => state.listings
   );
@@ -47,7 +51,10 @@ const HomePage = () => {
           const allListings = groupedListings[location];
           const currentPage = pageIndexes[location] || 0;
           const start = currentPage * ITEMS_PER_PAGE;
-          const visibleListings = allListings.slice(start, start + ITEMS_PER_PAGE);
+          const visibleListings = allListings.slice(
+            start,
+            start + ITEMS_PER_PAGE
+          );
           const totalPages = Math.ceil(allListings.length / ITEMS_PER_PAGE);
 
           return (
@@ -61,7 +68,11 @@ const HomePage = () => {
                     className="arrow-button left"
                     onClick={() =>
                       dispatch(
-                        changePage({ location, direction: -1, itemsPerPage: ITEMS_PER_PAGE })
+                        changePage({
+                          location,
+                          direction: -1,
+                          itemsPerPage: ITEMS_PER_PAGE,
+                        })
                       )
                     }
                     disabled={currentPage === 0}
@@ -70,7 +81,11 @@ const HomePage = () => {
                     className="arrow-button right"
                     onClick={() =>
                       dispatch(
-                        changePage({ location, direction: 1, itemsPerPage: ITEMS_PER_PAGE })
+                        changePage({
+                          location,
+                          direction: 1,
+                          itemsPerPage: ITEMS_PER_PAGE,
+                        })
                       )
                     }
                     disabled={currentPage === totalPages - 1}
@@ -90,6 +105,11 @@ const HomePage = () => {
             </section>
           );
         })}
+      </div>
+
+      <div>
+        <h1>{t("welcome")}</h1>
+        <p>{t("description")}</p>
       </div>
       <Footer />
     </>

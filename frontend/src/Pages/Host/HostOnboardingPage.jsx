@@ -382,9 +382,11 @@ const HostOnboardingPage = () => {
       
       toast.success('🎉 Listing published successfully!');
       
-      setTimeout(() => {
-        window.location.href = `/rooms/${result._id}`;
-      }, 2000);
+setTimeout(() => {
+
+    window.location.href = `/rooms`;
+
+}, 2000);
 
     } catch (error) {
       console.error('❌ Error submitting listing:', error);
