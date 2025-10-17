@@ -20,7 +20,6 @@
     border-radius: 12px;
     width: 90%;
     max-width: 568px; 
-    padding: 24px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
     position: relative;
     max-height: 90vh;
@@ -213,3 +212,168 @@
 .google-icon { font-size: 18px; font-weight: bold; }
 .apple-icon { font-size: 20px; }
 .email-icon { font-size: 18px; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ .phone-confirm-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .phone-confirm-content {
+            background-color: white;
+            border-radius: 40px;
+            width: 100%;
+            max-width: 568px;
+            height: 330px;
+            box-shadow: 0 2px 16px rgba(0, 0, 0, 0.12);
+            overflow: hidden;
+        }
+
+        .phone-confirm-header {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid #ebebeb;
+            position: relative;
+        }
+
+        .phone-confirm-back {
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+
+        .phone-confirm-back:hover {
+            background-color: #f7f7f7;
+        }
+
+        .phone-confirm-title {
+            font-size: 18px;
+            font-weight: 600;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .phone-confirm-body {
+            padding: 24px;
+        }
+
+        .phone-confirm-instruction {
+            margin-bottom: 24px;
+            color: #222222;
+            font-size: 16px;
+            line-height: 1.4;
+        }
+
+        .phone-confirm-code-container {
+            display: flex;
+            /* gap: 12px; */
+            margin-bottom: 20px;
+            border: #222222 1px solid;
+            width: 183px;
+            height: 56px;
+            border-radius: 10px;
+        }
+        .phone-confirm-code-container:focus-visible{
+            border-color: #000000;
+        }
+
+        .phone-confirm-input {
+            width: 25px;
+            height: 25px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 500;
+            border: none;
+            align-self: center;
+            transition: all 0.2s;
+        }
+
+        .phone-confirm-input:focus {
+            outline: none;
+            border-color: #000000;
+        }
+
+        .phone-confirm-input.filled {
+            border-color: #000000;
+        }
+
+        .phone-confirm-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 24px 0 24px ;
+            border-top: 1px solid #eee;
+        }
+
+        .phone-confirm-option {
+            background: none;
+            border: none;
+            color: #222222;
+            text-decoration: underline;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 12px;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+        }
+
+        .phone-confirm-option:hover {
+            background-color: #f7f7f7;
+        }
+
+        .phone-confirm-continue {
+            background-color: #222222;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 14px 24px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .phone-confirm-continue:hover {
+            background-color: #000000;
+        }
+
+        .phone-confirm-continue.disabled {
+            background-color: #dddddd;
+            color: #717171;
+            cursor: not-allowed;
+        }
+
+        .phone-confirm-continue.disabled:hover {
+            background-color: #dddddd;
+        }
