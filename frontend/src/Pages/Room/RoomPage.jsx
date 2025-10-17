@@ -104,7 +104,8 @@ const RoomPage = () => {
           </MapContainer>
         </div>
       </div>
-      <Footer />
+      
+       <Footer/>
     </>
   );
 };

@@ -5,7 +5,10 @@
     flex-direction: row;
     min-height: 100vh;
     padding-top: 80px;
-      font-family: "Manrope", sans-serif ;
+    font-family: "Manrope", sans-serif ;
+    position: relative;
+    gap: 0;
+      
     /* Account for fixed navbar */
 
     .room-list {
@@ -13,7 +16,8 @@
         padding: 1.5rem 1.5rem 1.5rem 2rem;
         display: flex;
         flex-direction: column;
-        margin-right: 40%;
+      
+       
 
         /* Account for fixed map */
         /* ----- Header above cards ----- */
@@ -90,18 +94,27 @@
 
     /* ---------- Map Section ---------- */
     .room-map {
-        position: fixed;
-        top: 125px;
-        right: 0;
+        // position: fixed;
+        // top: 125px;
+        // right: 0;
+        // width: 40%;
+        // bottom: 25px;
+        // overflow: hidden;
+        position: sticky;
+        top: 100px;
+        // right: 0;
         width: 40%;
-        bottom: 25px;
-        overflow: hidden;
+        height: calc(100vh - 180px); 
+        padding: 1.5rem 2rem 1.5rem 1.5rem;
+        align-self: flex-start;
+        height: calc(100vh - 120px); /* Full viewport height minus navbar */
 
         .leaflet-container {
             height: 100%;
             width: 100%;
+            margin-left: 23px;
             border-radius: 40px;
-            
+            border-bottom: 110px;
         }
     }
 }

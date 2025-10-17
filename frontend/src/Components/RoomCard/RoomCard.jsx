@@ -133,7 +133,7 @@ const RoomCard = ({ room = {} }) => {
 
       <div className="room-info">
         <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <h3>{room.type}</h3>
+          <h3>{room.propertyType} in {room.address.city}</h3>
           <h2>
             ★ {room.rating} ({room.reviewCount})
           </h2>

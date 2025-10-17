@@ -146,7 +146,7 @@ const Navbar = () => {
       <img
         src={hasError ? item.defaultImg : imageSrc}
         alt={`${item.label} icon`}
-        style={{ width: "24px", height: "24px" }}
+        style={{ width: "60px", height: "50px" }}
         onError={() => handleImageError(item.key)}
       />
     );

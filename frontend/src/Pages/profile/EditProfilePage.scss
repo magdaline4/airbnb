@@ -1,0 +1,411 @@
+// Edit Profile Page Styles - Matching the exact design
+.edit-profile-page {
+  padding-top: 80px;
+  min-height: 100vh;
+  background: #ffffff;
+  
+  .edit-profile-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+  
+  .edit-profile-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 48px;
+    min-height: calc(100vh - 80px);
+    align-items: start;
+  }
+  
+  .profile-picture-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding-top: 32px;
+    
+    .profile-avatar {
+      img {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+    }
+    
+    .edit-photo-button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #f5f5f5;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #222;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background: #e0e0e0;
+      }
+      
+      svg {
+        font-size: 12px;
+      }
+    }
+  }
+  
+  .edit-profile-main-content {
+    padding: 32px 0;
+    
+    .profile-header {
+      margin-bottom: 32px;
+      
+      h1 {
+        font-size: 28px;
+        font-weight: 600;
+        margin: 0 0 12px 0;
+        color: #222;
+      }
+      
+      p {
+        font-size: 15px;
+        color: #666;
+        line-height: 1.4;
+        margin: 0;
+        
+        .learn-more-link {
+          color: #222;
+          text-decoration: underline;
+          cursor: pointer;
+          
+          &:hover {
+            color: #333;
+          }
+        }
+      }
+    }
+    
+    .profile-fields {
+      margin-bottom: 32px;
+      
+      .profile-field {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px 0;
+        border-bottom: 1px solid #f0f0f0;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        
+        &:hover {
+          background: #fafafa;
+        }
+        
+        &:last-child {
+          border-bottom: none;
+        }
+        
+        .field-icon {
+          width: 20px;
+          height: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #666;
+          font-size: 16px;
+        }
+        
+        .field-label {
+          font-size: 15px;
+          color: #222;
+          font-weight: 500;
+        }
+      }
+    }
+    
+    .about-me-section {
+      margin-bottom: 32px;
+      
+      h2 {
+        font-size: 20px;
+        font-weight: 600;
+        margin: 0 0 16px 0;
+        color: #222;
+      }
+      
+      .about-me-textarea {
+        position: relative;
+        
+        textarea {
+          width: 100%;
+          padding: 16px;
+          border: 2px dashed #e0e0e0;
+          border-radius: 8px;
+          font-size: 15px;
+          font-family: inherit;
+          resize: vertical;
+          min-height: 100px;
+          transition: border-color 0.2s ease;
+          background: transparent;
+          
+          &:focus {
+            outline: none;
+            border-color: #222;
+            border-style: solid;
+          }
+          
+          &::placeholder {
+            color: #999;
+          }
+        }
+        
+        .add-intro-link {
+          position: absolute;
+          bottom: 16px;
+          left: 16px;
+          font-size: 14px;
+          color: #222;
+          text-decoration: underline;
+          cursor: pointer;
+          
+          &:hover {
+            color: #333;
+          }
+        }
+      }
+    }
+    
+    .where-ive-been-section {
+      margin-bottom: 32px;
+      
+      .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        
+        h2 {
+          font-size: 20px;
+          font-weight: 600;
+          margin: 0;
+          color: #222;
+        }
+        
+        .toggle-container {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          
+          .toggle-label {
+            font-size: 14px;
+            color: #666;
+            text-align: right;
+            max-width: 200px;
+          }
+          
+          .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+            
+            input {
+              opacity: 0;
+              width: 0;
+              height: 0;
+              
+              &:checked + .toggle-slider {
+                background-color: #222;
+                
+                &:before {
+                  transform: translateX(20px);
+                }
+              }
+            }
+            
+            .toggle-slider {
+              position: absolute;
+              cursor: pointer;
+              top: 0;
+              left: 0;
+              right: 0;
+              bottom: 0;
+              background-color: #ccc;
+              transition: .4s;
+              border-radius: 24px;
+              
+              &:before {
+                position: absolute;
+                content: "";
+                height: 18px;
+                width: 18px;
+                left: 3px;
+                bottom: 3px;
+                background-color: white;
+                transition: .4s;
+                border-radius: 50%;
+              }
+            }
+          }
+        }
+      }
+      
+      .travel-stamps {
+        display: flex;
+        gap: 16px;
+        
+        .travel-stamp {
+          width: 120px;
+          height: 80px;
+          border: 1px solid #e0e0e0;
+          border-radius: 8px;
+          padding: 12px;
+          background: #fafafa;
+          position: relative;
+          
+          .stamp-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+            
+            .stamp-location {
+              font-size: 12px;
+              font-weight: 600;
+              color: #222;
+              line-height: 1.2;
+            }
+            
+            .stamp-icon {
+              color: #666;
+              font-size: 14px;
+            }
+          }
+          
+          .stamp-country {
+            font-size: 10px;
+            color: #666;
+            margin-bottom: 4px;
+          }
+          
+          .stamp-details {
+            position: absolute;
+            bottom: 8px;
+            left: 12px;
+            right: 12px;
+            
+            .stamp-city {
+              font-size: 11px;
+              color: #222;
+              margin-bottom: 2px;
+            }
+            
+            .stamp-trips {
+              font-size: 10px;
+              color: #666;
+            }
+          }
+        }
+      }
+    }
+    
+    .profile-actions {
+      display: flex;
+      justify-content: flex-end;
+      padding-top: 32px;
+      
+      .done-button {
+        background: #222;
+        border: none;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        
+        &:hover {
+          background: #333;
+        }
+      }
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 1024px) {
+  .edit-profile-page {
+    .edit-profile-layout {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+    
+    .profile-picture-section {
+      flex-direction: row;
+      justify-content: center;
+      padding-top: 0;
+    }
+    
+    .edit-profile-main-content {
+      padding: 0;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .edit-profile-page {
+    .edit-profile-container {
+      padding: 0 16px;
+    }
+    
+    .edit-profile-layout {
+      gap: 24px;
+    }
+    
+    .edit-profile-main-content {
+      .where-ive-been-section {
+        .section-header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 12px;
+          
+          .toggle-container {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+            
+            .toggle-label {
+              text-align: left;
+              max-width: none;
+            }
+          }
+        }
+        
+        .travel-stamps {
+          flex-wrap: wrap;
+        }
+      }
+    }
+  }
+}
+
+// Animation for page transitions
+.edit-profile-main-content {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
