@@ -113,8 +113,8 @@ const SocialButton = ({ text, className, onClick, icon }) => {
 
 function LoginModal({ isOpen, onClose }) {
   const [selectedCountry, setSelectedCountry] = useState(countries[0]);
-  const [phoneInputValue, setPhoneInputValue] = useState("1234567890");
-
+  const [phoneInputValue, setPhoneInputValue] = useState("");
+  const [isPhoneFocused, setIsPhoneFocused] = useState(false);
   // Handle escape key press
   const handleEscape = useCallback(
     (event) => {
@@ -154,39 +154,49 @@ function LoginModal({ isOpen, onClose }) {
     e.stopPropagation();
   };
 
-  // Handle country selection from select
+  // Handle phone input change
+  const handlePhoneInputChange = (e) => {
+    let value = e.target.value;
+
+    // Always start with the selected country code
+    if (!value.startsWith(selectedCountry.code)) {
+      value = selectedCountry.code + " " + value.replace(/\D/g, "");
+    }
+
+    // Extract digits after the country code
+    const digits = value.replace(selectedCountry.code, "").replace(/\D/g, "");
+    setPhoneInputValue(digits);
+  };
+
+  // Handle focus and blur
+  const handlePhoneInputFocus = () => {
+    // If empty, show country code only
+    if (!phoneInputValue) {
+      setPhoneInputValue("");
+    }
+    setIsPhoneFocused(true);
+  };
+
+  const handlePhoneInputBlur = () => {
+    setIsPhoneFocused(false);
+  };
+
   const handleCountrySelect = (e) => {
     const selectedCode = e.target.value;
     const country =
       countries.find((c) => c.code === selectedCode) || countries[0];
+
     setSelectedCountry(country);
+    setPhoneInputValue("");
+    document.getElementById("phone-input")?.focus(); // optional usability enhancement
   };
 
-  // Handle phone input change
-  const handlePhoneInputChange = (e) => {
-    const value = e.target.value.replace(/\D/g, ""); // Remove non-digits
-    setPhoneInputValue(value);
-  };
+  // Display value in input
+  const displayPhoneValue = `${selectedCountry.code}${
+    phoneInputValue ? " " + phoneInputValue : ""
+  }`;
 
-  // Get the display value for phone input (country code + phone number)
-  const getPhoneInputDisplayValue = () => {
-    if (!phoneInputValue) return "";
-    return `${selectedCountry.code} ${phoneInputValue}`;
-  };
-
-  // Handle phone input focus - show only numbers when focused
-  const handlePhoneInputFocus = (e) => {
-    e.target.value = phoneInputValue;
-  };
-
-  // Handle phone input blur - show full format with country code when not focused
-  const handlePhoneInputBlur = (e) => {
-    // Keep only numbers in state, display will be handled by getPhoneInputDisplayValue
-  };
-
-  if (!isOpen) {
-    return null;
-  }
+  if (!isOpen) return null;
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -239,7 +249,7 @@ function LoginModal({ isOpen, onClose }) {
               <input
                 id="phone-input"
                 type="tel"
-                value={getPhoneInputDisplayValue()}
+                value={displayPhoneValue}
                 onChange={handlePhoneInputChange}
                 onFocus={handlePhoneInputFocus}
                 onBlur={handlePhoneInputBlur}
