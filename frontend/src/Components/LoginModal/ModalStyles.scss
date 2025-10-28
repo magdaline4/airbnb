@@ -304,6 +304,84 @@ $radius: 12px;
     }
   }
 }
+// OTP Specific Styles
+.otp-instruction {
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+  color: #1f2937;
+  line-height: 1.5;
+}
+
+.otp-input-container {
+  display: flex;
+  // gap: 0.5rem;
+  border: 2px solid #333539;
+  margin-bottom: 2rem;
+  border-radius: 10px;
+  width: fit-content;
+}
+
+.otp-input {
+  width: 2rem;
+  height: 3.5rem;
+  text-align: center;
+  font-size: 1.5rem;
+  // font-weight: 600;
+  border: none;
+  border-radius: 0.5rem;
+  background: white;
+
+  &:focus {
+    outline: none;
+    border-color: #000;
+  }
+}
+
+.otp-footer {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 1rem;
+
+  .different-option-link {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: underline;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #000;
+    padding: 0;
+    text-align: left;
+
+    &:hover {
+      text-decoration: none;
+    }
+  }
+
+  .continue-button {
+    margin-bottom: 0;
+    padding: 0.75rem 1.5rem;
+    width: auto;
+    align-self: flex-end;
+  }
+}
+
+// Responsive Design
+@media (min-width: 640px) {
+  .otp-footer {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+    .continue-button {
+      align-self: auto;
+    }
+
+    .different-option-link {
+      text-align: left;
+    }
+  }
+}
 
 // Responsive
 @media (max-width: 600px) {

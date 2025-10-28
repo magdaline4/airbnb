@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback ,useRef} from "react";
-// import "./ModalStyles.scss";
-import"./ModalStyles.css"
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import "./ModalStyles.scss";
+
 // Country data with codes
 const countries = [
   { code: "+91", name: "India" },
@@ -74,73 +74,83 @@ const CloseIcon = () => (
     role="presentation"
     focusable="false"
   >
-    <path d="m6 6 20 20"></path>
-    <path d="m26 6-20 20"></path>
+    <path d="m6 6 20 20" stroke="currentColor" strokeWidth="3"></path>
+    <path d="m26 6-20 20" stroke="currentColor" strokeWidth="3"></path>
   </svg>
 );
 
-// Back arrow SVG for the phone confirmation modal
-const BackArrowIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+// Back Arrow Component
+const BackArrow = () => (
+  <svg
+    className="close-button-svg"
+    viewBox="0 0 32 32"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true"
+    role="presentation"
+    focusable="false"
+  >
     <path
-      d="M15 18L9 12L15 6"
+      d="m20 28-11.29289322-11.2928932c-.39052429-.3905243-.39052429-1.0236893 0-1.4142136l11.29289322-11.2928932"
       stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+      strokeWidth="3"
+    ></path>
   </svg>
 );
 
-// Reusable component for the social buttons
-const SocialButton = ({ icon, text, className, onClick }) => (
-  <button className="social-button" onClick={onClick}>
-    <span className={`social-icon ${className}`}>{icon}</span>
-    {text}
-  </button>
+// Dropdown Arrow Component
+const DropdownArrow = () => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 32 32"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true"
+    role="presentation"
+    focusable="false"
+    style={{
+      display: "block",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: 4,
+      overflow: "visible",
+    }}
+  >
+    <path fill="none" d="M28 12 16.7 23.3a1 1 0 0 1-1.4 0L4 12"></path>
+  </svg>
 );
 
-function LoginModal({ isOpen, onClose }) {
-  const [showPhoneConfirm, setShowPhoneConfirm] = useState(false);
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [verificationCode, setVerificationCode] = useState([
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-  ]);
+// SocialButton component
+const SocialButton = ({ text, className, onClick, icon }) => {
+  return (
+    <button className={`social-button ${className}`} onClick={onClick}>
+      {icon}
+      <span>{text}</span>
+    </button>
+  );
+};
+
+// OTP Modal Component
+function OTPModal({ isOpen, onClose, phoneNumber, onBack }) {
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const inputRefs = useRef([]);
 
-  // Reset states when modal closes
-  useEffect(() => {
-    if (!isOpen) {
-      setShowPhoneConfirm(false);
-      setPhoneNumber("");
-      setVerificationCode(["", "", "", "", "", ""]);
-    }
-  }, [isOpen]);
-
-  // Memoized callback for handling the Escape key press
   const handleEscape = useCallback(
     (event) => {
       if (event.key === "Escape") {
-        if (showPhoneConfirm) {
-          setShowPhoneConfirm(false);
-        } else {
-          onClose();
-        }
+        onClose();
       }
     },
-    [onClose, showPhoneConfirm]
+    [onClose]
   );
 
-  // Effect to add/remove the Escape key listener and body scroll lock
   useEffect(() => {
     if (isOpen) {
       document.addEventListener("keydown", handleEscape);
       document.body.style.overflow = "hidden";
+      // Focus first input when modal opens
+      setTimeout(() => {
+        inputRefs.current[0]?.focus();
+      }, 100);
     } else {
       document.removeEventListener("keydown", handleEscape);
       document.body.style.overflow = "unset";
@@ -152,242 +162,358 @@ function LoginModal({ isOpen, onClose }) {
     };
   }, [isOpen, handleEscape]);
 
-  // Effect to focus first input when phone confirmation modal opens
-  useEffect(() => {
-    if (showPhoneConfirm && inputRefs.current[0]) {
-      inputRefs.current[0].focus();
-    }
-  }, [showPhoneConfirm]);
+  const handleOtpChange = (index, value) => {
+    // Only allow numbers
+    if (value && !/^\d+$/.test(value)) return;
 
-  // Phone confirmation modal handlers
-  const handleInputChange = (index, value) => {
-    if (value.length > 1) {
-      value = value[0];
-    }
+    const newOtp = [...otp];
+    newOtp[index] = value.slice(-1); // Only take last character
+    setOtp(newOtp);
 
-    if (!/^\d*$/.test(value)) {
-      return;
-    }
-
-    const newCode = [...verificationCode];
-    newCode[index] = value;
-    setVerificationCode(newCode);
-
+    // Auto-focus next input
     if (value && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
   };
 
   const handleKeyDown = (index, e) => {
-    if (e.key === "Backspace" && !verificationCode[index] && index > 0) {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
     }
   };
 
   const handlePaste = (e) => {
     e.preventDefault();
-    const pastedData = e.clipboardData.getData("text").slice(0, 6).split("");
-    const newCode = [...verificationCode];
+    const pastedData = e.clipboardData.getData("text").slice(0, 6);
+    const digits = pastedData.replace(/\D/g, "").split("");
 
-    pastedData.forEach((char, index) => {
-      if (/^\d$/.test(char) && index < 6) {
-        newCode[index] = char;
+    const newOtp = [...otp];
+    digits.forEach((digit, index) => {
+      if (index < 6) {
+        newOtp[index] = digit;
       }
     });
+    setOtp(newOtp);
 
-    setVerificationCode(newCode);
-    const lastFilledIndex = Math.min(pastedData.length, 5);
-    inputRefs.current[lastFilledIndex]?.focus();
+    // Focus last filled input or next empty
+    const nextIndex = Math.min(digits.length, 5);
+    inputRefs.current[nextIndex]?.focus();
   };
 
-  const handlePhoneContinue = () => {
-    // Validate phone number and show confirmation modal
-    if (phoneNumber.trim()) {
-      setShowPhoneConfirm(true);
-    }
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const otpCode = otp.join("");
+    console.log("OTP entered:", otpCode);
+    // Add your OTP verification logic here
   };
-
-  const handleVerificationContinue = () => {
-    const fullCode = verificationCode.join("");
-    if (fullCode.length === 6) {
-      console.log("Verification code:", fullCode);
-      // Handle verification logic here
-      // On successful verification, close both modals
-      onClose();
-      setShowPhoneConfirm(false);
-    }
-  };
-
-  const handleBackToLogin = () => {
-    setShowPhoneConfirm(false);
-  };
-
-  const isCodeComplete = verificationCode.every((digit) => digit !== "");
-
-  if (!isOpen) {
-    return null;
-  }
 
   const handleContentClick = (e) => {
     e.stopPropagation();
   };
 
-  // Render Phone Confirmation Modal
-  if (showPhoneConfirm) {
-    return (
-      <div className="phone-confirm-overlay" onClick={onClose}>
-        <div className="phone-confirm-content" onClick={handleContentClick}>
-          <div className="phone-confirm-header">
-            <button
-              className="phone-confirm-back"
-              onClick={handleBackToLogin}
-              aria-label="Go back"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 32 32"
-                aria-hidden="true"
-                role="presentation"
-                focusable="false"
-                style={{
-                  display: "block",
-                  fill: "none",
-                  height: "16px",
-                  width: "16px",
-                  stroke: "currentcolor",
-                  strokeWidth: "3",
-                  overflow: "visible",
-                }}
+  const isOtpComplete = otp.every((digit) => digit !== "");
 
-                // style="display: block; fill: none; height: 16px; width: 16px; stroke: currentcolor; stroke-width: 3; overflow: visible;"
-              >
-                <g fill="none">
-                  <path d="M4 16h26M15 28 3.7 16.7a1 1 0 0 1 0-1.4L15 4"></path>
-                </g>
-              </svg>
-            </button>
-            <div class="phone-confirm-title">Confirm your number</div>
-          </div>
+  if (!isOpen) return null;
 
-          <div class="phone-confirm-body">
-            <p class="phone-confirm-instruction">
-              Enter the code we've sent via SMS to +91 {phoneNumber}:
-            </p>
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div
+        className="modal-content otp-modal-content"
+        onClick={handleContentClick}
+      >
+        {/* Header */}
+        <div className="modal-header">
+          <button
+            className="close-button back-button"
+            onClick={onBack}
+            aria-label="Back"
+          >
+            <BackArrow />
+          </button>
+          <div className="modal-title">Confirm your number</div>
+          <div className="line-separator"></div>
+        </div>
 
-            <div className="phone-confirm-code-container" onPaste={handlePaste}>
-              {verificationCode.map((digit, index) => (
+        {/* Body */}
+        <div className="modal-body otp-modal-body">
+          <p className="otp-instruction">
+            Enter the code we've sent via SMS to {phoneNumber}:
+          </p>
+
+          <form onSubmit={handleSubmit}>
+            <div className="otp-input-container">
+              {otp.map((digit, index) => (
                 <input
-                  className="phone-confirm-input"
+                  placeholder="-"
                   key={index}
                   ref={(el) => (inputRefs.current[index] = el)}
                   type="text"
                   inputMode="numeric"
-                  placeholder="-"
                   maxLength="1"
                   value={digit}
-                  onChange={(e) => handleInputChange(index, e.target.value)}
+                  onChange={(e) => handleOtpChange(index, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(index, e)}
+                  onPaste={handlePaste}
+                  className="otp-input"
                 />
               ))}
             </div>
-          </div>
-          <div class="phone-confirm-actions">
-            <button
-              className="phone-confirm-option"
-              onClick={handleBackToLogin}
-            >
-              Choose a different option
-            </button>
-            <button
-              className={`phone-confirm-continue ${
-                !isCodeComplete ? "disabled" : ""
-              }`}
-              onClick={handleVerificationContinue}
-              disabled={!isCodeComplete}
-            >
-              Continue
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
-  // Render Main Login Modal
-  return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={handleContentClick}>
-        <div className="modal-header">
-          <button
-            className="close-button"
-            onClick={onClose}
-            aria-label="Close dialog"
-          >
-            <CloseIcon />
-          </button>
-          <div className="modal-title">Log in or sign up</div>
-        </div>
+            <div className="otp-footer">
+              <button
+                type="button"
+                className="different-option-link"
+                onClick={onBack}
+              >
+                Choose a different option
+              </button>
 
-        <div className="modal-body">
-          <h2>Welcome to Airbnb</h2>
-
-          <div className="input-group country-region-group">
-            <label htmlFor="country">Country/Region</label>
-            <select id="country" defaultValue="IN">
-              <option value="IN">India (+91)</option>
-              <option value="US">United States (+1)</option>
-            </select>
-          </div>
-
-          <div className="input-group">
-            <label htmlFor="phone">Phone number</label>
-            <input
-              type="tel"
-              id="phone"
-              placeholder="Enter your phone number"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-            />
-          </div>
-
-          <p className="privacy-text">
-            We'll call or text you to confirm your number. Standard message and
-            data rates apply.
-            <a href="#">Privacy Policy</a>
-          </p>
-
-          {/* Continue Button - This triggers the phone confirmation modal */}
-          <button
-            className="continue-button"
-            onClick={handlePhoneContinue}
-            disabled={!phoneNumber.trim()}
-          >
-            Continue
-          </button>
-
-          <div className="or-divider">or</div>
-
-          <SocialButton
-            icon="G"
-            text="Continue with Google"
-            className="google-icon"
-            onClick={() => console.log("Google login clicked")}
-          />
-          <SocialButton
-            icon=""
-            text="Continue with Apple"
-            className="apple-icon"
-            onClick={() => console.log("Apple login clicked")}
-          />
-          <SocialButton
-            icon="✉"
-            text="Continue with email"
-            className="email-icon"
-            onClick={() => console.log("Email login clicked")}
-          />
+              <button
+                type="submit"
+                className={`continue-button ${
+                  !isOtpComplete ? "disabled" : ""
+                }`}
+                disabled={!isOtpComplete}
+              >
+                Continue
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
+  );
+}
+
+function LoginModal({ isOpen, onClose }) {
+  const [selectedCountry, setSelectedCountry] = useState(countries[0]);
+  const [phoneInputValue, setPhoneInputValue] = useState("");
+  const [isPhoneFocused, setIsPhoneFocused] = useState(false);
+  const [showOTPModal, setShowOTPModal] = useState(false);
+  const [submittedPhone, setSubmittedPhone] = useState("");
+
+  // Handle escape key press
+  const handleEscape = useCallback(
+    (event) => {
+      if (event.key === "Escape" && !showOTPModal) {
+        onClose();
+      }
+    },
+    [onClose, showOTPModal]
+  );
+
+  // Handle body scroll and event listeners
+  useEffect(() => {
+    if (isOpen && !showOTPModal) {
+      document.addEventListener("keydown", handleEscape);
+      document.body.style.overflow = "hidden";
+    } else if (!showOTPModal) {
+      document.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = "unset";
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+      if (!showOTPModal) {
+        document.body.style.overflow = "unset";
+      }
+    };
+  }, [isOpen, handleEscape, showOTPModal]);
+
+  // Handle form submission
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const fullPhoneNumber = `${selectedCountry.code} ${phoneInputValue}`;
+    setSubmittedPhone(fullPhoneNumber);
+    console.log("Phone number:", fullPhoneNumber);
+    // Show OTP modal
+    setShowOTPModal(true);
+  };
+
+  // Prevent modal close when clicking inside content
+  const handleContentClick = (e) => {
+    e.stopPropagation();
+  };
+
+  // Handle phone input change
+  const handlePhoneInputChange = (e) => {
+    let value = e.target.value;
+
+    // Always start with the selected country code
+    if (!value.startsWith(selectedCountry.code)) {
+      value = selectedCountry.code + " " + value.replace(/\D/g, "");
+    }
+
+    // Extract digits after the country code
+    const digits = value.replace(selectedCountry.code, "").replace(/\D/g, "");
+    setPhoneInputValue(digits);
+  };
+
+  // Handle focus and blur
+  const handlePhoneInputFocus = () => {
+    // If empty, show country code only
+    if (!phoneInputValue) {
+      setPhoneInputValue("");
+    }
+    setIsPhoneFocused(true);
+  };
+
+  const handlePhoneInputBlur = () => {
+    setIsPhoneFocused(false);
+  };
+
+  const handleCountrySelect = (e) => {
+    const selectedCode = e.target.value;
+    const country =
+      countries.find((c) => c.code === selectedCode) || countries[0];
+
+    setSelectedCountry(country);
+    setPhoneInputValue("");
+    document.getElementById("phone-input")?.focus(); // optional usability enhancement
+  };
+
+  const handleBackFromOTP = () => {
+    setShowOTPModal(false);
+  };
+
+  const handleCloseAll = () => {
+    setShowOTPModal(false);
+    onClose();
+  };
+
+  // Display value in input
+  const displayPhoneValue = `${selectedCountry.code}${
+    phoneInputValue ? " " + phoneInputValue : ""
+  }`;
+
+  if (!isOpen) return null;
+
+  return (
+    <>
+      {!showOTPModal && (
+        <div className="modal-overlay" onClick={onClose}>
+          <div className="modal-content" onClick={handleContentClick}>
+            {/* Header */}
+            <div className="modal-header">
+              <button
+                className="close-button"
+                onClick={onClose}
+                aria-label="Close"
+              >
+                <CloseIcon />
+              </button>
+              <div className="modal-title">Log in or sign up</div>
+
+              <div className="line-separator"></div>
+            </div>
+
+            {/* Body */}
+            <div className="modal-body">
+              <h2 className="welcome-title">Welcome to Airbnb</h2>
+
+              <form onSubmit={handleSubmit}>
+                {/* Country/Region - Select input */}
+                <div className="input-group">
+                  <div className="select-wrapper">
+                    {/*<label htmlFor="country-select" className="input-label">
+                      Country/Region
+                    </label>*/}
+                    <select
+                      id="country-select"
+                      value={selectedCountry.code}
+                      onChange={handleCountrySelect}
+                      className="country-select"
+                      required
+                    >
+                      {countries.map((country) => (
+                        <option key={country.code} value={country.code}>
+                          {country.name} ({country.code})
+                        </option>
+                      ))}
+                    </select>
+                    <span className="select-arrow">
+                      <DropdownArrow />
+                    </span>
+                  </div>
+                </div>
+
+                {/* Phone Number */}
+                <div className="input-group">
+                  {/*<label htmlFor="phone-input" className="input-label">
+                    Phone number
+                  </label>*/}
+                  <input
+                    id="phone-input"
+                    type="tel"
+                    value={displayPhoneValue}
+                    onChange={handlePhoneInputChange}
+                    onFocus={handlePhoneInputFocus}
+                    onBlur={handlePhoneInputBlur}
+                    placeholder="Phone number"
+                    className="phone-input"
+                    required
+                  />
+                </div>
+
+                {/* Privacy Text */}
+                <p className="privacy-text">
+                  We'll call or text you to confirm your number. Standard
+                  message and data rates apply.
+                  <br />
+                  <a href="#" className="privacy-link">
+                    Privacy Policy
+                  </a>
+                </p>
+
+                <button type="submit" className="continue-button">
+                  Continue
+                </button>
+              </form>
+
+              {/* OR Divider */}
+              <div className="or-divider">
+                <span>or</span>
+              </div>
+
+              {/* Social Login Buttons */}
+              <div className="social-buttons-container">
+                <SocialButton
+                  text="Continue with Google"
+                  className="google-button"
+                  icon={<GoogleIcon />}
+                  onClick={() => console.log("Google login clicked")}
+                />
+                <SocialButton
+                  text="Continue with Apple"
+                  className="apple-button"
+                  icon={<AppleIcon />}
+                  onClick={() => console.log("Apple login clicked")}
+                />
+                <SocialButton
+                  text="Continue with email"
+                  className="email-button"
+                  icon={<EmailIcon />}
+                  onClick={() => console.log("Email login clicked")}
+                />
+                <SocialButton
+                  text="Continue with Facebook"
+                  className="facebook-button"
+                  icon={<FacebookIcon />}
+                  onClick={() => console.log("Facebook login clicked")}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <OTPModal
+        isOpen={showOTPModal}
+        onClose={handleCloseAll}
+        phoneNumber={submittedPhone}
+        onBack={handleBackFromOTP}
+      />
+    </>
   );
 }
 
